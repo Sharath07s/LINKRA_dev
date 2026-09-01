@@ -21,32 +21,9 @@ import {
   ChevronRight,
   AlertCircle
 } from "lucide-react";
-
-// Removed MOCK_CRIMES array. Data is loaded dynamically via useCrimes hook.
-
-const CRITICAL_ALERTS = [
-  {
-    id: "a1",
-    title: "Modus Operandi Match Alert",
-    description: "ATM Jackpotting M.O. matched between Indiranagar PS and Whitefield PS within a 24hr window.",
-    time: "10 mins ago",
-    severity: "critical"
-  },
-  {
-    id: "a2",
-    title: "Emerging Cybercrime Cluster",
-    description: "Spike in digital blackmail scams targeting senior citizens in Mangaluru (up 45% this week).",
-    time: "2 hours ago",
-    severity: "warning"
-  },
-  {
-    id: "a3",
-    title: "Network Link Sighted",
-    description: "Associate of Kariya Raja detected via mobile tower cell overlap in Mysuru Central.",
-    time: "4 hours ago",
-    severity: "critical"
-  }
-];
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 export default function DashboardPage() {
   const { data: crimes, isLoading, error } = useCrimes();
@@ -74,139 +51,92 @@ export default function DashboardPage() {
         {/* Welcome and Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Statewide Intelligence Hub</h1>
-            <p className="text-sm text-slate-400">Real-time analytical mapping and command console of Karnataka State Police</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight sm:text-3xl">LINKRA</h1>
+            <p className="text-sm text-muted-foreground">AI-Powered Criminal Intelligence Network</p>
           </div>
-          <div className="flex items-center gap-2 rounded-xl bg-slate-900 border border-slate-800 p-2 text-xs font-mono text-slate-400">
-            <Clock className="h-4 w-4 text-blue-400" />
+          <div className="flex items-center gap-2 rounded-md bg-secondary border border-border p-2 text-xs font-mono text-muted-foreground">
+            <Clock className="h-4 w-4 text-primary" />
             <span>SESSION LIFETIME: 07:54:12</span>
           </div>
         </div>
 
         {/* Global AI Search Panel */}
-        <div className="bg-slate-900/40 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 h-32 w-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="bg-card border border-border rounded-xl p-5 shadow-sm relative overflow-hidden">
           <form onSubmit={handleSearchSubmit} className="relative flex gap-3 max-w-5xl mx-auto">
             <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-muted-foreground">
                 <Search className="h-5 w-5" />
               </div>
               <input
                 type="text"
-                className="w-full bg-slate-950/80 border border-slate-800 hover:border-slate-700/80 focus:border-blue-500 rounded-xl pl-11 pr-4 py-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
-                placeholder="Ask KCIA AI: 'Show burglary hotspots in Mysuru' or 'Analyze links for Kariya Raja'..."
+                className="w-full bg-background border border-border hover:border-border/80 focus:border-primary rounded-md pl-11 pr-4 py-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-sm"
+                placeholder="Ask LINKRA Copilot for investigation assistance..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button 
               type="submit" 
-              className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-6 py-3.5 text-sm font-semibold transition-all shadow-md shadow-blue-600/15 flex items-center gap-2"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-6 py-3.5 text-sm font-semibold transition-all shadow flex items-center gap-2"
             >
-              <span>Query AI</span>
+              <span>Query Copilot</span>
               <ChevronRight className="h-4 w-4" />
             </button>
           </form>
-          
-          {/* Quick Suggestions */}
-          <div className="mt-3.5 flex flex-wrap gap-2 items-center text-xs">
-            <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Suggested Queries:</span>
-            {[
-              "Burglary hotspots in Mysuru",
-              "Cybercrime growth trends in Bengaluru East",
-              "Organized auto theft networks",
-              "Suspect ties of Vicky Saluja"
-            ]?.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => selectSuggestedPrompt(prompt)}
-                className="px-3 py-1 bg-slate-950 hover:bg-slate-800/80 border border-slate-850 hover:border-slate-700 rounded-full text-slate-400 hover:text-slate-200 transition-all font-medium"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Four Core Stat Widgets */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Stat 1 */}
-          <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-200">
+          <div className="p-5 bg-card border border-border rounded-xl flex flex-col justify-between relative group hover:border-border/80 transition-all duration-200 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Active Investigations</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">{crimesList.length + 120}</h3>
+                <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Active Investigations</p>
+                <h3 className="text-2xl font-bold mt-1 text-foreground">{isLoading ? "—" : crimesList.length}</h3>
               </div>
-              <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-400">
+              <div className="p-2.5 bg-primary/10 rounded-md border border-primary/20 text-primary">
                 <Activity className="h-5 w-5" />
               </div>
-            </div>
-            {/* Sparkline SVG */}
-            <div className="mt-4 flex items-end justify-between">
-              <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" /> +14.2% from last month
-              </span>
-              <svg className="w-16 h-8 text-blue-500" viewBox="0 0 100 50">
-                <path d="M 0,35 Q 20,40 40,20 T 80,10 T 100,5" fill="none" stroke="currentColor" strokeWidth="2.5" />
-              </svg>
             </div>
           </div>
 
           {/* Stat 2 */}
-          <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-200">
+          <div className="p-5 bg-card border border-border rounded-xl flex flex-col justify-between relative group hover:border-border/80 transition-all duration-200 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Critical Alerts</p>
-                <h3 className="text-2xl font-bold mt-1 text-red-400">3</h3>
+                <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Critical Alerts</p>
+                <h3 className="text-2xl font-bold mt-1 text-foreground">—</h3>
               </div>
-              <div className="p-2.5 bg-red-500/10 rounded-xl border border-red-500/20 text-red-400 animate-pulse">
+              <div className="p-2.5 bg-destructive/10 rounded-md border border-destructive/20 text-destructive">
                 <AlertTriangle className="h-5 w-5" />
               </div>
-            </div>
-            <div className="mt-4 flex items-end justify-between">
-              <span className="text-[10px] text-red-400 font-semibold">2 pending response</span>
-              <svg className="w-16 h-8 text-red-500" viewBox="0 0 100 50">
-                <path d="M 0,45 Q 20,20 40,40 T 80,15 T 100,8" fill="none" stroke="currentColor" strokeWidth="2.5" />
-              </svg>
             </div>
           </div>
 
           {/* Stat 3 */}
-          <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-200">
+          <div className="p-5 bg-card border border-border rounded-xl flex flex-col justify-between relative group hover:border-border/80 transition-all duration-200 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">AI Predictive Forecasts</p>
-                <h3 className="text-2xl font-bold mt-1 text-indigo-400">18</h3>
+                <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">AI Predictive Forecasts</p>
+                <h3 className="text-2xl font-bold mt-1 text-foreground">—</h3>
               </div>
-              <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-indigo-400">
+              <div className="p-2.5 bg-indigo-500/10 rounded-md border border-indigo-500/20 text-indigo-400">
                 <Shield className="h-5 w-5" />
               </div>
-            </div>
-            <div className="mt-4 flex items-end justify-between">
-              <span className="text-[10px] text-indigo-400 font-semibold">89% confidence average</span>
-              <svg className="w-16 h-8 text-indigo-500" viewBox="0 0 100 50">
-                <path d="M 0,42 Q 25,25 50,45 T 100,5" fill="none" stroke="currentColor" strokeWidth="2.5" />
-              </svg>
             </div>
           </div>
 
           {/* Stat 4 */}
-          <div className="p-5 bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-200">
+          <div className="p-5 bg-card border border-border rounded-xl flex flex-col justify-between relative group hover:border-border/80 transition-all duration-200 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Pending Reports</p>
-                <h3 className="text-2xl font-bold mt-1 text-amber-500">6</h3>
+                <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Pending Reports</p>
+                <h3 className="text-2xl font-bold mt-1 text-foreground">—</h3>
               </div>
-              <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-500">
+              <div className="p-2.5 bg-amber-500/10 rounded-md border border-amber-500/20 text-amber-500">
                 <FileText className="h-5 w-5" />
               </div>
-            </div>
-            <div className="mt-4 flex items-end justify-between">
-              <span className="text-[10px] text-amber-500 font-semibold">Requires supervisor signoff</span>
-              <svg className="w-16 h-8 text-amber-500" viewBox="0 0 100 50">
-                <path d="M 0,30 Q 30,50 60,35 T 100,45" fill="none" stroke="currentColor" strokeWidth="2.5" />
-              </svg>
             </div>
           </div>
 
@@ -216,189 +146,151 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Critical Alerts Feed */}
-          <div className="lg:col-span-5 p-6 bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-[400px]">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+          <div className="lg:col-span-5 bg-card border border-border rounded-xl flex flex-col h-[400px] overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between border-b border-border p-4 bg-secondary/30">
               <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-                <h3 className="font-bold text-white text-base">Security & Modus Operandi Alerts</h3>
+                <h3 className="font-bold text-foreground text-sm tracking-tight">Security & Modus Operandi Alerts</h3>
               </div>
-              <span className="text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded uppercase font-bold tracking-wider">
-                LIVE
-              </span>
             </div>
 
-            <div className="flex-1 overflow-y-auto mt-4 space-y-3 pr-1">
-              {CRITICAL_ALERTS?.map((alert) => (
-                <div 
-                  key={alert.id} 
-                  className={`p-3.5 rounded-xl border transition-all hover:bg-slate-900/90 ${
-                    alert.severity === "critical" 
-                      ? "bg-red-950/10 border-red-900/40 hover:border-red-900/60" 
-                      : "bg-amber-950/10 border-amber-900/40 hover:border-amber-900/60"
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                      alert.severity === "critical" ? "text-red-400" : "text-amber-400"
-                    }`}>
-                      <AlertCircle className="h-3.5 w-3.5" />
-                      {alert.title}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-mono">{alert.time}</span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">{alert.description}</p>
-                </div>
-              ))}
+            <div className="flex-1 p-4">
+              <EmptyState 
+                title="No Active Alerts" 
+                description="There are currently no critical security alerts in your jurisdiction."
+                icon={<AlertCircle className="h-8 w-8 text-muted-foreground" />} 
+              />
             </div>
           </div>
 
           {/* Crime Map Preview Card */}
-          <div className="lg:col-span-7 p-6 bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-[400px] relative overflow-hidden">
-            <div className="flex justify-between items-center border-b border-slate-800/80 pb-4 z-10">
+          <div className="lg:col-span-7 bg-card border border-border rounded-xl flex flex-col h-[400px] relative overflow-hidden shadow-sm">
+            <div className="flex justify-between items-center border-b border-border p-4 bg-secondary/30 z-10">
               <div>
-                <h3 className="font-bold text-white text-base">Statewide Threat & Hotspot Forecast</h3>
-                <p className="text-xs text-slate-400">Interactive geographic risk allocation</p>
+                <h3 className="font-bold text-foreground text-sm tracking-tight">Strategic Threat & Hotspot Forecast</h3>
               </div>
               <button 
                 onClick={() => router.push("/crime-map")}
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-xs text-slate-300 transition-colors font-semibold"
+                className="flex items-center gap-1 px-3 py-1.5 bg-background hover:bg-secondary border border-border rounded-md text-xs text-foreground transition-colors font-semibold"
               >
                 <span>Full Screen Analysis</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
 
-            {/* Stylized SVG Map of Karnataka (simplistic polygon grid for datathon aesthetics) */}
-            <div className="flex-1 flex items-center justify-center relative bg-slate-950/30 rounded-xl border border-slate-800/60 mt-4 overflow-hidden">
-              <svg className="w-[300px] h-[220px] text-blue-900/25" viewBox="0 0 200 300" fill="currentColor">
-                {/* Simulated Karnataka Districts */}
-                <path d="M50 30 L80 10 L100 40 L90 80 L60 80 Z" className="hover:fill-blue-600/40 cursor-pointer transition-colors" data-title="Belagavi" stroke="#1E4D92" strokeWidth="1"/>
-                <path d="M80 10 L120 20 L130 50 L100 40 Z" className="hover:fill-blue-600/40 cursor-pointer transition-colors" data-title="Vijayapura" stroke="#1E4D92" strokeWidth="1"/>
-                <path d="M120 20 L150 40 L140 80 L130 50 Z" className="hover:fill-red-650/40 fill-red-950/20 cursor-pointer transition-colors" data-title="Kalaburagi (High Risk)" stroke="#D93025" strokeWidth="1"/>
-                <path d="M100 40 L130 50 L140 80 L110 90 L90 80 Z" className="hover:fill-blue-600/40 cursor-pointer transition-colors" stroke="#1E4D92" strokeWidth="1"/>
-                <path d="M90 80 L110 90 L100 130 L70 120 Z" className="hover:fill-blue-600/40 cursor-pointer transition-colors" stroke="#1E4D92" strokeWidth="1"/>
-                <path d="M100 130 L130 140 L120 180 L80 170 Z" className="hover:fill-amber-600/40 fill-amber-950/20 cursor-pointer transition-colors" data-title="Shivamogga (Medium Risk)" stroke="#F9A825" strokeWidth="1"/>
-                {/* Bengaluru Area */}
-                <path d="M120 180 L150 170 L160 210 L130 220 Z" className="hover:fill-red-650/40 fill-red-950/40 cursor-pointer transition-colors animate-pulse duration-2000" data-title="Bengaluru Urban (Critical Hotspot)" stroke="#D93025" strokeWidth="1.5"/>
-                <path d="M80 170 L120 180 L130 220 L90 230 Z" className="hover:fill-blue-600/40 cursor-pointer transition-colors" data-title="Mysuru" stroke="#1E4D92" strokeWidth="1"/>
-                <path d="M90 230 L130 220 L110 280 L70 260 Z" className="hover:fill-blue-600/40 cursor-pointer transition-colors" stroke="#1E4D92" strokeWidth="1"/>
-              </svg>
-
-              {/* Float Legend */}
-              <div className="absolute bottom-3 right-3 bg-slate-900/90 border border-slate-800 p-2 rounded-lg text-[10px] space-y-1 z-10">
-                <span className="font-bold text-slate-300 block mb-0.5">Threat Index</span>
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
-                  <span>High Risk Zone</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span>Elevated Risk</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <span className="h-2 w-2 rounded-full bg-blue-600" />
-                  <span>Normal Sector</span>
-                </div>
-              </div>
+            <div className="flex-1 p-4">
+              <EmptyState 
+                title="Geospatial Service Inactive" 
+                description="Live map telemetry requires an active connection to the geospatial subsystem."
+                icon={<Map className="h-8 w-8 text-muted-foreground" />} 
+              />
             </div>
           </div>
 
         </div>
 
         {/* Bottom Section: Latest FIRs Table */}
-        <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800/80 pb-4 mb-4">
+        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border p-4 bg-secondary/30">
             <div>
-              <h3 className="font-bold text-white text-lg">Active First Information Reports (FIRs)</h3>
-              <p className="text-xs text-slate-400">Real-time case log synchronizing CCTNS databases</p>
+              <h3 className="font-bold text-foreground text-base tracking-tight">Active First Information Reports (FIRs)</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Real-time case log synchronizing CCTNS databases</p>
             </div>
             <div className="flex gap-2">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-lg text-xs font-semibold transition-colors">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-background border border-border hover:bg-secondary text-muted-foreground hover:text-foreground rounded-md text-xs font-semibold transition-colors shadow-sm">
                 <Filter className="h-3.5 w-3.5" />
                 <span>Filter Districts</span>
               </button>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-lg text-xs font-semibold transition-colors">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-background border border-border hover:bg-secondary text-muted-foreground hover:text-foreground rounded-md text-xs font-semibold transition-colors shadow-sm">
                 <Sliders className="h-3.5 w-3.5" />
                 <span>Customize Columns</span>
               </button>
             </div>
           </div>
 
-          {/* Table container with horizontal scroll */}
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800/80 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-950/20">
-                  <th className="py-3 px-4">FIR Number</th>
-                  <th className="py-3 px-4">Crime Classification</th>
-                  <th className="py-3 px-4">District Sector</th>
-                  <th className="py-3 px-4">Police Jurisdiction</th>
-                  <th className="py-3 px-4">Registration Date</th>
-                  <th className="py-3 px-4 text-center">Threat Rating</th>
-                  <th className="py-3 px-4 text-center">Case Status</th>
-                  <th className="py-3 px-4 text-right">Intel Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50 text-xs">
-                {crimesList?.map((crime: any) => (
-                  <tr key={crime.id} className="hover:bg-slate-800/20 transition-colors group">
-                    <td className="py-3.5 px-4 font-mono font-bold text-blue-400 group-hover:text-blue-300">
-                      {crime.fir_number}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-200">
-                      {crime.title}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-400">
-                      {crime.district}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-400">
-                      {crime.station}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-400">
-                      {crime.date}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        crime.severity === "High" 
-                          ? "bg-red-500/10 text-red-400 border border-red-500/20" 
-                          : crime.severity === "Medium"
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      }`}>
-                        {crime.severity}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                        crime.status === "Under Investigation" 
-                          ? "text-blue-400" 
-                          : crime.status === "FIR Registered"
-                          ? "text-amber-400"
-                          : "text-slate-500"
-                      }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${
-                          crime.status === "Under Investigation" 
-                            ? "bg-blue-500 animate-pulse" 
-                            : crime.status === "FIR Registered"
-                            ? "bg-amber-500"
-                            : "bg-slate-600"
-                        }`} />
-                        {crime.status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <button 
-                        onClick={() => setSelectedCrime(crime)}
-                        className="p-1 px-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 rounded text-[10px] font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1 ml-auto"
-                      >
-                        <Eye className="h-3 w-3" />
-                        <span>Inspect</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-4">
+            {isLoading ? (
+              <LoadingState message="Loading investigations..." />
+            ) : error ? (
+              <ErrorState title="Failed to load investigations" description="An error occurred while fetching FIR data from the backend." />
+            ) : crimesList.length === 0 ? (
+              <EmptyState title="No Investigations Found" description="There are no active investigations in the database." />
+            ) : (
+              <div className="overflow-x-auto w-full border border-border rounded-md">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary/50">
+                      <th className="py-3 px-4">FIR Number</th>
+                      <th className="py-3 px-4">Crime Classification</th>
+                      <th className="py-3 px-4">District Sector</th>
+                      <th className="py-3 px-4">Police Jurisdiction</th>
+                      <th className="py-3 px-4">Registration Date</th>
+                      <th className="py-3 px-4 text-center">Threat Rating</th>
+                      <th className="py-3 px-4 text-center">Case Status</th>
+                      <th className="py-3 px-4 text-right">Intel Details</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border text-xs">
+                    {crimesList?.map((crime: any) => (
+                      <tr key={crime.id} className="hover:bg-secondary/30 transition-colors group">
+                        <td className="py-3.5 px-4 font-mono font-bold text-primary group-hover:text-primary/80">
+                          {crime.fir_number}
+                        </td>
+                        <td className="py-3.5 px-4 font-semibold text-foreground">
+                          {crime.title}
+                        </td>
+                        <td className="py-3.5 px-4 text-muted-foreground">
+                          {crime.district}
+                        </td>
+                        <td className="py-3.5 px-4 text-muted-foreground">
+                          {crime.station}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-muted-foreground">
+                          {crime.date}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase ${
+                            crime.severity === "High" 
+                              ? "bg-destructive/10 text-destructive border border-destructive/20" 
+                              : crime.severity === "Medium"
+                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                              : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                          }`}>
+                            {crime.severity}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
+                            crime.status === "Under Investigation" 
+                              ? "text-primary" 
+                              : crime.status === "FIR Registered"
+                              ? "text-amber-500"
+                              : "text-muted-foreground"
+                          }`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${
+                              crime.status === "Under Investigation" 
+                                ? "bg-primary animate-pulse" 
+                                : crime.status === "FIR Registered"
+                                ? "bg-amber-500"
+                                : "bg-muted-foreground"
+                            }`} />
+                            {crime.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button 
+                            onClick={() => setSelectedCrime(crime)}
+                            className="p-1 px-2.5 bg-background hover:bg-secondary border border-border rounded-md text-[10px] font-bold text-muted-foreground hover:text-foreground transition-all flex items-center gap-1 ml-auto shadow-sm"
+                          >
+                            <Eye className="h-3 w-3" />
+                            <span>Inspect</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 
@@ -406,74 +298,74 @@ export default function DashboardPage() {
 
       {/* Case Inspector side drawer */}
       {selectedCrime && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
-          <div className="w-full max-w-xl bg-[#061224] border-l border-slate-800 p-6 md:p-8 flex flex-col h-full shadow-2xl animate-in slide-in-from-right duration-250">
+        <div className="fixed inset-0 z-50 flex justify-end bg-background/60 backdrop-blur-sm">
+          <div className="w-full max-w-xl bg-card border-l border-border p-6 md:p-8 flex flex-col h-full shadow-2xl animate-in slide-in-from-right duration-250">
             {/* Header */}
-            <div className="flex justify-between items-start border-b border-slate-800 pb-4">
+            <div className="flex justify-between items-start border-b border-border pb-4">
               <div>
-                <span className="font-mono text-xs text-blue-400 font-bold">{selectedCrime.fir_number}</span>
-                <h2 className="text-xl font-bold text-white mt-1 leading-snug">{selectedCrime.title}</h2>
+                <span className="font-mono text-xs text-primary font-bold">{selectedCrime.fir_number}</span>
+                <h2 className="text-xl font-bold text-foreground mt-1 leading-snug">{selectedCrime.title}</h2>
               </div>
               <button 
                 onClick={() => setSelectedCrime(null)}
-                className="p-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 rounded-lg transition-colors"
+                className="p-1.5 bg-secondary border border-border hover:bg-secondary/80 text-muted-foreground rounded-md transition-colors"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
 
             {/* Content body */}
-            <div className="flex-1 overflow-y-auto py-6 space-y-6">
+            <div className="flex-1 overflow-y-auto py-6 space-y-6 pr-2">
               
               {/* Core Attributes Grid */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-950/40 border border-slate-850 rounded-xl p-4">
+              <div className="grid grid-cols-2 gap-4 bg-background border border-border rounded-xl p-4 shadow-sm">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase block">Crime Type</span>
-                  <span className="text-xs font-semibold text-slate-200">{selectedCrime.type}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block">Crime Type</span>
+                  <span className="text-xs font-semibold text-foreground">{selectedCrime.type}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase block">Threat Index</span>
-                  <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mt-0.5 ${
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block">Threat Index</span>
+                  <span className={`inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase mt-0.5 ${
                     selectedCrime.severity === "High" 
-                      ? "bg-red-500/10 text-red-400 border border-red-500/20" 
+                      ? "bg-destructive/10 text-destructive border border-destructive/20" 
                       : selectedCrime.severity === "Medium"
-                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                      : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                      : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                   }`}>
                     {selectedCrime.severity}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase block">Police Station</span>
-                  <span className="text-xs text-slate-300">{selectedCrime.station} ({selectedCrime.district})</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block">Police Station</span>
+                  <span className="text-xs text-foreground">{selectedCrime.station} ({selectedCrime.district})</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase block">Registration Date</span>
-                  <span className="text-xs font-mono text-slate-300">{selectedCrime.date}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block">Registration Date</span>
+                  <span className="text-xs font-mono text-foreground">{selectedCrime.date}</span>
                 </div>
               </div>
 
               {/* Modus Operandi */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Modus Operandi (M.O.)</h4>
-                <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-850 leading-relaxed text-xs text-slate-300">
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Modus Operandi (M.O.)</h4>
+                <div className="p-4 bg-secondary/30 rounded-xl border border-border leading-relaxed text-xs text-foreground shadow-sm">
                   {selectedCrime.modus_operandi}
                 </div>
               </div>
 
               {/* Suspects linked */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Associated Suspect Profiles</h4>
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Associated Suspect Profiles</h4>
                 <div className="space-y-2">
                   {selectedCrime.suspects?.map((suspect: string, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-950/50 rounded-xl border border-slate-850">
-                      <span className="text-xs font-semibold text-slate-200">{suspect}</span>
+                    <div key={idx} className="flex items-center justify-between p-3 bg-background rounded-xl border border-border shadow-sm">
+                      <span className="text-xs font-semibold text-foreground">{suspect}</span>
                       <button 
                         onClick={() => {
                           setSelectedCrime(null);
                           router.push(`/knowledge-graph?focus=${encodeURIComponent(suspect)}`);
                         }}
-                        className="text-[10px] font-bold text-blue-400 hover:text-blue-300 underline"
+                        className="text-[10px] font-bold text-primary hover:text-primary/80 underline"
                       >
                         Inspect Node Link
                       </button>
@@ -483,12 +375,12 @@ export default function DashboardPage() {
               </div>
 
               {/* Security Audit Badge */}
-              <div className="p-4 bg-slate-950/60 border border-slate-850 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-red-500 font-bold text-[10px] uppercase">
+              <div className="p-4 bg-background border border-border rounded-xl space-y-2 shadow-sm">
+                <div className="flex items-center gap-2 text-destructive font-bold text-[10px] uppercase">
                   <Shield className="h-4 w-4" />
                   <span>Audit Trail & Classification</span>
                 </div>
-                <p className="text-[10px] text-slate-500 leading-normal">
+                <p className="text-[10px] text-muted-foreground leading-normal">
                   Access to FIR file records has been registered under active user session logs. This information is classified as law enforcement sensitive and must not be copied or distributed outside police firewalls.
                 </p>
               </div>
@@ -496,19 +388,19 @@ export default function DashboardPage() {
             </div>
 
             {/* Footer buttons */}
-            <div className="border-t border-slate-800 pt-4 flex gap-3">
+            <div className="border-t border-border pt-4 flex gap-3">
               <button 
                 onClick={() => {
                   setSelectedCrime(null);
                   router.push(`/ai-assistant?query=Analyze%20links%20for%2520${encodeURIComponent(selectedCrime.fir_number)}`);
                 }}
-                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold text-center transition-colors"
+                className="flex-1 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md text-xs font-bold text-center transition-colors shadow"
               >
                 Analyze Case with AI
               </button>
               <button 
                 onClick={() => setSelectedCrime(null)}
-                className="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold transition-colors"
+                className="px-4 py-2.5 bg-secondary border border-border hover:bg-secondary/80 text-foreground rounded-md text-xs font-bold transition-colors shadow-sm"
               >
                 Close Drawer
               </button>

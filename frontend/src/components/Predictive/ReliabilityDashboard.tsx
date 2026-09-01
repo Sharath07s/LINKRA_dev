@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { ShieldCheck } from "lucide-react";
@@ -7,8 +8,8 @@ export default function ReliabilityDashboard() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/model-monitoring/summary")
-      .then(r => r.json())
+    apiClient.get("/model-monitoring/summary")
+      .then(r => r.data)
       .then(res => setData(res))
       .catch(console.warn);
   }, []);

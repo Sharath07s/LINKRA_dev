@@ -26,7 +26,7 @@ def setup_database():
     db = TestingSessionLocal()
     from app.models.user import Role
     import uuid
-    admin_role = Role(id=uuid.UUID("00000000-0000-0000-0000-000000000000"), name="SCRB Admin", description="Admin role")
+    admin_role = Role(id=uuid.UUID("00000000-0000-0000-0000-000000000000"), name="ADMIN", description="Admin role")
     db.add(admin_role)
     db.commit()
     db.close()

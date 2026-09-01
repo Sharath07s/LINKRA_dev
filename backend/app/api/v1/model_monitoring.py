@@ -17,40 +17,40 @@ router = APIRouter()
 @router.get("/forecast")
 def monitor_forecast(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     return ForecastMonitor(db).monitor()
 
 @router.get("/hotspots")
 def monitor_hotspots(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     return HotspotMonitor(db).monitor()
 
 @router.get("/recidivism")
 def monitor_recidivism(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     return RecidivismMonitor(db).monitor()
 
 @router.get("/networks")
 def monitor_networks(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     return NetworkMonitor().monitor()
 
 @router.get("/drift")
 def detect_drift(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     return DriftDetector(db).detect()
 
 @router.get("/summary")
 def get_monitoring_summary(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     return MonitoringSummary(db).generate_summary()

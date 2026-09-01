@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
@@ -14,9 +15,9 @@ export default function InvestigationHealthPanel({ investigationId }: HealthProp
   useEffect(() => {
     const fetchHealth = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/investigations/${investigationId}/health`);
-        if (res.ok) {
-          const json = await res.json();
+        const res = await apiClient.get(`/investigations/${investigationId}/health`);
+        if (res.status === 200) {
+          const json = res.data;
           setData(json);
         }
       } catch (err) {

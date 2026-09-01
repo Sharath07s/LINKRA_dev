@@ -34,10 +34,10 @@ class RecidivismEngine:
         ).count()
         
         # 2. Neo4j Metrics
-        cypher = f"MATCH (s:Suspect {{id: '{suspect_id}'}})-[:KNOWS]-(a:Suspect) RETURN count(a) as degree"
+        cypher = "MATCH (s:Suspect {id: $suspect_id})-[:KNOWS]-(a:Suspect) RETURN count(a) as degree"
         degree_centrality = 0
         try:
-            results = neo4j_intelligence.execute_query(cypher)
+            results = neo4j_intelligence.execute_query(cypher, parameters={"suspect_id": suspect_id})
             if results:
                 degree_centrality = results[0]["degree"]
         except Exception:

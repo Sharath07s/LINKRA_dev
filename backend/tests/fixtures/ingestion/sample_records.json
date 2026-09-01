@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Ravi Kumar",
+    "phone_number": "9876543210",
+    "address": "45 MG Road, Bengaluru",
+    "date": "2026-08-14",
+    "vehicle_number": "KA 01 AB 1234",
+    "notes": "Suspect in snatching case near Koramangala"
+  },
+  {
+    "name": "Suresh Rao",
+    "phone_number": "7654321098",
+    "address": "12 Church Street, Mysuru",
+    "date": "2026-08-15",
+    "notes": "Associate of Ravi Kumar, seen on same motorcycle"
+  },
+  {
+    "name": "Venkatesh Murthy",
+    "phone_number": "8765432109",
+    "address": "Shop No 7, Koramangala 4th Block, Bengaluru",
+    "date": "2026-08-14",
+    "notes": "Witness to the snatching incident"
+  }
+]

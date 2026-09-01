@@ -7,7 +7,7 @@ __pycache__/
 # Environment
 .env
 .env.local
-.env.example
+.env.*.local
 
 # IDE
 .vscode/

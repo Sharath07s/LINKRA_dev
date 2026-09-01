@@ -1,3 +1,4 @@
+import { apiClient } from "@/lib/api-client";
 import React, { useState } from "react";
 import { DatabaseBackup, Play } from "lucide-react";
 
@@ -9,7 +10,7 @@ export default function BackupStatusPanel({ data }: { data: any }) {
   const handleTrigger = async () => {
     setTriggering(true);
     try {
-      await fetch("http://localhost:8000/api/v1/infrastructure/backups/trigger", { method: "POST" });
+      await apiClient.post("/infrastructure/backups/trigger");
       // In a real app we'd refresh the data here or rely on the realtime stream
     } catch (_) {}
     setTimeout(() => setTriggering(false), 2000);

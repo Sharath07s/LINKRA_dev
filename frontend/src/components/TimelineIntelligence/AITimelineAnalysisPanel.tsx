@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { Sparkles, BrainCircuit, Activity, TrendingUp, AlertTriangle } from "lucide-react";
@@ -16,9 +17,9 @@ export default function AITimelineAnalysisPanel({ entityType, entityId }: AITime
     const fetchAnalysis = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/timeline/analysis?entity_type=${entityType}&entity_id=${entityId}`);
-        if (res.ok) {
-          const json = await res.json();
+        const res = await apiClient.get(`/timeline/analysis?entity_type=${entityType}&entity_id=${entityId}`);
+        if (res.status === 200) {
+          const json = res.data;
           setData(json);
         }
       } catch (err) {

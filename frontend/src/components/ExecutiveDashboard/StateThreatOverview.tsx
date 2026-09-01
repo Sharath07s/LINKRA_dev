@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { AlertTriangle, Activity } from "lucide-react";
@@ -10,9 +11,9 @@ export default function StateThreatOverview() {
   useEffect(() => {
     const fetchThreatLevel = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/executive/threat-level`);
-        if (res.ok) {
-          const json = await res.json();
+        const res = await apiClient.get(`/executive/threat-level`);
+        if (res.status === 200) {
+          const json = res.data;
           setData(json);
         }
       } catch (err) {
@@ -49,7 +50,7 @@ export default function StateThreatOverview() {
             </div>
           </div>
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-300 mb-1">Statewide Threat Level</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-300 mb-1">Strategic Threat Level</h2>
             <div className="flex items-end gap-3">
               <span className="text-4xl md:text-5xl font-bold tracking-tighter leading-none">{data.level}</span>
               <span className="text-xl font-bold mb-1 opacity-80">({data.score}/100)</span>

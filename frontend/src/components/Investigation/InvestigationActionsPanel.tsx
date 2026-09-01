@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState } from "react";
 import { UserPlus, Bell, FileText, Download, Network, Map as MapIcon, ShieldAlert } from "lucide-react";
@@ -13,9 +14,7 @@ export default function InvestigationActionsPanel({ investigationId }: ActionsPa
   const handleAssign = async () => {
     setIsAssigning(true);
     try {
-      await fetch(`http://localhost:8000/api/v1/investigations/${investigationId}/assign`, {
-        method: "POST"
-      });
+      await apiClient.post(`/investigations/${investigationId}/assign`);
       // Handle success locally
     } catch (e) {
       console.warn("Assignment failed", e);

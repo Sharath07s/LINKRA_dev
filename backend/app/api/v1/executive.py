@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, case
 from datetime import datetime, timedelta
 import json
+import logging
 
 from app.api import deps
 from app.models.user import User
@@ -13,12 +14,15 @@ from app.models.location import District
 from app.ai.provider import FallbackManager
 from app.ai.neo4j.intelligence import neo4j_intelligence
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
 
 @router.get("/threat-level")
 def get_state_threat_level(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     """
     Calculate state-wide threat level purely using Postgres logic.
@@ -54,7 +58,7 @@ def get_state_threat_level(
 @router.get("/district-rankings")
 def get_district_rankings(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     """
     Returns top districts ranked by dynamic threat score using postgres aggregations.
@@ -104,7 +108,7 @@ def get_district_rankings(
 @router.get("/emerging-threats")
 def get_emerging_threats(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     now = datetime.utcnow()
     seven_days_ago = now - timedelta(days=7)
@@ -142,7 +146,7 @@ def get_emerging_threats(
 @router.get("/high-risk-offenders")
 def get_high_risk_offenders(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     # Join suspects with their crimes to calculate real score
     offenders = db.query(
@@ -179,7 +183,7 @@ def get_high_risk_offenders(
 @router.get("/high-risk-networks")
 def get_high_risk_networks(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     # True Neo4j graph query to find community clusters
     cypher = """
@@ -206,13 +210,13 @@ def get_high_risk_networks(
             })
         return networks
     except Exception as e:
-        print(f"Neo4j network query failed: {e}")
+        logger.error(f"Neo4j high-risk-networks query failed: {e}")
         return []
 
 @router.get("/hotspots")
 def get_hotspots(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     crimes = db.query(Crime.latitude, Crime.longitude, District.name)\
                .join(District, Crime.district_id == District.id)\
@@ -252,7 +256,7 @@ def get_hotspots(
 @router.post("/briefing")
 def generate_briefing(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     # 1. Gather real DB statistics
     crime_count = db.query(Crime).count()
@@ -293,9 +297,10 @@ def generate_briefing(
             "confidence": 92,
             "evidence_sources": ["PostgreSQL", "Neo4j Cypher", "LLM Inference"]
         }
-    except Exception as e:
+    except Exception:
+        logger.error("Executive briefing LLM call failed")
         return {
-            "summary": f"System error generating LLM briefing. Raw stats: {crime_count} crimes, Top District: {top_district}.",
+            "summary": "AI briefing unavailable. Check system status.",
             "key_risks": [],
             "recommended_actions": [],
             "confidence": 0,

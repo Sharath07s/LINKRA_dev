@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KSP Crime Intelligence Assistant",
-  description: "AI-powered crime intelligence and investigation platform for Karnataka State Police",
+  title: "SIH26189 Intelligence Platform",
+  description: "AI-powered crime intelligence and investigation platform",
 };
 
 export default function RootLayout({
@@ -27,6 +27,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

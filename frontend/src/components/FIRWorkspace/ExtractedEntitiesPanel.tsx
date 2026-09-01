@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { Users, Car, Smartphone, MapPin, Building, Package } from "lucide-react";
@@ -14,9 +15,9 @@ export default function ExtractedEntitiesPanel({ firId }: EntitiesProps) {
   useEffect(() => {
     const fetchEntities = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/crimes/${firId}/entities`);
-        if (res.ok) {
-          const json = await res.json();
+        const res = await apiClient.get(`/crimes/${firId}/entities`);
+        if (res.status === 200) {
+          const json = res.data;
           setData(json);
         }
       } catch (err) {

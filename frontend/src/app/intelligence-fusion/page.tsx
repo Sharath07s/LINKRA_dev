@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -22,10 +23,10 @@ function IntelligenceFusionContent() {
   const fetchFusionData = async () => {
     try {
       const [signals, correlations, priorities, recommendations] = await Promise.all([
-        fetch("http://localhost:8000/api/v1/fusion/signals").then(r => r.json()),
-        fetch("http://localhost:8000/api/v1/fusion/correlations").then(r => r.json()),
-        fetch("http://localhost:8000/api/v1/fusion/priorities").then(r => r.json()),
-        fetch("http://localhost:8000/api/v1/fusion/recommendations").then(r => r.json())
+        apiClient.get("/fusion/signals").then(r => r.data),
+        apiClient.get("/fusion/correlations").then(r => r.data),
+        apiClient.get("/fusion/priorities").then(r => r.data),
+        apiClient.get("/fusion/recommendations").then(r => r.data)
       ]);
 
       setData({ signals, correlations, priorities, recommendations });

@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { BrainCircuit } from "lucide-react";
@@ -7,8 +8,8 @@ export default function AIIntelligenceFeed() {
   const [feed, setFeed] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/command-wall/intelligence-feed", { method: "POST" })
-      .then(r => r.json())
+    apiClient.post("/command-wall/intelligence-feed")
+      .then(r => r.data)
       .then(d => setFeed(d))
       .catch(e => console.warn(e));
   }, []);

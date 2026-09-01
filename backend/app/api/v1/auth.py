@@ -1,9 +1,10 @@
 from datetime import timedelta
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+import time
 
 from app.api import deps
 from app.core import security
@@ -11,6 +12,8 @@ from app.core.config import settings
 from app.models.user import User
 
 router = APIRouter()
+
+LOGIN_ATTEMPTS = {}
 
 class Token(BaseModel):
     access_token: str
@@ -22,8 +25,24 @@ class Msg(BaseModel):
 
 @router.post("/login", response_model=Token)
 def login_access_token(
+    request: Request,
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    
+    # Simple rate limiting: max 5 attempts per minute per IP
+    if client_ip in LOGIN_ATTEMPTS:
+        attempts, last_time = LOGIN_ATTEMPTS[client_ip]
+        if now - last_time < 60:
+            if attempts >= 5:
+                raise HTTPException(status_code=429, detail="Too many login attempts. Please try again later.")
+            LOGIN_ATTEMPTS[client_ip] = (attempts + 1, last_time)
+        else:
+            LOGIN_ATTEMPTS[client_ip] = (1, now)
+    else:
+        LOGIN_ATTEMPTS[client_ip] = (1, now)
+
     """
     OAuth2 compatible token login, get an access token for future requests.
     """

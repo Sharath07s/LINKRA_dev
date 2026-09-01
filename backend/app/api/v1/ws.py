@@ -1,5 +1,7 @@
 from typing import List
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from app.api import deps
+from app.models.user import User
 
 router = APIRouter()
 
@@ -12,7 +14,8 @@ class ConnectionManager:
         self.active_connections.append(websocket)
 
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
@@ -21,10 +24,16 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @router.websocket("/notifications")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(
+    websocket: WebSocket,
+    current_user: User = Depends(deps.get_ws_user),
+):
     """
     WebSocket endpoint for real-time notifications (e.g., new crimes, critical alerts).
     """
+    if not current_user:
+        return
+        
     await manager.connect(websocket)
     try:
         while True:

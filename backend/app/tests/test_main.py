@@ -6,7 +6,7 @@ client = TestClient(app)
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Welcome to the KSP Crime Intelligence Assistant API"}
+    assert response.json() == {"message": "Welcome to the LINKRA API"}
 
 def test_health_check():
     response = client.get("/api/v1/health")

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, users, crimes, chat, investigations, ws, suspects, intents, neo4j, timeline, executive, alerts, officer, command_wall, system_health, predictive, predictive_validation, predictive_explainability, model_monitoring, realtime, infrastructure, intelligence_fusion
+from app.api.v1 import auth, users, crimes, chat, investigations, ws, suspects, intents, neo4j, timeline, executive, alerts, officer, command_wall, system_health, predictive, predictive_validation, predictive_explainability, model_monitoring, realtime, infrastructure, intelligence_fusion, ingestion, resolution, relationship, graph, graph_analytics, graph_anomalies, graph_predictions, explainability, copilot, reports
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -11,6 +11,10 @@ api_router.include_router(chat.router, prefix="/chat", tags=["chat"])
 api_router.include_router(intents.router, prefix="/intents", tags=["intents"])
 api_router.include_router(ws.router, prefix="/ws", tags=["websocket"])
 api_router.include_router(neo4j.router, prefix="/neo4j", tags=["neo4j"])
+api_router.include_router(graph.router, prefix="/graph", tags=["graph"])
+api_router.include_router(graph_analytics.router, prefix="/graph/analytics", tags=["graph_analytics"])
+api_router.include_router(graph_anomalies.router, prefix="/graph/anomalies", tags=["graph_anomalies"])
+api_router.include_router(graph_predictions.router, prefix="/graph/potential-links", tags=["graph_predictions"])
 api_router.include_router(timeline.router, prefix="/timeline", tags=["timeline"])
 api_router.include_router(executive.router, prefix="/executive", tags=["executive"])
 api_router.include_router(alerts.router, prefix="/alerts", tags=["alerts"])
@@ -24,3 +28,9 @@ api_router.include_router(model_monitoring.router, prefix="/model-monitoring", t
 api_router.include_router(realtime.router, prefix="/realtime", tags=["realtime"])
 api_router.include_router(infrastructure.router, prefix="/infrastructure", tags=["infrastructure"])
 api_router.include_router(intelligence_fusion.router, prefix="/fusion", tags=["intelligence_fusion"])
+api_router.include_router(ingestion.router, prefix="/ingestion", tags=["ingestion"])
+api_router.include_router(resolution.router, prefix="/resolution", tags=["resolution"])
+api_router.include_router(relationship.router, prefix="/relationship", tags=["relationship"])
+api_router.include_router(explainability.router, prefix="/explainability", tags=["explainability"])
+api_router.include_router(copilot.router, prefix="/copilot", tags=["copilot"])
+api_router.include_router(reports.router, prefix="/investigations", tags=["reports"])

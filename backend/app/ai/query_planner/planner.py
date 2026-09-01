@@ -165,7 +165,8 @@ class QueryPlanner:
     def _crime_network(db: Session, **kwargs) -> List[Dict]:
         fir = kwargs.get("fir_number") or "FIR-2025-441"
         data = neo4j_intelligence.execute_query(
-            f"MATCH path = (c:Crime {{fir_number: '{fir}'}})-[*1..2]-(connected) UNWIND nodes(path) AS n RETURN collect(distinct n) AS nodes"
+            "MATCH path = (c:Crime {fir_number: $fir})-[*1..2]-(connected) UNWIND nodes(path) AS n RETURN collect(distinct n) AS nodes",
+            parameters={"fir": fir}
         )
         if not data:
             return []

@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { ScanSearch, AlertTriangle } from "lucide-react";
@@ -10,8 +11,8 @@ export default function PredictiveExplainabilityPanel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/predictive-explainability/summary")
-      .then(r => r.json())
+    apiClient.get("/predictive-explainability/summary")
+      .then(r => r.data)
       .then(res => {
         setData(res);
         setLoading(false);

@@ -17,14 +17,14 @@ def explain_forecast(
     district_id: str,
     crime_type_id: str = None,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     return ForecastExplainer(db).explain(district_id, crime_type_id)
 
 @router.get("/hotspots")
 def explain_hotspots(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     return HotspotExplainer(db).explain()
 
@@ -32,13 +32,13 @@ def explain_hotspots(
 def explain_offender(
     suspect_id: str,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     return RecidivismExplainer(db).explain(suspect_id)
 
 @router.get("/networks")
 def explain_networks(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     return NetworkGrowthExplainer().explain()
 
@@ -46,7 +46,7 @@ def explain_networks(
 def get_explainability_summary(
     district_id: str = None,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     # Need to pass a default district or handle iteration properly if None,
     # Here we simulate fetching explanations to pass to the frontend

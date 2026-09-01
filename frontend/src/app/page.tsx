@@ -27,7 +27,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-col items-center gap-1.5">
-          <h2 className="text-sm font-bold tracking-wider text-slate-250 uppercase">KCIA Secure Gateway [TEST]</h2>
+          <h2 className="text-sm font-bold tracking-wider text-slate-250 uppercase">LINKRA Secure Gateway [TEST]</h2>
           <p className="text-xs text-slate-500">Initiating cryptographically secure network handshake...</p>
         </div>
         <div className="h-1.5 w-48 bg-slate-900 rounded-full overflow-hidden border border-slate-800">

@@ -15,7 +15,7 @@ router = APIRouter()
 @router.get("/forecast")
 def validate_forecast(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     val = ForecastValidator(db)
     return val.validate()
@@ -23,7 +23,7 @@ def validate_forecast(
 @router.get("/hotspots")
 def validate_hotspots(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     val = HotspotValidator(db)
     return val.validate()
@@ -31,14 +31,14 @@ def validate_hotspots(
 @router.get("/recidivism")
 def validate_recidivism(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     val = RecidivismValidator(db)
     return val.validate()
 
 @router.get("/networks")
 def validate_networks(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     val = NetworkGrowthValidator()
     return val.validate()
@@ -46,7 +46,7 @@ def validate_networks(
 @router.get("/summary")
 def get_validation_summary(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     
     forecast_res = ForecastValidator(db).validate()

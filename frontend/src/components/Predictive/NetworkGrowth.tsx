@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { Share2, AlertTriangle, Network } from "lucide-react";
@@ -8,8 +9,8 @@ export default function NetworkGrowth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/predictive/networks")
-      .then(r => r.json())
+    apiClient.get("/predictive/networks")
+      .then(r => r.data)
       .then(res => {
         setData(res);
         setLoading(false);

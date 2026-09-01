@@ -23,7 +23,7 @@ export default function LoginPage() {
     "Station Inspector",
     "District SP",
     "Intelligence Analyst",
-    "SCRB Administrator"
+    "System Administrator"
   ];
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
@@ -106,13 +106,13 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl bg-clip-text bg-gradient-to-r from-slate-100 via-slate-200 to-slate-400">
-            KCIA
+            LINKRA
           </h1>
           <p className="text-sm font-semibold tracking-widest text-blue-400 uppercase mt-1">
-            Karnataka Crime Intelligence Assistant
+            AI-Powered Criminal Intelligence Network
           </p>
           <p className="text-xs text-slate-500 mt-2 max-w-sm">
-            Government of Karnataka • State Crime Records Bureau (SCRB) • Law Enforcement Only
+            National Criminal Intelligence Network • Law Enforcement Only
           </p>
         </div>
 
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. KSP-4892-BLR"
+                    placeholder="e.g. LEO-4892-IND"
                     className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
                     value={badge}
                     onChange={(e) => setBadge(e.target.value)}

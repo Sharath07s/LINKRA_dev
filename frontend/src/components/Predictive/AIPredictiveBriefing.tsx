@@ -2,19 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Sparkles, FileText, AlertTriangle } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
 
 export default function AIPredictiveBriefing() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/predictive/briefing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    })
-      .then(r => r.json())
+    apiClient.post("/predictive/briefing")
       .then(res => {
-        setData(res);
+        setData(res.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));

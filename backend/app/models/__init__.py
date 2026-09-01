@@ -9,3 +9,6 @@ from .document import DocumentChunk
 from .alert import Alert
 from .officer import OfficerAssignment, OfficerAction
 from .event_audit_log import EventAuditLog
+from .ingestion import IngestionJob, EntityCandidate
+from .resolution import CanonicalEntity
+from .relationship import EntityRelationship

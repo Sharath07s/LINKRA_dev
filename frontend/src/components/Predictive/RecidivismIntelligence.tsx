@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { UserMinus, AlertTriangle } from "lucide-react";
@@ -9,8 +10,8 @@ export default function RecidivismIntelligence() {
 
   useEffect(() => {
     // Testing with a dummy ID, expecting insufficient data or error in empty db
-    fetch("http://localhost:8000/api/v1/predictive/offenders/00000000-0000-0000-0000-000000000000")
-      .then(r => r.json())
+    apiClient.get("/predictive/offenders/00000000-0000-0000-0000-000000000000")
+      .then(r => r.data)
       .then(res => {
         setData(res);
         setLoading(false);

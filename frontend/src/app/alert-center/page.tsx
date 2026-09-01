@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -35,9 +36,9 @@ function AlertCenterContent() {
   const fetchAlerts = async () => {
     try {
       // The base /api/v1/alerts endpoint triggers the AlertEngine to evaluate current intelligence
-      const res = await fetch("http://localhost:8000/api/v1/alerts/open");
-      if (res.ok) {
-        const data = await res.json();
+      const res = await apiClient.get("/alerts/open");
+      if (res.status === 200) {
+        const data = res.data;
         setAlerts(data);
       }
     } catch (err) {
@@ -49,10 +50,8 @@ function AlertCenterContent() {
 
   const handleResolve = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/alerts/${id}/resolve`, {
-        method: 'POST'
-      });
-      if (res.ok) {
+      const res = await apiClient.post(`/alerts/${id}/resolve`);
+      if (res.status === 200) {
         setAlerts(alerts?.filter(a => a.id !== id));
         if (selectedAlert?.id === id) {
           setSelectedAlert(null);

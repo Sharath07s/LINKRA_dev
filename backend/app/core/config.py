@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import Optional, List, Union
+from pydantic import AnyHttpUrl, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import json
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -9,9 +11,22 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    APP_ENV: str = "development"
     PROJECT_NAME: str = "KCIA"
+    APP_NAME: str = "KCIA"
     API_V1_STR: str = "/api/v1"
     
+    # CORS
+    CORS_ORIGINS: Union[str, List[str]] = []
+    
+    @validator("CORS_ORIGINS", pre=True)
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
+
     # Database
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
@@ -32,7 +47,8 @@ class Settings(BaseSettings):
     NEO4J_PASSWORD: str = ""
         
     # Security
-    SECRET_KEY: str = "your-secret-key-for-dev"
+    SECRET_KEY: str  # Required, no insecure default
+    JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # AI Providers
@@ -42,6 +58,15 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: Optional[str] = None
     DEEPSEEK_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
+
+    # Entity Resolution Settings
+    RESOLUTION_WEIGHT_NAME: float = 0.50
+    RESOLUTION_WEIGHT_PHONE: float = 0.30
+    RESOLUTION_WEIGHT_VEHICLE: float = 0.15
+    RESOLUTION_WEIGHT_LOCATION: float = 0.05
+    RESOLUTION_THRESHOLD_AUTO_MATCH: float = 0.80
+    RESOLUTION_THRESHOLD_REVIEW: float = 0.65
+    RESOLUTION_TEMPORAL_PENALTY: float = 0.10
 
 settings = Settings()
 

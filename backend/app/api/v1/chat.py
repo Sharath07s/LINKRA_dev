@@ -44,7 +44,7 @@ def _keyword_intent(query: str) -> dict:
                     crime_type = ct
                     break
             district = None
-            for d in ["mysuru", "bengaluru", "mangaluru", "hubballi", "belagavi", "shivamogga", "tumakuru", "davangere", "kalaburagi", "ballari"]:
+            for d in ["mysuru", "bengaluru", "mangaluru", "hubballi", "belagavi", "shivamogga", "tumakuru", "davangere", "kalaburagi", "ballari", "delhi", "mumbai", "chennai", "kolkata"]:
                 if d in q:
                     district = d.capitalize()
                     break
@@ -98,7 +98,7 @@ def chat_with_ai(
             logger.error(f"Vector search failed: {e}")
 
     # ── Step 3: LLM Summarization ────────────────────────────────
-    summarization_prompt = f"""You are KCIA — Karnataka Crime Intelligence Assistant.
+    summarization_prompt = f"""You are LINKRA — AI-Powered Criminal Intelligence Network.
 The user asked: "{query_in.query}"
 
 Extracted intent: {intent_label}

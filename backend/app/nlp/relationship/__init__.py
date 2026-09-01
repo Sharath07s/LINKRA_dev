@@ -1,0 +1,1 @@
+from .extractor import extract_relationships_for_page

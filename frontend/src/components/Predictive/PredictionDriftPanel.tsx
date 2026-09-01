@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { GitPullRequestDraft } from "lucide-react";
@@ -7,8 +8,8 @@ export default function PredictionDriftPanel() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/model-monitoring/drift")
-      .then(r => r.json())
+    apiClient.get("/model-monitoring/drift")
+      .then(r => r.data)
       .then(res => setData(res))
       .catch(console.warn);
   }, []);

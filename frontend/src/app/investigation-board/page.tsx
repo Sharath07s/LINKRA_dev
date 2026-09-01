@@ -1,8 +1,9 @@
 "use client";
-
+import { apiClient } from "@/lib/api-client";
 import { useState, useEffect } from "react";
+import { investigationService, Investigation } from "@/services/investigation.service";
 import DashboardLayout from "@/components/DashboardLayout";
-import CaseSummary from "@/components/Investigation/CaseSummary";
+import { CaseSummary } from "@/components/Investigation/CaseSummary";
 import AICopilot from "@/components/Investigation/AICopilot";
 import EvidenceIntel from "@/components/Investigation/EvidenceIntel";
 import NetworkGraph from "@/components/NetworkGraph";
@@ -13,23 +14,10 @@ import ThreatAssessmentPanel from "@/components/Investigation/ThreatAssessmentPa
 import InvestigationAuditTrail from "@/components/Investigation/InvestigationAuditTrail";
 import InvestigationHealthPanel from "@/components/Investigation/InvestigationHealthPanel";
 
-const MOCK_CASE = {
-  id: "INV-2026-8812",
-  firNumber: "BLR-FIR-2026-0412",
-  crimeType: "Cyber-Physical Theft",
-  district: "Bengaluru City",
-  station: "Indiranagar PS",
-  investigator: "Insp. Vikram Rao",
-  status: "ACTIVE INVESTIGATION",
-  priority: "CRITICAL" as const,
-  riskLevel: "HIGH THREAT",
-  dateOpened: "06 JUN 2026 04:15 HRS",
-  dateUpdated: "17 JUN 2026 14:30 HRS"
-};
-
-const API_BASE = "http://localhost:8000/api/v1";
-
 export default function InvestigationBoardPage() {
+  const [investigations, setInvestigations] = useState<Investigation[]>([]);
+  const [selectedInvestigation, setSelectedInvestigation] = useState<Investigation | null>(null);
+
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
   const [nodeCoordinates, setNodeCoordinates] = useState<Record<string, {x: number, y: number}>>({});
@@ -38,11 +26,26 @@ export default function InvestigationBoardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchInvestigations = async () => {
+      try {
+        const data = await investigationService.listInvestigations();
+        setInvestigations(data);
+        if (data.length > 0) {
+          setSelectedInvestigation(data[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch investigations", err);
+      }
+    };
+    fetchInvestigations();
+  }, []);
+
+  useEffect(() => {
     const fetchGraphData = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch(`${API_BASE}/neo4j/high-risk-networks`);
-        const data = await res.json();
+        const res = await apiClient.get(`/neo4j/high-risk-networks`);
+        const data = res.data;
         
         if (data.nodes && data.edges) {
           const subNodes = data.nodes.slice(0, 8);
@@ -83,6 +86,37 @@ export default function InvestigationBoardPage() {
     setHighlightedNodeIds([node.id, ...neighbors]);
   };
 
+  if (!selectedInvestigation) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center h-[70vh] text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white">No Active Investigations</h2>
+          <p className="text-slate-400 max-w-md">Upload a FIR or Police Report in the Data Sources tab to automatically extract intelligence and start an investigation.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Map backend Investigation model to expected props for CaseSummary
+  const currentCase = {
+    id: selectedInvestigation.id,
+    firNumber: "AUTO-GENERATED",
+    crimeType: "Investigation",
+    district: "Jurisdiction",
+    station: "HQ",
+    investigator: "Current User",
+    status: selectedInvestigation.status || "ACTIVE",
+    priority: selectedInvestigation.priority || "NORMAL",
+    riskLevel: "ANALYZING",
+    dateOpened: selectedInvestigation.started_at || new Date().toISOString(),
+    dateUpdated: new Date().toISOString()
+  };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full space-y-6">
@@ -93,11 +127,11 @@ export default function InvestigationBoardPage() {
             <p className="text-sm text-slate-400">Comprehensive case context, AI analysis, and intelligence mapping.</p>
           </div>
           <div className="flex gap-3 h-24">
-            <InvestigationActionsPanel investigationId={MOCK_CASE.id} />
+            <InvestigationActionsPanel investigationId={currentCase.id} />
           </div>
         </div>
 
-        <CaseSummary caseData={MOCK_CASE} />
+        <CaseSummary crime={currentCase as any} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
@@ -107,17 +141,17 @@ export default function InvestigationBoardPage() {
               <AICopilot />
             </div>
             <div className="h-[350px]">
-              <ThreatAssessmentPanel investigationId={MOCK_CASE.id} />
+              <ThreatAssessmentPanel investigationId={currentCase.id} />
             </div>
             <div className="flex-1">
-              <InvestigationHealthPanel investigationId={MOCK_CASE.id} />
+              <InvestigationHealthPanel investigationId={currentCase.id} />
             </div>
           </div>
 
           {/* Center Column: Timeline & Evidence */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="h-[500px]">
-              <CaseTimeline investigationId={MOCK_CASE.id} />
+              <CaseTimeline investigationId={currentCase.id} />
             </div>
             <div className="h-[300px]">
               <EvidenceIntel />
@@ -127,7 +161,7 @@ export default function InvestigationBoardPage() {
           {/* Right Column: Geographic & Network Intelligence */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="h-[400px]">
-              <CaseMapPanel investigationId={MOCK_CASE.id} />
+              <CaseMapPanel investigationId={currentCase.id} />
             </div>
             
             <div className="h-[400px] bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col overflow-hidden">
@@ -155,7 +189,7 @@ export default function InvestigationBoardPage() {
             </div>
 
             <div className="flex-1 min-h-[250px]">
-              <InvestigationAuditTrail investigationId={MOCK_CASE.id} />
+              <InvestigationAuditTrail investigationId={currentCase.id} />
             </div>
           </div>
 

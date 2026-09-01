@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { apiClient } from '@/lib/api-client';
 
 // Interfaces mapping to Backend Models
 export interface ChatRequest {
@@ -15,8 +16,6 @@ export interface ChatResponse {
   record_count?: number;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-
 export const chatService = {
   /**
    * Sends a message to the backend AI chat endpoint.
@@ -25,30 +24,10 @@ export const chatService = {
    */
   async sendMessage(message: string): Promise<ChatResponse> {
     try {
-      // Retrieve token from zustand persisted storage
-      const storageStr = localStorage.getItem('kcia-auth-storage');
-      let token = '';
-      if (storageStr) {
-        try {
-          const authData = JSON.parse(storageStr);
-          token = authData?.state?.token || '';
-        } catch (_) {
-          console.warn("Failed to parse auth storage");
-        }
-      }
-
-      if (!token) {
-        throw new Error("Authentication failed. Please log in again.");
-      }
-
-      const response = await axios.post<ChatResponse>(
-        `${API_BASE_URL}/chat/`,
+      const response = await apiClient.post<ChatResponse>(
+        `/chat/`,
         { query: message },
         {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
           timeout: 60000,
         }
       );

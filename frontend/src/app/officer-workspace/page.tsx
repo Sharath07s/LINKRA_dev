@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -41,29 +42,29 @@ function OfficerWorkspaceContent() {
 
   const fetchCases = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/officer/cases");
-      if(res.ok) setCases(await res.json());
+      const res = await apiClient.get("/officer/cases");
+      if(res.status === 200) setCases(res.data);
     } catch(e) { console.warn(e) }
   };
 
   const fetchAlerts = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/officer/alerts");
-      if(res.ok) setAlerts(await res.json());
+      const res = await apiClient.get("/officer/alerts");
+      if(res.status === 200) setAlerts(res.data);
     } catch(e) { console.warn(e) }
   };
 
   const fetchActions = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/officer/actions");
-      if(res.ok) setActions(await res.json());
+      const res = await apiClient.get("/officer/actions");
+      if(res.status === 200) setActions(res.data);
     } catch(e) { console.warn(e) }
   };
 
   const fetchAudit = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/officer/audit");
-      if(res.ok) setAudit(await res.json());
+      const res = await apiClient.get("/officer/audit");
+      if(res.status === 200) setAudit(res.data);
     } catch(e) { console.warn(e) }
   };
 

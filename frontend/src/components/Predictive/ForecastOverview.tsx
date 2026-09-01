@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { TrendingUp, Activity, CheckCircle, AlertTriangle } from "lucide-react";
@@ -13,8 +14,8 @@ export default function ForecastOverview() {
   // For the demo we simulate fetching the first district.
   
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/predictive/forecast?district_id=00000000-0000-0000-0000-000000000000") // This will likely hit insufficient data
-      .then(r => r.json())
+    apiClient.get("/predictive/forecast?district_id=00000000-0000-0000-0000-000000000000") // This will likely hit insufficient data
+      .then(r => r.data)
       .then(res => {
         setData(res);
         setLoading(false);

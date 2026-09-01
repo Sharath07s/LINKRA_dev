@@ -11,7 +11,7 @@ export default function OfficerActionsPanel({ actions, fetchActions }: { actions
   const handleSubmit = async () => {
     if (!notes) return;
     try {
-      await fetch("http://localhost:8000/api/v1/officer/action", {
+      await fetch("/officer/action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action_type: actionType, notes })

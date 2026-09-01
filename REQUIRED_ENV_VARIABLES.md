@@ -13,19 +13,19 @@ These variables **must** be configured for the application to function correctly
 | `*_API_KEY` | You must provide the API key corresponding to your chosen `AI_PROVIDER`. | e.g. `OPENAI_API_KEY=sk-...` |
 
 ### Required Database & Service Configs
-*Note: If you are running locally via Docker Compose, these have default values in docker-compose.yml and are thus not strictly required to be provided in `.env` for local development. However, they are mandatory for production or connecting to external instances.*
+*Note: You must define these variables in your `.env` file even for local development.*
 
 | Variable | Description | Default Local Value |
 | :--- | :--- | :--- |
 | `POSTGRES_SERVER` | Hostname of the PostgreSQL database. | `localhost` |
 | `POSTGRES_PORT` | Port of the PostgreSQL database. | `5432` |
-| `POSTGRES_USER` | PostgreSQL user. | `kcia_user` |
-| `POSTGRES_PASSWORD` | PostgreSQL password. | `kcia_secret_password` |
-| `POSTGRES_DB` | PostgreSQL database name. | `kcia_db` |
+| `POSTGRES_USER` | PostgreSQL user. | `postgres` |
+| `POSTGRES_PASSWORD` | PostgreSQL password. | (must provide) |
+| `POSTGRES_DB` | PostgreSQL database name. | `sih26189_db` |
 | `REDIS_URL` | Connection URL for Redis. | `redis://localhost:6379/0` |
 | `NEO4J_URI` | Connection URI for Neo4j. | `bolt://localhost:7687` |
 | `NEO4J_USER` | Neo4j username. | `neo4j` |
-| `NEO4J_PASSWORD` | Neo4j password. | `neo4j_password` |
+| `NEO4J_PASSWORD` | Neo4j password. | (must provide) |
 | `NEXT_PUBLIC_API_URL` | API URL for the frontend. | `http://localhost:8000/api/v1` |
 
 ## Optional Environment Variables

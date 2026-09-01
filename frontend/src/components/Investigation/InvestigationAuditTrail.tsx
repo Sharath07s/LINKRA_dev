@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { List, CheckCircle2, Eye, Download, Search, Settings } from "lucide-react";
@@ -21,9 +22,9 @@ export default function InvestigationAuditTrail({ investigationId }: AuditTrailP
   useEffect(() => {
     const fetchAudit = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/investigations/${investigationId}/audit`);
-        if (res.ok) {
-          const data = await res.json();
+        const res = await apiClient.get(`/investigations/${investigationId}/audit`);
+        if (res.status === 200) {
+          const data = res.data;
           setLogs(data);
         }
       } catch (err) {

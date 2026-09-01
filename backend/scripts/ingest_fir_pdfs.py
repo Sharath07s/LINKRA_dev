@@ -22,7 +22,8 @@ def ingest_pdfs(directory_path: str):
         print("No PDF files found.")
         return
 
-    vector_store = VectorStore(connection_string="postgresql://kcia_user:kcia_secret_password@localhost:5432/kcia_db")
+    from app.core.config import settings
+    vector_store = VectorStore(connection_string=settings.SQLALCHEMY_DATABASE_URI)
     
     # We use a character text splitter.
     # Chunk size of 1000 with 200 overlap is standard for LLM RAG pipelines.

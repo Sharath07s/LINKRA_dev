@@ -32,7 +32,7 @@ const INITIAL_REPORTS: IntelligenceReport[] = [
   { id: "r1", title: "Burglary MO Spatiotemporal Assessment - Mysuru", type: "Hotspot Analysis", scope: "District-wide", createdDate: "2026-06-05", status: "Verified & Signed", size: "1.8 MB", hash: "SHA256: 4b29f...9c4a" },
   { id: "r2", title: "ATM Jackpotting Cyber-Physical Briefing", type: "Case Brief", scope: "Case-specific", createdDate: "2026-06-06", status: "Verified & Signed", size: "2.1 MB", hash: "SHA256: 8d10e...fa7b" },
   { id: "r3", title: "Vicky Saluja Smuggling Ties & Phone Log Graph", type: "Network Analysis", scope: "Suspect-centric", createdDate: "2026-06-04", status: "Pending Review", size: "4.2 MB", hash: "SHA256: 1a99c...dd34" },
-  { id: "r4", title: "Karnataka Cyber Blackmail Trend Summary", type: "Trend Report", scope: "Statewide", createdDate: "2026-06-01", status: "Verified & Signed", size: "3.5 MB", hash: "SHA256: 7f12b...bb88" }
+  { id: "r4", title: "Cyber Blackmail Trend Summary - Karnataka Region", type: "Trend Report", scope: "Regional", createdDate: "2026-06-01", status: "Verified & Signed", size: "3.5 MB", hash: "SHA256: 7f12b...bb88" }
 ];
 
 export default function ReportsPage() {
@@ -54,7 +54,7 @@ export default function ReportsPage() {
 
     setNewlyGeneratedReport(null);
     setCompilingStep(1);
-    setCompilingLog("Initiating SCRB secure connection handshake...");
+    setCompilingLog("Initiating secure connection handshake...");
 
     setTimeout(() => {
       setCompilingStep(2);
@@ -171,8 +171,8 @@ export default function ReportsPage() {
                 >
                   <option>Case-specific</option>
                   <option>Suspect-centric</option>
-                  <option>District-wide</option>
-                  <option>Statewide</option>
+                  <option>Regional</option>
+                  <option>National</option>
                 </select>
               </div>
 
@@ -255,7 +255,7 @@ export default function ReportsPage() {
                 <div className="p-3 bg-slate-950 border border-slate-850 rounded-xl flex items-start gap-2 text-[9px] text-slate-500">
                   <AlertCircle className="h-4 w-4 text-slate-550 shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
-                    Compiling documents registers an entry in the statewide audit log detailing badge code, system parameters, and active IP. Exported PDFs contain digital classification watermarks.
+                    Compiling documents registers an entry in the national audit log detailing badge code, system parameters, and active IP. Exported PDFs contain digital classification watermarks.
                   </p>
                 </div>
 
@@ -270,7 +270,7 @@ export default function ReportsPage() {
           <div className="flex justify-between items-center border-b border-slate-800/80 pb-4 mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Generated Intelligence Briefings</h3>
-              <p className="text-xs text-slate-400">Archived PDF files signed with SCRB key credentials</p>
+              <p className="text-xs text-slate-400">Archived PDF files signed with platform key credentials</p>
             </div>
             <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-lg text-xs font-semibold transition-colors">
               <Sliders className="h-3.5 w-3.5" />

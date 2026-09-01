@@ -13,7 +13,7 @@ def extract_intent_endpoint(
     *,
     db: Session = Depends(deps.get_db),
     query_in: IntentRequest,
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     """
     Extract structured intent from user query.

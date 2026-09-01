@@ -11,15 +11,8 @@ class VectorStore:
         Initializes the VectorStore, natively integrating with PGVector.
         """
         if not connection_string:
-            db_user = os.getenv("POSTGRES_USER", "kcia_user")
-            db_pass = os.getenv("POSTGRES_PASSWORD", "kcia_secret_password")
-            db_host = os.getenv("POSTGRES_HOST", "postgres")
-            db_port = os.getenv("POSTGRES_PORT", "5432")
-            db_name = os.getenv("POSTGRES_DB", "kcia_db")
-            
-            # Since this is run inside docker, the host is postgres.
-            # If run locally, you might want to switch host to localhost.
-            self.connection_string = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+            from app.core.config import settings
+            self.connection_string = settings.SQLALCHEMY_DATABASE_URI
         else:
             self.connection_string = connection_string
             

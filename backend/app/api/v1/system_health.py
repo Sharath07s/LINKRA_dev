@@ -1,10 +1,13 @@
 import time
 import requests
+import logging
 from typing import Any, List, Dict
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 from app.api import deps
 from app.models.user import User
@@ -21,7 +24,7 @@ router = APIRouter()
 @router.get("/postgres")
 def get_postgres_health(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     start_time = time.time()
     # Simple query to check connectivity
@@ -41,7 +44,7 @@ def get_postgres_health(
 
 @router.get("/neo4j")
 def get_neo4j_health(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     try:
         start_time = time.time()
@@ -64,12 +67,13 @@ def get_neo4j_health(
             "crimes": crimes
         }
     except Exception as e:
-        return {"status": "offline", "error": str(e)}
+        logger.error(f"Neo4j health check failed: {e}")
+        return {"status": "offline", "error": "Neo4j is unreachable"}
 
 @router.get("/rag")
 def get_rag_health(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     chunk_count = db.query(DocumentChunk).count()
     return {
@@ -81,7 +85,7 @@ def get_rag_health(
 
 @router.get("/providers")
 def get_provider_health(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     providers = [
         {"name": "Gemini", "model": "gemini-1.5-pro", "status": "Offline", "latency_ms": 0},
@@ -109,7 +113,7 @@ def get_provider_health(
 @router.get("/alerts")
 def get_alert_health(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     now = datetime.utcnow()
     start_of_day = now.replace(hour=0, minute=0, second=0)
@@ -127,7 +131,7 @@ def get_alert_health(
 
 @router.get("/apis")
 def get_api_health(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     endpoints = ["/api/v1/auth/me", "/api/v1/command-wall/threat-level", "/api/v1/crimes/stats"]
     results = []
@@ -145,7 +149,7 @@ def get_api_health(
 @router.get("/data-quality")
 def get_data_quality(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     missing_districts = db.query(Crime).filter(Crime.district_id == None).count()
     missing_coords = db.query(Crime).filter(Crime.latitude == None).count()
@@ -165,7 +169,7 @@ def get_data_quality(
 @router.get("/summary")
 def get_summary(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     pg = "Healthy"
     neo = "Healthy"

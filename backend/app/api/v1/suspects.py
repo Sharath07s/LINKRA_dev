@@ -29,7 +29,7 @@ def create_suspect(
     *,
     db: Session = Depends(deps.get_db),
     suspect_in: SuspectCreate,
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     """
     Create new suspect record.
@@ -60,7 +60,7 @@ def update_suspect(
     db: Session = Depends(deps.get_db),
     id: UUID,
     suspect_in: SuspectUpdate,
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     """
     Update suspect record.

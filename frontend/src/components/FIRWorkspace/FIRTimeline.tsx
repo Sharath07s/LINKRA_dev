@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { Clock, Activity, FileText } from "lucide-react";
@@ -14,9 +15,9 @@ export default function FIRTimeline({ firId }: FIRTimelineProps) {
   useEffect(() => {
     const fetchTimeline = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/crimes/${firId}/timeline`);
-        if (res.ok) {
-          const data = await res.json();
+        const res = await apiClient.get(`/crimes/${firId}/timeline`);
+        if (res.status === 200) {
+          const data = res.data;
           setEvents(data);
         }
       } catch (err) {

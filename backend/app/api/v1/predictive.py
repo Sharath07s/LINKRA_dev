@@ -1,4 +1,7 @@
+import logging
 from typing import Any, List, Dict
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -20,7 +23,7 @@ def get_forecast(
     district_id: str,
     crime_type_id: str = None,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     forecaster = CrimeForecaster(db)
     return forecaster.predict_volume(district_id, crime_type_id)
@@ -28,7 +31,7 @@ def get_forecast(
 @router.get("/hotspots")
 def get_hotspots(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     predictor = HotspotPredictor(db)
     return predictor.predict_hotspots()
@@ -37,14 +40,14 @@ def get_hotspots(
 def get_offender_prediction(
     suspect_id: str,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     engine = RecidivismEngine(db)
     return engine.predict_recidivism(suspect_id)
 
 @router.get("/networks")
 def get_network_prediction(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     engine = NetworkGrowthEngine()
     return engine.predict_growth()
@@ -53,7 +56,7 @@ def get_network_prediction(
 def generate_predictive_briefing(
     district_id: str = None,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
 ) -> Any:
     # 1. Gather all explainable predictive context
     from app.services.predictive_explainability.forecast_explainer import ForecastExplainer
@@ -140,7 +143,8 @@ def generate_predictive_briefing(
             "evidence": ["Data supplied by KCIA Predictive Engine", "Models: CrimeForecaster, HotspotPredictor, NetworkGrowthEngine"]
         }
     except Exception as e:
+        logger.error(f"Predictive briefing generation failed: {e}")
         return {
             "status": "error",
-            "message": f"Failed to generate briefing: {str(e)}"
+            "message": "Failed to generate predictive briefing. Please try again."
         }

@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
+import { useAuthStore } from "@/store/authStore";
 
 interface KCIAEvent {
   event_id: string;
@@ -35,7 +36,8 @@ export const RealtimeProvider = ({ children, channel }: { children: React.ReactN
       if (ws.current?.readyState === WebSocket.OPEN) return;
       
       // In production, use wss:// and handle dynamic hosts
-      const wsUrl = `ws://localhost:8000/api/v1/realtime/ws/${channel}`;
+      const token = useAuthStore.getState().token;
+      const wsUrl = `ws://localhost:8000/api/v1/realtime/ws/${channel}${token ? `?token=${token}` : ''}`;
       ws.current = new WebSocket(wsUrl);
 
       ws.current.onopen = () => {

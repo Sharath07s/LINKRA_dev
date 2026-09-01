@@ -1,12 +1,11 @@
-from typing import Generator, List
-from fastapi import Depends, HTTPException, status
+from typing import Generator, List, Optional
+from fastapi import Depends, HTTPException, status, WebSocket, Query
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from app.core.config import settings
 from app.models.user import User, Role
-from app.core.security import ALGORITHM
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
@@ -33,7 +32,7 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         user_id: str = payload.get("sub")
         token_type: str = payload.get("type")
         if user_id is None or token_type != "access":
@@ -65,3 +64,39 @@ class RoleChecker:
                 detail="Operation not permitted"
             )
         return user
+
+
+async def get_ws_user(
+    websocket: WebSocket,
+    token: Optional[str] = Query(default=None),
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    """
+    WebSocket authentication via query parameter token.
+    Usage: ws://host/ws/endpoint?token=<access_jwt>
+    Closes the WebSocket with 4001 if authentication fails.
+    Returns the authenticated User or None (caller must check).
+    """
+    if token is None:
+        await websocket.close(code=4001, reason="Missing authentication token")
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        user_id: str = payload.get("sub")
+        token_type: str = payload.get("type")
+        if user_id is None or token_type != "access":
+            await websocket.close(code=4001, reason="Invalid token")
+            return None
+    except JWTError:
+        await websocket.close(code=4001, reason="Invalid token")
+        return None
+
+    if db is None:
+        await websocket.close(code=4011, reason="Database unavailable")
+        return None
+
+    user = db.query(User).filter(User.id == user_id, User.is_deleted == False).first()
+    if user is None or not user.is_active:
+        await websocket.close(code=4001, reason="User not found or inactive")
+        return None
+    return user

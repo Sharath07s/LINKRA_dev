@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -31,13 +32,13 @@ function CommandWallContent() {
     const fetchData = async () => {
       try {
         const [threat, alerts, hotspots, nets, officers, invs, timeline] = await Promise.all([
-          fetch("http://localhost:8000/api/v1/command-wall/threat-level").then(r => r.json()),
-          fetch("http://localhost:8000/api/v1/command-wall/alerts").then(r => r.json()),
-          fetch("http://localhost:8000/api/v1/command-wall/hotspots").then(r => r.json()),
-          fetch("http://localhost:8000/api/v1/command-wall/networks").then(r => r.json()),
-          fetch("http://localhost:8000/api/v1/command-wall/officers").then(r => r.json()),
-          fetch("http://localhost:8000/api/v1/command-wall/investigations").then(r => r.json()),
-          fetch("http://localhost:8000/api/v1/command-wall/timeline").then(r => r.json()),
+          apiClient.get("/command-wall/threat-level").then(r => r.data),
+          apiClient.get("/command-wall/alerts").then(r => r.data),
+          apiClient.get("/command-wall/hotspots").then(r => r.data),
+          apiClient.get("/command-wall/networks").then(r => r.data),
+          apiClient.get("/command-wall/officers").then(r => r.data),
+          apiClient.get("/command-wall/investigations").then(r => r.data),
+          apiClient.get("/command-wall/timeline").then(r => r.data),
         ]);
         
         setData({
@@ -62,9 +63,9 @@ function CommandWallContent() {
     if (lastEvent) {
       console.log("[Command Wall] Realtime Event Received:", lastEvent);
       // Fast refresh on any event
-      fetch("http://localhost:8000/api/v1/command-wall/threat-level").then(r => r.json()).then(t => setData((prev: any) => ({ ...prev, threatLevel: t })));
-      fetch("http://localhost:8000/api/v1/command-wall/alerts").then(r => r.json()).then(a => setData((prev: any) => ({ ...prev, alerts: a })));
-      fetch("http://localhost:8000/api/v1/command-wall/hotspots").then(r => r.json()).then(h => setData((prev: any) => ({ ...prev, hotspots: h })));
+      apiClient.get("/command-wall/threat-level").then(r => r.data).then(t => setData((prev: any) => ({ ...prev, threatLevel: t })));
+      apiClient.get("/command-wall/alerts").then(r => r.data).then(a => setData((prev: any) => ({ ...prev, alerts: a })));
+      apiClient.get("/command-wall/hotspots").then(r => r.data).then(h => setData((prev: any) => ({ ...prev, hotspots: h })));
     }
   }, [lastEvent]);
 

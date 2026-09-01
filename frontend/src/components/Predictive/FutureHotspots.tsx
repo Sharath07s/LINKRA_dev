@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { Map, AlertTriangle, Crosshair } from "lucide-react";
@@ -8,8 +9,8 @@ export default function FutureHotspots() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/predictive/hotspots")
-      .then(r => r.json())
+    apiClient.get("/predictive/hotspots")
+      .then(r => r.data)
       .then(res => {
         setData(res);
         setLoading(false);

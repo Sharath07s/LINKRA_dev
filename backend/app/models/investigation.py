@@ -16,6 +16,7 @@ class Investigation(BaseModel):
     crime = relationship("Crime", back_populates="investigations")
     officer = relationship("User")
     notes = relationship("InvestigationNote", back_populates="investigation")
+    entities = relationship("InvestigationEntity", back_populates="investigation", cascade="all, delete-orphan")
 
 class InvestigationNote(BaseModel):
     __tablename__ = "investigation_notes"
@@ -23,3 +24,14 @@ class InvestigationNote(BaseModel):
     note = Column(Text)
     
     investigation = relationship("Investigation", back_populates="notes")
+
+class InvestigationEntity(BaseModel):
+    """
+    Mapping between an investigation and canonical entities (M1.11 Workspace).
+    """
+    __tablename__ = "investigation_entities"
+    investigation_id = Column(UUID(as_uuid=True), ForeignKey("investigations.id"))
+    entity_id = Column(UUID(as_uuid=True), ForeignKey("canonical_entities.id"))
+    
+    investigation = relationship("Investigation", back_populates="entities")
+    entity = relationship("CanonicalEntity")

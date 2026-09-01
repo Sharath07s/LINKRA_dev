@@ -2,6 +2,7 @@ from typing import Any, List, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
+import logging
 
 from app.api import deps
 from app.models.user import User
@@ -13,7 +14,9 @@ from app.ai.provider import FallbackManager
 from app.ai.neo4j.intelligence import neo4j_intelligence
 from pydantic import BaseModel
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
+
 
 class ActionCreate(BaseModel):
     action_type: str
@@ -26,7 +29,7 @@ class CopilotRequest(BaseModel):
 @router.get("/cases")
 def get_assigned_cases(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     """Get open cases assigned to the current officer."""
     assignments = db.query(OfficerAssignment).filter(
@@ -44,7 +47,7 @@ def get_assigned_cases(
 @router.get("/alerts")
 def get_assigned_alerts(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     """Get active alerts assigned to the current officer."""
     assignments = db.query(OfficerAssignment).filter(
@@ -62,7 +65,7 @@ def get_assigned_alerts(
 @router.get("/actions")
 def get_recent_actions(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     actions = db.query(OfficerAction).filter(
         OfficerAction.officer_id == current_user.id
@@ -72,7 +75,7 @@ def get_recent_actions(
 @router.get("/audit")
 def get_audit_timeline(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     # Get audit logs related to this user
     logs = db.query(AuditLog).filter(
@@ -84,7 +87,7 @@ def get_audit_timeline(
 def log_action(
     payload: ActionCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     action = OfficerAction(
         officer_id=current_user.id,
@@ -102,7 +105,7 @@ def log_action(
 def officer_copilot(
     payload: CopilotRequest,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "ADMIN"])),
 ) -> Any:
     # 1. Fetch Assignments
     cases = get_assigned_cases(db, current_user)
@@ -124,13 +127,13 @@ def officer_copilot(
     if cases:
         first_case = cases[0]
         evidence.append(f"Case ID {first_case.id}")
-        cypher = f"""
-        MATCH (c:Crime {{id: '{first_case.id}'}})<-[:PARTICIPATED_IN]-(s:Suspect)
+        cypher = """
+        MATCH (c:Crime {id: $case_id})<-[:PARTICIPATED_IN]-(s:Suspect)
         OPTIONAL MATCH (s)-[:KNOWS]-(a:Suspect)
         RETURN s.full_name as suspect, collect(a.full_name) as associates
         """
         try:
-            results = neo4j_intelligence.execute_query(cypher)
+            results = neo4j_intelligence.execute_query(cypher, parameters={"case_id": first_case.id})
             if results:
                 neo4j_context = "Known Network: " + str(results)
                 evidence.append("Neo4j Suspect Graph")
@@ -159,9 +162,10 @@ def officer_copilot(
             "risk_assessment": "Medium to High based on known network connections",
             "evidence_used": evidence if evidence else ["PostgreSQL Assignment Records"]
         }
-    except Exception as e:
+    except Exception:
+        logger.error("Officer copilot LLM call failed")
         return {
-             "response": "System error processing Copilot request.",
+             "response": "AI copilot is temporarily unavailable. Please check system status.",
              "priority_actions": [],
              "recommended_follow_ups": [],
              "risk_assessment": "Unknown",

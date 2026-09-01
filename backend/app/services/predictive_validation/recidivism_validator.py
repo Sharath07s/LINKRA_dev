@@ -50,7 +50,10 @@ class RecidivismValidator:
             # by assuming degree centrality hasn't shrunk. (A limitation, but valid for platform audit)
             deg = 0
             try:
-                res = neo4j_intelligence.execute_query(f"MATCH (s:Suspect {{id: '{sid}'}})-[:KNOWS]-(a) RETURN count(a) as d")
+                res = neo4j_intelligence.execute_query(
+                    "MATCH (s:Suspect {id: $sid})-[:KNOWS]-(a) RETURN count(a) as d",
+                    parameters={"sid": sid}
+                )
                 if res: deg = res[0]["d"]
             except: pass
             

@@ -1,17 +1,96 @@
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc
+from uuid import UUID
 import random
 from datetime import datetime
 
 from app.api import deps
 from app.models.user import User
-from app.models.investigation import Investigation, InvestigationNote
+from app.models.investigation import Investigation, InvestigationNote, InvestigationEntity
 from app.models.crime import Crime, CrimeStatusHistory
 from app.models.analytics import AuditLog
+from app.models.resolution import CanonicalEntity
+from app.schemas.investigation import InvestigationEntityCreate, InvestigationEntityResponse, InvestigationWorkspaceResponse
 
 router = APIRouter()
+
+@router.get("/{id}/entities", response_model=List[InvestigationEntityResponse])
+def get_investigation_entities(
+    id: UUID,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Get all entities associated with an investigation.
+    """
+    investigation = db.query(Investigation).filter(Investigation.id == id).first()
+    if not investigation:
+        raise HTTPException(status_code=404, detail="Investigation not found")
+        
+    entities = db.query(InvestigationEntity).filter(InvestigationEntity.investigation_id == id).all()
+    return entities
+
+@router.post("/{id}/entities", response_model=InvestigationEntityResponse)
+def add_investigation_entity(
+    id: UUID,
+    entity_in: InvestigationEntityCreate,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Associate an existing canonical entity with an investigation.
+    """
+    if entity_in.investigation_id != id:
+        raise HTTPException(status_code=400, detail="Investigation ID mismatch")
+        
+    investigation = db.query(Investigation).filter(Investigation.id == id).first()
+    if not investigation:
+        raise HTTPException(status_code=404, detail="Investigation not found")
+        
+    canonical_entity = db.query(CanonicalEntity).filter(CanonicalEntity.id == entity_in.entity_id).first()
+    if not canonical_entity:
+        raise HTTPException(status_code=404, detail="Canonical Entity not found")
+        
+    existing = db.query(InvestigationEntity).filter(
+        InvestigationEntity.investigation_id == id,
+        InvestigationEntity.entity_id == entity_in.entity_id
+    ).first()
+    
+    if existing:
+        return existing
+        
+    inv_entity = InvestigationEntity(
+        investigation_id=id,
+        entity_id=entity_in.entity_id
+    )
+    db.add(inv_entity)
+    db.commit()
+    db.refresh(inv_entity)
+    return inv_entity
+
+@router.delete("/{id}/entities/{entity_id}")
+def remove_investigation_entity(
+    id: UUID,
+    entity_id: UUID,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Remove an entity association from an investigation.
+    """
+    inv_entity = db.query(InvestigationEntity).filter(
+        InvestigationEntity.investigation_id == id,
+        InvestigationEntity.entity_id == entity_id
+    ).first()
+    
+    if not inv_entity:
+        raise HTTPException(status_code=404, detail="Investigation entity association not found")
+        
+    db.delete(inv_entity)
+    db.commit()
+    return {"status": "success"}
 
 @router.get("/")
 def get_investigations(
@@ -22,7 +101,7 @@ def get_investigations(
 ) -> Any:
     investigations = db.query(Investigation).offset(skip).limit(limit).all()
     if not investigations:
-        return [{"id": "INV-101", "status": "ACTIVE", "crime_id": "CR-101"}] # Return mock if empty for UI dev
+        return [] # Phase 3: No mock data
     return investigations
 
 @router.get("/{id}/timeline")

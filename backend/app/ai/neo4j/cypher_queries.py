@@ -1,31 +1,51 @@
 # backend/app/ai/neo4j/cypher_queries.py
+"""
+Cypher query constants.
+
+All queries must be:
+- Bounded (LIMIT applied or depth capped)
+- Parameterized (no f-string variable interpolation of user input)
+- Read-only where possible (no writes in query layer)
+"""
+
+# Default limits
+DEFAULT_ASSOC_LIMIT = 50
+DEFAULT_NETWORK_LIMIT = 150
 
 FIND_ASSOCIATES = """
-MATCH (s:Suspect {id: $suspect_id})-[:INVOLVED_IN]->(c:Crime)<-[:INVOLVED_IN]-(associate:Suspect)
-WHERE s.id <> associate.id
-RETURN associate.id AS associate_id, associate.name AS associate_name, count(c) AS shared_crimes, collect(c.fir_number) AS crime_firs
+MATCH (e1:Entity {id: $entity_id})-[r1]-(c:Entity {entity_type: 'CRIME'})-[r2]-(associate:Entity)
+WHERE e1.id <> associate.id AND associate.entity_type = 'PERSON'
+RETURN associate.id AS associate_id, associate.name AS associate_name, count(c) AS shared_crimes
 ORDER BY shared_crimes DESC
+LIMIT $limit
 """
 
 FIND_SHARED_VEHICLES = """
-MATCH (s:Suspect {id: $suspect_id})-[:USED]->(v:Vehicle)<-[:USED]-(associate:Suspect)
-WHERE s.id <> associate.id
-RETURN associate.id AS associate_id, associate.name AS associate_name, v.reg_number AS vehicle_number, count(v) AS weight
+MATCH (e1:Entity {id: $entity_id})-[r1:OWNS|USES|CONNECTED_TO]-(v:Entity {entity_type: 'VEHICLE'})
+      -[r2:OWNS|USES|CONNECTED_TO]-(associate:Entity)
+WHERE e1.id <> associate.id AND associate.entity_type = 'PERSON'
+RETURN associate.id AS associate_id, associate.name AS associate_name,
+       v.name AS vehicle_number, count(v) AS weight
+LIMIT $limit
 """
 
 FIND_CRIMES_FOR_VEHICLE = """
-MATCH (c:Crime)-[:INVOLVES]->(v:Vehicle {reg_number: $vehicle_number})
-RETURN c.id AS crime_id, c.fir_number AS fir_number, c.title AS title, c.status AS status
+MATCH (c:Entity {entity_type: 'CRIME'})-[r]-(v:Entity {name: $vehicle_number, entity_type: 'VEHICLE'})
+RETURN c.id AS crime_id, c.name AS title
 """
 
+# Fixed: previously returned `path` object which was unusable — now returns nodes/edges
 FIND_CRIMINAL_NETWORK = """
-MATCH path = (s:Suspect {id: $suspect_id})-[*1..2]-(connected)
-WHERE (connected:Suspect OR connected:Crime OR connected:Vehicle OR connected:Location OR connected:PhoneNumber OR connected:PoliceStation OR connected:District)
-RETURN path
+MATCH (e:Entity {id: $entity_id})-[*1..2]-(connected:Entity)
+WHERE e.id <> connected.id
+WITH collect(distinct connected) AS connected_nodes
+UNWIND connected_nodes AS n
+OPTIONAL MATCH (e)-[r]-(n)
+RETURN collect(distinct n) AS nodes, collect(distinct r) AS edges
 """
 
 FIND_REPEAT_OFFENDERS = """
-MATCH (s:Suspect)-[:INVOLVED_IN]->(c:Crime)
+MATCH (s:Entity {entity_type: 'PERSON'})-[r]-(c:Entity {entity_type: 'CRIME'})
 WITH s, count(c) AS crime_count
 WHERE crime_count > 1
 RETURN s.id AS suspect_id, s.name AS suspect_name, crime_count
@@ -34,23 +54,44 @@ LIMIT $limit
 """
 
 FIND_MOST_CONNECTED_SUSPECTS = """
-MATCH (s:Suspect)-[r]-()
+MATCH (s:Entity {entity_type: 'PERSON'})-[r]-()
 RETURN s.id AS suspect_id, s.name AS suspect_name, count(r) AS connections
 ORDER BY connections DESC
 LIMIT $limit
 """
 
 GET_NETWORK_NODES_EDGES = """
-MATCH path = (s:Suspect {id: $suspect_id})-[*1..2]-(connected)
-UNWIND nodes(path) AS n
-UNWIND relationships(path) AS r
-RETURN collect(distinct n) AS nodes, collect(distinct r) AS edges
+MATCH path = (e:Entity {id: $entity_id})-[*1..2]-(connected:Entity)
+WITH nodes(path) AS ns, relationships(path) AS rs
+UNWIND ns AS n
+WITH collect(distinct n) AS all_nodes, rs
+UNWIND rs AS r
+WITH all_nodes, collect(distinct r) AS all_edges
+RETURN all_nodes AS nodes, all_edges AS edges
+LIMIT $limit
 """
 
+# Fixed: previously a full graph scan of all Person nodes with no LIMIT
+# Now bounded — only fetches entities where risk_score is populated
 GET_HIGH_RISK_NETWORK = """
-MATCH path = (s:Suspect)-[r:INVOLVED_IN|ASSOCIATED_WITH|USED]-(connected)
-WHERE s.risk_score >= 8.0 OR s.risk_score = 'High'
+MATCH (s:Entity {entity_type: 'PERSON'})
+WHERE s.risk_score IS NOT NULL AND s.risk_score >= $min_risk
+WITH s
+LIMIT $limit
+MATCH path = (s)-[r]-(connected:Entity)
 UNWIND nodes(path) AS n
-UNWIND relationships(path) AS r
-RETURN collect(distinct n) AS nodes, collect(distinct r) AS edges
+UNWIND relationships(path) AS rel
+RETURN collect(distinct n) AS nodes, collect(distinct rel) AS edges
+"""
+
+# Initialize Entity uniqueness constraint
+ENSURE_ENTITY_CONSTRAINT = """
+CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE
+"""
+
+# Get a single entity with its direct relationships
+GET_ENTITY_WITH_RELATIONSHIPS = """
+MATCH (e:Entity {id: $entity_id})
+OPTIONAL MATCH (e)-[r]-(connected:Entity)
+RETURN e AS entity, collect(distinct r) AS rels, collect(distinct connected) AS connected_nodes
 """

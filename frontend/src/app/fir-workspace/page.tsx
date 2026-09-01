@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -29,8 +30,8 @@ export default function FIRWorkspacePage() {
     const fetchGraphData = async () => {
       try {
         setIsLoadingGraph(true);
-        const res = await fetch(`http://localhost:8000/api/v1/neo4j/high-risk-networks`);
-        const data = await res.json();
+        const res = await apiClient.get(`/neo4j/high-risk-networks`);
+        const data = res.data;
         
         if (data.nodes && data.edges) {
           const subNodes = data.nodes.slice(0, 6);

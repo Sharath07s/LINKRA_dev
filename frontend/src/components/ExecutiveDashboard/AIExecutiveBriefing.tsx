@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState } from "react";
 import { Sparkles, BrainCircuit, CheckCircle2, Crosshair, AlertTriangle } from "lucide-react";
@@ -10,11 +11,9 @@ export default function AIExecutiveBriefing() {
   useEffect(() => {
     const fetchBriefing = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/executive/briefing`, {
-          method: 'POST',
-        });
-        if (res.ok) {
-          const json = await res.json();
+        const res = await apiClient.post(`/executive/briefing`);
+        if (res.status === 200) {
+          const json = res.data;
           setData(json);
         }
       } catch (err) {
@@ -56,7 +55,7 @@ export default function AIExecutiveBriefing() {
       
       <div className="p-6 flex-1 overflow-y-auto space-y-6">
         <div>
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Statewide Assessment</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Strategic Assessment</span>
           <p className="text-sm md:text-base text-slate-200 leading-relaxed font-serif tracking-wide border-l-2 border-blue-500 pl-4 py-1">
             {data.summary}
           </p>

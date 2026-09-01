@@ -24,7 +24,7 @@ def read_users(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: UserModel = Depends(deps.RoleChecker(["SCRB Admin", "Admin"])),
+    current_user: UserModel = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     """
     Retrieve users. Only admins can view all users.
@@ -37,7 +37,7 @@ def create_user(
     *,
     db: Session = Depends(deps.get_db),
     user_in: UserCreate,
-    current_user: UserModel = Depends(deps.RoleChecker(["SCRB Admin", "Admin"])),
+    current_user: UserModel = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     """
     Create new user.
@@ -68,7 +68,7 @@ def update_user(
     db: Session = Depends(deps.get_db),
     id: UUID,
     user_in: UserUpdate,
-    current_user: UserModel = Depends(deps.RoleChecker(["SCRB Admin", "Admin"])),
+    current_user: UserModel = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     """
     Update a user.
@@ -89,7 +89,7 @@ def deactivate_user(
     *,
     db: Session = Depends(deps.get_db),
     id: UUID,
-    current_user: UserModel = Depends(deps.RoleChecker(["SCRB Admin", "Admin"])),
+    current_user: UserModel = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     """
     Deactivate a user instead of deleting.
@@ -102,7 +102,7 @@ def deactivate_user(
 
 @router.get("/admin-only", response_model=dict)
 def read_admin_data(
-    current_user: UserModel = Depends(deps.RoleChecker(["SCRB Admin"])),
+    current_user: UserModel = Depends(deps.RoleChecker(["ADMIN"])),
 ) -> Any:
     """
     Only SCRB Admin can access this route.

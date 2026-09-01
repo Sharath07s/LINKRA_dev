@@ -137,7 +137,7 @@ def get_timeline(
 @router.post("/intelligence-feed")
 def get_intelligence_feed(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.RoleChecker(["EXECUTIVE", "ADMIN"])),
 ) -> Any:
     crime_count = db.query(Crime).count()
     if crime_count == 0:

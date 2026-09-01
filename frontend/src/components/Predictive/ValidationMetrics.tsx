@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useState, useEffect } from "react";
 import { CheckCircle, AlertTriangle, BarChart, ShieldCheck } from "lucide-react";
@@ -8,8 +9,8 @@ export default function ValidationMetrics() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/predictive-validation/summary")
-      .then(r => r.json())
+    apiClient.get("/predictive-validation/summary")
+      .then(r => r.data)
       .then(res => {
         setData(res);
         setLoading(false);

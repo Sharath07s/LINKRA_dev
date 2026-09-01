@@ -1,3 +1,4 @@
+import { apiClient } from "@/lib/api-client";
 import React, { useState } from "react";
 import { MessageSquare, Bot } from "lucide-react";
 
@@ -10,8 +11,8 @@ export default function FusionBriefingPanel({ data }: { data: any }) {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/fusion/briefing", { method: "POST" });
-      const result = await response.json();
+      const response = await apiClient.post("/fusion/briefing");
+      const result = response.data;
       setBriefing(result.briefing);
     } catch (e) {
       setBriefing("Failed to generate briefing. Ensure backend is running.");

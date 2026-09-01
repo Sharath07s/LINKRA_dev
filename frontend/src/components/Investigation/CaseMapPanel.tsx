@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/api-client";
 
 import React, { useEffect, useState, useRef } from "react";
 import { Map, Layers, Target, Navigation } from "lucide-react";
@@ -17,9 +18,9 @@ export default function CaseMapPanel({ investigationId }: CaseMapPanelProps) {
     const fetchLocations = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/investigations/${investigationId}/locations`);
-        if (res.ok) {
-          const data = await res.json();
+        const res = await apiClient.get(`/investigations/${investigationId}/locations`);
+        if (res.status === 200) {
+          const data = res.data;
           setLocations(data);
         }
       } catch (err) {

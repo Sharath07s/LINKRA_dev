@@ -1,0 +1,224 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.3, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.13/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/sharathhn/SIH_26189/ICA_ai/backend
+plugins: langsmith-0.8.9, Faker-30.0.0, anyio-4.13.0
+collecting ... collected 70 items
+
+app/tests/test_ai_provider.py::test_get_openai_provider PASSED           [  1%]
+app/tests/test_ai_provider.py::test_get_gemini_provider PASSED           [  2%]
+app/tests/test_ai_provider.py::test_unsupported_provider PASSED          [  4%]
+app/tests/test_ai_workflows.py::test_fir_extraction_workflow PASSED      [  5%]
+app/tests/test_ai_workflows.py::test_vector_search_mock FAILED           [  7%]
+app/tests/test_api.py::test_read_main PASSED                             [  8%]
+app/tests/test_auth.py::test_password_hashing PASSED                     [ 10%]
+app/tests/test_auth.py::test_create_access_token PASSED                  [ 11%]
+app/tests/test_auth.py::test_create_refresh_token PASSED                 [ 12%]
+app/tests/test_main.py::test_read_root PASSED                            [ 14%]
+app/tests/test_main.py::test_health_check PASSED                         [ 15%]
+app/tests/test_models.py::test_create_user PASSED                        [ 17%]
+app/tests/test_models.py::test_soft_delete PASSED                        [ 18%]
+app/tests/test_repositories.py::test_repo_create PASSED                  [ 20%]
+app/tests/test_repositories.py::test_repo_soft_delete PASSED             [ 21%]
+app/tests/test_suspects.py::test_read_suspects_empty PASSED              [ 22%]
+app/tests/test_suspects.py::test_create_suspect FAILED                   [ 24%]
+app/tests/test_suspects.py::test_update_suspect FAILED                   [ 25%]
+app/tests/test_suspects.py::test_get_nonexistent_suspect PASSED          [ 27%]
+app/tests/test_users.py::test_read_user_me PASSED                        [ 28%]
+app/tests/test_users.py::test_read_users_admin_only FAILED               [ 30%]
+app/tests/test_users.py::test_create_user FAILED                         [ 31%]
+app/tests/test_users.py::test_deactivate_user FAILED                     [ 32%]
+test_auth.py::test_login PASSED                                          [ 34%]
+test_auth.py::test_protected_route ERROR                                 [ 35%]
+test_connectivity.py::test_dns PASSED                                    [ 37%]
+test_connectivity.py::test_db_connectivity PASSED                        [ 38%]
+tests/test_auth_rbac.py::test_admin_access FAILED                        [ 40%]
+tests/test_auth_rbac.py::test_officer_denied_admin_route FAILED          [ 41%]
+tests/test_auth_rbac.py::test_executive_access_fusion FAILED             [ 42%]
+tests/test_auth_rbac.py::test_officer_denied_fusion FAILED               [ 44%]
+tests/test_auth_rbac.py::test_missing_auth PASSED                        [ 45%]
+tests/test_chat.py::test_chat_hello PASSED                               [ 47%]
+tests/test_chat.py::test_chat_backend_reaches PASSED                     [ 48%]
+tests/test_chat.py::test_fallback_provider FAILED                        [ 50%]
+tests/test_ingestion.py::TestTxtParser::test_parse_valid_txt PASSED      [ 51%]
+tests/test_ingestion.py::TestTxtParser::test_parse_empty_txt PASSED      [ 52%]
+tests/test_ingestion.py::TestTxtParser::test_parse_missing_file PASSED   [ 54%]
+tests/test_ingestion.py::TestCsvParser::test_parse_valid_csv PASSED      [ 55%]
+tests/test_ingestion.py::TestCsvParser::test_parse_empty_csv PASSED      [ 57%]
+tests/test_ingestion.py::TestCsvParser::test_parse_headers_only_csv PASSED [ 58%]
+tests/test_ingestion.py::TestJsonParser::test_parse_valid_json_array PASSED [ 60%]
+tests/test_ingestion.py::TestJsonParser::test_parse_single_json_object PASSED [ 61%]
+tests/test_ingestion.py::TestJsonParser::test_parse_malformed_json PASSED [ 62%]
+tests/test_ingestion.py::TestJsonParser::test_parse_empty_json PASSED    [ 64%]
+tests/test_ingestion.py::TestNLPExtraction::test_extract_persons PASSED  [ 65%]
+tests/test_ingestion.py::TestNLPExtraction::test_extract_locations PASSED [ 67%]
+tests/test_ingestion.py::TestNLPExtraction::test_extract_phones PASSED   [ 68%]
+tests/test_ingestion.py::TestNLPExtraction::test_extract_vehicles PASSED [ 70%]
+tests/test_ingestion.py::TestNLPExtraction::test_extract_dates PASSED    [ 71%]
+tests/test_ingestion.py::TestNLPExtraction::test_extract_from_empty_text PASSED [ 72%]
+tests/test_ingestion.py::TestNLPExtraction::test_provenance_offsets PASSED [ 74%]
+tests/test_ingestion.py::TestNLPExtraction::test_full_fir_extraction PASSED [ 75%]
+tests/test_ingestion.py::TestValidation::test_valid_pdf_extension PASSED [ 77%]
+tests/test_ingestion.py::TestValidation::test_valid_csv_extension PASSED [ 78%]
+tests/test_ingestion.py::TestValidation::test_unsupported_extension PASSED [ 80%]
+tests/test_ingestion.py::TestValidation::test_empty_file PASSED          [ 81%]
+tests/test_ingestion.py::TestValidation::test_oversized_file PASSED      [ 82%]
+tests/test_ingestion.py::TestValidation::test_missing_filename PASSED    [ 84%]
+tests/test_relationship.py::test_structured_relationship_extraction PASSED [ 85%]
+tests/test_relationship.py::test_unstructured_relationship_extraction_with_trigger PASSED [ 87%]
+tests/test_relationship.py::test_unstructured_relationship_extraction_without_trigger_is_ignored PASSED [ 88%]
+tests/test_resolution.py::test_normalization PASSED                      [ 90%]
+tests/test_resolution.py::test_string_similarity PASSED                  [ 91%]
+tests/test_resolution_audit.py::test_fuzzy_matching_string PASSED        [ 92%]
+tests/test_resolution_audit.py::test_engine_exact_match PASSED           [ 94%]
+tests/test_resolution_audit.py::test_engine_fuzzy_typo PASSED            [ 95%]
+tests/test_resolution_audit.py::test_engine_different_name PASSED        [ 97%]
+tests/test_resolution_audit.py::test_engine_phone_exact PASSED           [ 98%]
+tests/test_resolution_audit.py::test_engine_phone_different PASSED       [100%]
+
+==================================== ERRORS ====================================
+____________________ ERROR at setup of test_protected_route ____________________
+file /Users/sharathhn/SIH_26189/ICA_ai/backend/test_auth.py, line 31
+  def test_protected_route(token):
+E       fixture 'token' not found
+>       available fixtures: _session_faker, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, doctest_namespace, faker, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/Users/sharathhn/SIH_26189/ICA_ai/backend/test_auth.py:31
+=================================== FAILURES ===================================
+___________________________ test_vector_search_mock ____________________________
+app/tests/test_ai_workflows.py:25: in test_vector_search_mock
+    assert len(results) == 2
+E   assert 0 == 2
+E    +  where 0 = len([])
+----------------------------- Captured stderr call -----------------------------
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 6779.44it/s]
+------------------------------ Captured log call -------------------------------
+WARNING  huggingface_hub.utils._http:_http.py:904 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+_____________________________ test_create_suspect ______________________________
+app/tests/test_suspects.py:16: in test_create_suspect
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <Response [403 Forbidden]>.status_code
+_____________________________ test_update_suspect ______________________________
+app/tests/test_suspects.py:30: in test_update_suspect
+    suspect_id = response.json()["id"]
+                 ^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'
+__________________________ test_read_users_admin_only __________________________
+app/tests/test_users.py:13: in test_read_users_admin_only
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <Response [403 Forbidden]>.status_code
+_______________________________ test_create_user _______________________________
+app/tests/test_users.py:25: in test_create_user
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <Response [403 Forbidden]>.status_code
+_____________________________ test_deactivate_user _____________________________
+app/tests/test_users.py:37: in test_deactivate_user
+    user_id = create_resp.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'
+______________________________ test_admin_access _______________________________
+tests/test_auth_rbac.py:53: in test_admin_access
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = <Response [401 Unauthorized]>.status_code
+_______________________ test_officer_denied_admin_route ________________________
+tests/test_auth_rbac.py:58: in test_officer_denied_admin_route
+    assert response.status_code == 403
+E   assert 401 == 403
+E    +  where 401 = <Response [401 Unauthorized]>.status_code
+_________________________ test_executive_access_fusion _________________________
+tests/test_auth_rbac.py:63: in test_executive_access_fusion
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = <Response [401 Unauthorized]>.status_code
+__________________________ test_officer_denied_fusion __________________________
+tests/test_auth_rbac.py:68: in test_officer_denied_fusion
+    assert response.status_code == 403
+E   assert 401 == 403
+E    +  where 401 = <Response [401 Unauthorized]>.status_code
+____________________________ test_fallback_provider ____________________________
+tests/test_chat.py:49: in test_fallback_provider
+    assert response.status_code == 500
+E   assert 200 == 500
+E    +  where 200 = <Response [200 OK]>.status_code
+------------------------------ Captured log call -------------------------------
+WARNING  app.ai.provider:provider.py:165 Provider groq failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+ERROR    app.ai.intents.engine:engine.py:67 Intent extraction failed: All AI providers failed. Last error: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+WARNING  app.ai.provider:provider.py:165 Provider groq failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+=============================== warnings summary ===============================
+../../../../../Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+app/core/config.py:22
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/core/config.py:22: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("CORS_ORIGINS", pre=True)
+
+app/schemas/user.py:23
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/schemas/user.py:23: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class User(UserBase):
+
+app/schemas/chat.py:5
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/schemas/chat.py:5: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'strip_whitespace'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    query: str = Field(..., min_length=1, max_length=2000, strip_whitespace=True)
+
+app/schemas/suspect.py:23
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/schemas/suspect.py:23: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Suspect(SuspectBase):
+
+app/api/v1/resolution.py:16
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/api/v1/resolution.py:16: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class ResolutionReviewResponse(BaseModel):
+
+app/tests/test_repositories.py::test_repo_soft_delete
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/repositories/base.py:44: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    obj = db.query(self.model).get(id)
+
+app/tests/test_repositories.py::test_repo_soft_delete
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/tests/test_repositories.py:45: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    raw = db.query(User).get(user.id)
+
+test_auth.py::test_login
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but test_auth.py::test_login returned <class 'str'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+test_connectivity.py::test_dns
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but test_connectivity.py::test_dns returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+test_connectivity.py::test_db_connectivity
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but test_connectivity.py::test_db_connectivity returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+tests/test_chat.py::test_chat_hello
+tests/test_chat.py::test_chat_backend_reaches
+tests/test_chat.py::test_fallback_provider
+  /Users/sharathhn/SIH_26189/ICA_ai/backend/app/api/v1/chat.py:133: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp=datetime.datetime.utcnow().isoformat(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED app/tests/test_ai_workflows.py::test_vector_search_mock - assert 0 == 2
+FAILED app/tests/test_suspects.py::test_create_suspect - assert 403 == 200
+FAILED app/tests/test_suspects.py::test_update_suspect - KeyError: 'id'
+FAILED app/tests/test_users.py::test_read_users_admin_only - assert 403 == 200
+FAILED app/tests/test_users.py::test_create_user - assert 403 == 200
+FAILED app/tests/test_users.py::test_deactivate_user - KeyError: 'id'
+FAILED tests/test_auth_rbac.py::test_admin_access - assert 401 == 200
+FAILED tests/test_auth_rbac.py::test_officer_denied_admin_route - assert 401 ...
+FAILED tests/test_auth_rbac.py::test_executive_access_fusion - assert 401 == 200
+FAILED tests/test_auth_rbac.py::test_officer_denied_fusion - assert 401 == 403
+FAILED tests/test_chat.py::test_fallback_provider - assert 200 == 500
+ERROR test_auth.py::test_protected_route
+============= 11 failed, 58 passed, 14 warnings, 1 error in 40.86s =============

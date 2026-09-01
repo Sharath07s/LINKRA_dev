@@ -4,8 +4,6 @@ from jose import jwt
 import bcrypt
 from app.core.config import settings
 
-ALGORITHM = "HS256"
-
 def create_access_token(
     subject: Union[str, Any], expires_delta: timedelta = None
 ) -> str:
@@ -16,13 +14,13 @@ def create_access_token(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode = {"exp": expire, "sub": str(subject), "type": "access"}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt
 
 def create_refresh_token(subject: Union[str, Any]) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=30)
     to_encode = {"exp": expire, "sub": str(subject), "type": "refresh"}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -40,4 +38,4 @@ def create_mfa_token(subject: Union[str, Any]) -> str:
     """Creates a temporary token for MFA verification step"""
     expire = datetime.now(timezone.utc) + timedelta(minutes=5)
     to_encode = {"exp": expire, "sub": str(subject), "type": "mfa_pending"}
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)

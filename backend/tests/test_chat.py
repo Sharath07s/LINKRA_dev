@@ -12,12 +12,14 @@ class MockUser(BaseModel):
 def override_get_current_active_user():
     return MockUser()
 
-app.dependency_overrides[deps.get_current_active_user] = override_get_current_active_user
+@pytest.fixture
+def chat_client():
+    app.dependency_overrides[deps.get_current_active_user] = override_get_current_active_user
+    yield TestClient(app)
+    app.dependency_overrides.clear()
 
-client = TestClient(app)
-
-def test_chat_hello():
-    response = client.post("/api/v1/chat/", json={"query": "Hello"})
+def test_chat_hello(chat_client):
+    response = chat_client.post("/api/v1/chat/", json={"query": "Hello"})
     assert response.status_code == 200
     data = response.json()
     assert "message" in data
@@ -26,15 +28,15 @@ def test_chat_hello():
     assert "timestamp" in data
     assert data["status"] == "success"
 
-def test_chat_backend_reaches():
-    response = client.post("/api/v1/chat/", json={"query": "Show theft cases in Mysuru"})
+def test_chat_backend_reaches(chat_client):
+    response = chat_client.post("/api/v1/chat/", json={"query": "Show theft cases in Mysuru"})
     assert response.status_code == 200
     data = response.json()
     assert "message" in data
     assert len(data["message"]) > 0
     assert "provider" in data
     
-def test_fallback_provider(monkeypatch):
+def test_fallback_provider(monkeypatch, chat_client):
     # Test fallback by setting an invalid primary key but a valid secondary
     # We will simulate the provider raising an exception inside the API route.
     # In a true integration test with no keys, it should hit the 500 error.
@@ -45,6 +47,8 @@ def test_fallback_provider(monkeypatch):
     monkeypatch.setattr(settings, "ANTHROPIC_API_KEY", None)
     monkeypatch.setattr(settings, "DEEPSEEK_API_KEY", None)
     
-    response = client.post("/api/v1/chat/", json={"query": "Hello"})
-    assert response.status_code == 500
-    assert "All AI providers failed" in response.json()["detail"]
+    response = chat_client.post("/api/v1/chat/", json={"query": "Hello"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["provider"] == "system_fallback"
+    assert "AI providers are currently offline" in data["message"]
