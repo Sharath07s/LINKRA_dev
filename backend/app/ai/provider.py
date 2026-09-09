@@ -41,7 +41,7 @@ class GeminiProvider(AIProvider):
 
     def get_chat_model(self, temperature: float = 0.0) -> BaseChatModel:
         from langchain_google_genai import ChatGoogleGenerativeAI
-        return ChatGoogleGenerativeAI(google_api_key=self.api_key, temperature=temperature, model="gemini-1.5-pro")
+        return ChatGoogleGenerativeAI(google_api_key=self.api_key, temperature=temperature, model="gemini-3.6-flash")
 
     def generate_response(self, prompt: str, **kwargs) -> str:
         model = self.get_chat_model()
@@ -91,7 +91,7 @@ class GroqProvider(AIProvider):
 
     def get_chat_model(self, temperature: float = 0.0) -> BaseChatModel:
         from langchain_groq import ChatGroq
-        return ChatGroq(groq_api_key=self.api_key, temperature=temperature, model="llama-3.3-70b-versatile")
+        return ChatGroq(groq_api_key=self.api_key, temperature=temperature, model="qwen/qwen3.6-27b")
 
     def generate_response(self, prompt: str, **kwargs) -> str:
         model = self.get_chat_model()
@@ -157,7 +157,17 @@ class FallbackManager:
                     result = structured_model.invoke(prompt)
                 else:
                     result = model.invoke(prompt)
-                    result = result.content
+                    content = result.content
+                    if isinstance(content, list):
+                        text_parts = []
+                        for part in content:
+                            if isinstance(part, dict) and "text" in part:
+                                text_parts.append(part["text"])
+                            elif isinstance(part, str):
+                                text_parts.append(part)
+                        result = "".join(text_parts)
+                    else:
+                        result = str(content)
                     
                 return {"result": result, "provider": provider_name}
                 

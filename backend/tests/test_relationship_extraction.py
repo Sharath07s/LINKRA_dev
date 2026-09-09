@@ -142,8 +142,7 @@ class TestRelationshipTypeSecurity:
         assert _sanitize_relationship_type("ASSOCIATED_WITH") == "ASSOCIATED_WITH"
 
     def test_sanitize_strips_special_chars(self):
-        assert _sanitize_relationship_type("OWNS; DROP TABLE") == "OWNSDROPTABl".upper() or \
-               _sanitize_relationship_type("OWNS; DROP TABLE") == "OWNSDROPABLE"
+        assert _sanitize_relationship_type("OWNS; DROP TABLE") == "OWNSDROPTABLE"
         # Any result: must only be alphanumeric+underscore
         result = _sanitize_relationship_type("OWNS; DROP TABLE entities;")
         for c in result:

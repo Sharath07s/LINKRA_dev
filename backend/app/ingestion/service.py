@@ -172,7 +172,7 @@ def process_ingestion(
                     raw_text=ent.raw_text,
                     normalized_value=ent.normalized_value,
                     confidence=ent.confidence,
-                    source_page=page.page_number if file_type == "pdf" else None,
+                    source_page=page.page_number if file_type in ("pdf", "txt") else None,
                     source_row=page.page_number if file_type in ("csv", "json") else None,
                     start_offset=ent.start_offset,
                     end_offset=ent.end_offset,
@@ -216,7 +216,7 @@ def process_ingestion(
                             raw_text=ent.raw_text,
                             normalized_value=ent.normalized_value,
                             confidence=ent.confidence,
-                            source_page=page.page_number if file_type == "pdf" else None,
+                            source_page=page.page_number if file_type in ("pdf", "txt") else None,
                             source_row=page.page_number if file_type in ("csv", "json") else None,
                             extraction_method=ent.extraction_method,
                         )

@@ -22,7 +22,7 @@ def copilot_chat(
     and returns a strictly grounded response with structured provenance.
     """
     try:
-        response = CopilotOrchestrator.handle_query(db, query_in)
+        response = CopilotOrchestrator.handle_query(db, query_in, current_user)
         return response
     except Exception as e:
         logger.error(f"Copilot chat failed: {e}")

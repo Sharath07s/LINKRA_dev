@@ -24,6 +24,7 @@ from app.models.relationship import EntityRelationship
 from app.models.ingestion import IngestionJob, EntityCandidate
 from app.ingestion.parsers import ParsedPage
 from app.ai.neo4j.intelligence import neo4j_intelligence
+from app.ai.provider import FallbackManager
 
 logger = logging.getLogger(__name__)
 
@@ -227,9 +228,8 @@ def _extract_unstructured(
     if not candidates:
         return []
 
-    from app.ai.provider import FallbackManager
-
     known_entities_text = ", ".join([f"'{c.raw_text}'" for c in candidates])
+
     messages = [
         ("system", RELATIONSHIP_SYSTEM_PROMPT),
         ("human", (

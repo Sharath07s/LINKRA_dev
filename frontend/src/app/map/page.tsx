@@ -1,46 +1,111 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { 
-  Filter, Layers, MapPin, Calendar, Sliders, ShieldAlert, Activity, ChevronRight, Maximize2, Minimize2, Info
+  Layers, MapPin, Calendar, Sliders, ShieldAlert, Loader2, MapIcon, Activity
 } from "lucide-react";
-import Map, { Source, Layer, Marker } from "react-map-gl/maplibre";
+import Map, { Source, Layer } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-
-const HOTSPOTS = [
-  { id: "h1", district: "Bengaluru City", locationName: "Indiranagar - Halasuru Sector", lat: 12.9784, lng: 77.6408, crimeCount: 18, threatScore: 9.4, riskLevel: "High", dominantCrime: "Cyber Jackpotting / Phishing", notes: "Correlated activity detected primarily during nocturnal hours (01:00 - 04:00)." },
-  { id: "h2", district: "Mysuru", locationName: "Vidyaranyapuram - Kuvempunagar Axis", lat: 12.2831, lng: 76.6346, crimeCount: 11, threatScore: 7.8, riskLevel: "Medium", dominantCrime: "House Breaking by Night", notes: "Concentrated around locked residential properties. MO involves rear window access via pry tools." },
-  { id: "h3", district: "Mangaluru", locationName: "Hampankatta - Port Area", lat: 12.8698, lng: 74.8430, crimeCount: 9, threatScore: 8.2, riskLevel: "High", dominantCrime: "Digital Ransomware Extortion", notes: "Targeting commercial networks and banking terminals. IP tracking points to cross-state proxy nodes." },
-  { id: "h4", district: "Kalaburagi", locationName: "Station Bazaar Ward", lat: 17.3323, lng: 76.8378, crimeCount: 14, threatScore: 8.6, riskLevel: "High", dominantCrime: "Property Larceny & Smuggling", notes: "High concentration of retail cargo thefts close to regional distribution terminals." }
-];
+import { geoService } from "@/services/geo.service";
+import { FilterOptionsResponse, CrimeMapFilters, CrimeProperties, DensityFeatureCollection } from "@/types/geo.types";
 
 export default function CrimeMapPage() {
-  const [selectedDistrict, setSelectedDistrict] = useState("All Districts");
-  const [selectedCrime, setSelectedCrime] = useState("All Crimes");
-  const [selectedRange, setSelectedRange] = useState("Last 30 Days");
+  const [filterOptions, setFilterOptions] = useState<FilterOptionsResponse | null>(null);
   
-  const [showHeatmap, setShowHeatmap] = useState(true);
-  const [showClusters, setShowClusters] = useState(true);
-  const [showStations, setShowStations] = useState(false);
-  const [activeHotspot, setActiveHotspot] = useState<any>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedCrime, setSelectedCrime] = useState("");
+  const [selectedInvestigation, setSelectedInvestigation] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
+  const [geoData, setGeoData] = useState<any>(null);
+  const [densityData, setDensityData] = useState<DensityFeatureCollection | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeCrime, setActiveCrime] = useState<CrimeProperties | null>(null);
+  const [activeCluster, setActiveCluster] = useState<{ cluster_id: number; crime_count: number; density_score: number } | null>(null);
+  
+  const [bbox, setBbox] = useState<string | null>(null);
+  const [showDensity, setShowDensity] = useState(true);
+  const [showPoints, setShowPoints] = useState(true);
 
-  const districtsList = ["All Regions", "Bengaluru City", "Mysuru", "Mangaluru", "Hubballi-Dharwad", "Belagavi", "Kalaburagi"];
-  const crimeTypesList = ["All Crimes", "House Breaking", "Cyber Fraud", "Vehicle Theft", "Larceny"];
 
-  const filteredHotspots = HOTSPOTS?.filter(h => {
-    if (selectedDistrict !== "All Districts" && h.district !== selectedDistrict) return false;
-    if (selectedCrime !== "All Crimes" && !h.dominantCrime.includes(selectedCrime.replace("All Crimes", ""))) return false;
-    return true;
-  });
 
-  const geojson = {
-    type: "FeatureCollection" as const,
-    features: filteredHotspots?.map(h => ({
-      type: "Feature" as const,
-      properties: { threatScore: h.threatScore, id: h.id },
-      geometry: { type: "Point" as const, coordinates: [h.lng, h.lat] }
-    }))
+  // Fetch filter options once
+  useEffect(() => {
+    geoService.getFilterOptions()
+      .then(options => setFilterOptions(options))
+      .catch(err => console.error("Failed to load filter options", err));
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const filters: CrimeMapFilters = {
+          district_id: selectedDistrict || undefined,
+          crime_type_id: selectedCrime || undefined,
+          investigation_id: selectedInvestigation || undefined,
+          start_date: startDate ? new Date(startDate).toISOString() : undefined,
+          end_date: endDate ? new Date(endDate).toISOString() : undefined,
+        };
+
+        const [crimes, density] = await Promise.all([
+          geoService.getCrimeLocations({ ...filters, bbox: bbox || undefined, limit: 1000 }),
+          geoService.getCrimeDensity({ ...filters, bbox: bbox || undefined })
+        ]);
+        setGeoData(crimes);
+        setDensityData(density);
+      } catch (err) {
+        console.error("Failed to load geospatial data", err);
+        setError("Unable to load geospatial intelligence.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [bbox, selectedDistrict, selectedCrime, selectedInvestigation, startDate, endDate]);
+
+  const handleResetFilters = () => {
+    setSelectedDistrict("");
+    setSelectedCrime("");
+    setSelectedInvestigation("");
+    setStartDate("");
+    setEndDate("");
+  };
+
+  const handleMapMove = useCallback((e: any) => {
+    const bounds = e.target.getBounds();
+    if (bounds) {
+      const newBbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+      setBbox(newBbox);
+    }
+  }, []);
+
+  const handleMapClick = (event: any) => {
+    const feature = event.features && event.features[0];
+    if (feature && feature.properties) {
+      if (feature.layer?.id === "density-fill-layer") {
+        setActiveCluster({
+          cluster_id: feature.properties.cluster_id,
+          crime_count: feature.properties.crime_count,
+          density_score: feature.properties.density_score
+        });
+        setActiveCrime(null);
+      } else if (feature.layer?.id === "crimes-layer") {
+        setActiveCrime(feature.properties as CrimeProperties);
+        setActiveCluster(null);
+      }
+    } else {
+      setActiveCrime(null);
+      setActiveCluster(null);
+    }
   };
 
   return (
@@ -50,77 +115,104 @@ export default function CrimeMapPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Geospatial Intelligence Map</h1>
-            <p className="text-sm text-slate-400">District threat analytics, spatiotemporal clustering, and police station boundaries</p>
-          </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/20 px-3 py-1 text-[10px] font-bold text-red-400">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
-            </span>
-            <span>HIGH RISK FLASHES</span>
+            <p className="text-sm text-slate-400">Observed crime locations and spatial density analysis</p>
           </div>
         </div>
 
         {/* Filters and Controls Toolbar */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-          <div className="md:col-span-3 space-y-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-900/40 border border-slate-800 p-4 rounded-2xl items-end">
+          <div className="md:col-span-2 space-y-1.5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <MapPin className="h-3 w-3 text-blue-500" /> District Sector
+              <MapPin className="h-3 w-3 text-blue-500" /> District
             </label>
             <select
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               value={selectedDistrict}
               onChange={(e) => setSelectedDistrict(e.target.value)}
             >
-              {districtsList?.map((d) => <option key={d} value={d}>{d}</option>)}
+              <option value="">All Districts</option>
+              {filterOptions?.districts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </div>
 
-          <div className="md:col-span-3 space-y-1.5">
+          <div className="md:col-span-2 space-y-1.5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <Sliders className="h-3 w-3 text-indigo-400" /> Crime Classification
+              <Sliders className="h-3 w-3 text-indigo-400" /> Crime Type
             </label>
             <select
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               value={selectedCrime}
               onChange={(e) => setSelectedCrime(e.target.value)}
             >
-              {crimeTypesList?.map((c) => <option key={c} value={c}>{c}</option>)}
+              <option value="">All Crime Types</option>
+              {filterOptions?.crime_types.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 
-          <div className="md:col-span-3 space-y-1.5">
+          <div className="md:col-span-2 space-y-1.5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <Calendar className="h-3 w-3 text-amber-500" /> Temporal Range
+              <ShieldAlert className="h-3 w-3 text-rose-500" /> Investigation
             </label>
             <select
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={selectedRange}
-              onChange={(e) => setSelectedRange(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              value={selectedInvestigation}
+              onChange={(e) => setSelectedInvestigation(e.target.value)}
+              disabled={!filterOptions || filterOptions.investigations.length === 0}
             >
-              <option>Last 30 Days</option>
-              <option>Last 6 Months</option>
-              <option>Year-To-Date</option>
+              <option value="">
+                {!filterOptions || filterOptions.investigations.length === 0 ? "No investigations available" : "All Investigations"}
+              </option>
+              {filterOptions?.investigations.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
           </div>
 
           <div className="md:col-span-3 space-y-1.5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <Layers className="h-3 w-3 text-emerald-400" /> Intelligence Overlays
+              <Calendar className="h-3 w-3 text-amber-500" /> Date Range
+            </label>
+            <div className="flex gap-2">
+              <input 
+                type="date"
+                className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <span className="text-slate-500 self-center">→</span>
+              <input 
+                type="date"
+                className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-1 flex items-end">
+            <button
+              onClick={handleResetFilters}
+              className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors"
+            >
+              Reset
+            </button>
+          </div>
+
+          <div className="md:col-span-2 space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <Layers className="h-3 w-3 text-emerald-400" /> Layers
             </label>
             <div className="flex gap-2">
               <button
-                onClick={() => setShowHeatmap(!showHeatmap)}
+                onClick={() => setShowDensity(!showDensity)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-bold border transition-colors ${
-                  showHeatmap ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-slate-950 border-slate-850 text-slate-500"
+                  showDensity ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-slate-950 border-slate-850 text-slate-500"
                 }`}
-              >Heatmap</button>
+              >Density</button>
               <button
-                onClick={() => setShowClusters(!showClusters)}
+                onClick={() => setShowPoints(!showPoints)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-bold border transition-colors ${
-                  showClusters ? "bg-blue-500/10 border-blue-500/30 text-blue-400" : "bg-slate-950 border-slate-850 text-slate-500"
+                  showPoints ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-slate-950 border-slate-850 text-slate-500"
                 }`}
-              >Clusters</button>
+              >Points</button>
             </div>
           </div>
         </div>
@@ -128,97 +220,206 @@ export default function CrimeMapPage() {
         {/* Map Viewport Area */}
         <div className="flex-1 min-h-[500px] grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           <div className="lg:col-span-8 bg-slate-950/40 border border-slate-800 rounded-2xl p-2 relative overflow-hidden h-[500px]">
+            {isLoading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm">
+                 <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2 rounded-full shadow-lg">
+                   <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                   <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Loading geospatial intelligence...</span>
+                 </div>
+              </div>
+            )}
+            {error && (
+               <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm">
+                 <div className="flex items-center gap-2 bg-red-950/40 border border-red-900 px-4 py-3 rounded-lg shadow-lg max-w-sm text-center flex-col">
+                   <ShieldAlert className="h-6 w-6 text-red-500 mb-2" />
+                   <span className="text-sm font-bold text-red-400 uppercase tracking-widest">{error}</span>
+                 </div>
+               </div>
+            )}
+            
             <Map
               initialViewState={{ longitude: 76.6, latitude: 15.3, zoom: 5.5 }}
               mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
               interactive={true}
+              onMoveEnd={handleMapMove}
+              onClick={handleMapClick}
+              interactiveLayerIds={["crimes-layer", "density-fill-layer"]}
+              cursor="pointer"
             >
-              {showHeatmap && (
-                <Source type="geojson" data={geojson}>
+              {/* Density polygon layer — rendered below points */}
+              {showDensity && densityData && !error && (
+                <Source id="density-source" type="geojson" data={densityData}>
                   <Layer 
-                    id="heatmap"
-                    type="heatmap"
+                    id="density-fill-layer"
+                    type="fill"
                     paint={{
-                      "heatmap-weight": ["interpolate", ["linear"], ["get", "threatScore"], 0, 0, 10, 1],
-                      "heatmap-intensity": 1,
-                      "heatmap-color": [
-                        "interpolate", ["linear"], ["heatmap-density"],
-                        0, "rgba(33,102,172,0)",
-                        0.2, "rgb(103,169,207)",
-                        0.4, "rgb(209,229,240)",
-                        0.6, "rgb(253,219,199)",
-                        0.8, "rgb(239,138,98)",
-                        1, "rgb(178,24,43)"
+                      "fill-color": [
+                        "interpolate", ["linear"], ["get", "crime_count"],
+                        5, "rgba(251, 191, 36, 0.15)",
+                        15, "rgba(245, 158, 11, 0.3)",
+                        30, "rgba(239, 68, 68, 0.4)",
+                        50, "rgba(220, 38, 38, 0.5)"
                       ],
-                      "heatmap-radius": 30,
-                      "heatmap-opacity": 0.8
+                      "fill-opacity": 0.6
+                    }}
+                  />
+                  <Layer 
+                    id="density-outline-layer"
+                    type="line"
+                    paint={{
+                      "line-color": [
+                        "interpolate", ["linear"], ["get", "crime_count"],
+                        5, "rgba(251, 191, 36, 0.5)",
+                        30, "rgba(239, 68, 68, 0.7)",
+                        50, "rgba(220, 38, 38, 0.9)"
+                      ],
+                      "line-width": 1.5
                     }}
                   />
                 </Source>
               )}
 
-              {showClusters && filteredHotspots?.map(h => (
-                <Marker key={h.id} longitude={h.lng} latitude={h.lat} anchor="center" onClick={(e) => {
-                  e.originalEvent.stopPropagation();
-                  setActiveHotspot(h);
-                }}>
-                  <div className="relative flex h-6 w-6 items-center justify-center cursor-pointer group">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <div className="relative inline-flex rounded-full h-4 w-4 bg-red-600 border-2 border-slate-900 group-hover:scale-125 transition-transform" />
-                  </div>
-                </Marker>
-              ))}
+              {/* Crime points layer — rendered on top */}
+              {showPoints && geoData && !error && (
+                <Source id="crimes-source" type="geojson" data={geoData}>
+                  <Layer 
+                    id="crimes-layer"
+                    type="circle"
+                    paint={{
+                      "circle-radius": [
+                        "interpolate", ["linear"], ["zoom"],
+                        5, 2,
+                        10, 5,
+                        15, 10
+                      ],
+                      "circle-color": "#ef4444",
+                      "circle-stroke-width": 1,
+                      "circle-stroke-color": "#1e293b",
+                      "circle-opacity": 0.7
+                    }}
+                  />
+                </Source>
+              )}
             </Map>
-          </div>
-
-          {/* Right panel: Active Hotspot details / sidebar */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            <div className="bg-slate-900/40 border border-slate-800 p-5 rounded-2xl">
-              <h4 className="font-bold text-white text-sm uppercase tracking-wider mb-3">Threat Indexes</h4>
-              <div className="space-y-3 text-xs">
-                <div className="flex items-start gap-2.5 p-2 bg-red-950/10 border border-red-900/30 rounded-xl">
-                  <span className="h-2 w-2 rounded-full bg-red-500 shrink-0 mt-1.5 animate-pulse" />
-                  <div>
-                    <span className="font-bold text-red-400 block">CRITICAL THREAT ZONE (&gt;8.0)</span>
-                    <span className="text-[10px] text-slate-455 text-slate-400">High density clusters. Immediate proactive patrols required.</span>
+            
+            {/* Density legend */}
+            {showDensity && densityData && densityData.features.length > 0 && (
+              <div className="absolute bottom-4 left-4 z-10">
+                <div className="bg-slate-950/90 backdrop-blur-sm border border-slate-800 px-3 py-2 rounded-lg shadow-lg">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Observed Crime Density</span>
+                  <div className="flex items-center gap-1.5 text-[9px]">
+                    <div className="w-3 h-3 rounded-sm bg-amber-500/30 border border-amber-500/50" />
+                    <span className="text-slate-400">Lower</span>
+                    <div className="w-8 h-1.5 bg-gradient-to-r from-amber-500/30 via-orange-500/40 to-red-600/50 rounded-full mx-1" />
+                    <div className="w-3 h-3 rounded-sm bg-red-600/50 border border-red-500/70" />
+                    <span className="text-slate-400">Higher</span>
                   </div>
+                  <span className="text-[8px] text-slate-500 mt-1 block">Method: PostGIS ST_ClusterDBSCAN</span>
                 </div>
               </div>
-            </div>
+            )}
+            
+            {!isLoading && !error && geoData?.features?.length === 0 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+                 <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-800 px-4 py-2 rounded-full shadow-lg">
+                   <span className="text-xs font-semibold text-slate-400">No verified crime locations available for the current view.</span>
+                 </div>
+              </div>
+            )}
+          </div>
 
+          {/* Right panel: Active Feature Details */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
             <div className="flex-1 bg-slate-900/40 border border-slate-800 p-5 rounded-2xl flex flex-col min-h-[300px]">
-              {activeHotspot ? (
+              {activeCluster ? (
                 <div className="space-y-4 flex-1 flex flex-col">
                   <div className="border-b border-slate-800 pb-3">
-                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest block font-mono">
-                      {activeHotspot.district} Sector
+                    <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block font-mono">
+                      Observed Spatial Cluster
                     </span>
-                    <h3 className="font-bold text-white text-base mt-0.5 leading-snug">{activeHotspot.locationName}</h3>
+                    <h3 className="font-bold text-white text-base mt-0.5 leading-snug">
+                      Cluster #{activeCluster.cluster_id}
+                    </h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
-                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Threat Score</span>
-                      <span className="text-lg font-extrabold text-red-400">{activeHotspot.threatScore} / 10</span>
+                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Observed Crimes</span>
+                      <span className="text-lg font-extrabold text-amber-400">{activeCluster.crime_count}</span>
                     </div>
                     <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
-                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Cases Pinned</span>
-                      <span className="text-lg font-extrabold text-slate-200">{activeHotspot.crimeCount}</span>
+                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Density Score</span>
+                      <span className="text-lg font-extrabold text-slate-200">{activeCluster.density_score}</span>
                     </div>
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Dominant MO Mode</span>
-                    <span className="font-semibold text-slate-300 block">{activeHotspot.dominantCrime}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Spatial Method</span>
+                    <span className="font-semibold text-slate-300 block">PostGIS ST_ClusterDBSCAN (eps=0.05°, minpoints=5)</span>
                   </div>
-                  <div className="space-y-1 text-xs bg-slate-950/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-slate-300">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase block">Field Intelligence Note</span>
-                    {activeHotspot.notes}
+                  <div className="space-y-1 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Geometry</span>
+                    <span className="font-semibold text-slate-300 block">Convex Hull of clustered crime locations</span>
+                  </div>
+                  <div className="space-y-1 text-xs bg-slate-950/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-slate-500">
+                    <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">System Note</span>
+                    This is an observed spatial density cluster, not a predictive hotspot. The boundary represents the convex hull of {activeCluster.crime_count} real crime records spatially concentrated within ~5.5km of each other.
+                  </div>
+                </div>
+              ) : activeCrime ? (
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <div className="border-b border-slate-800 pb-3">
+                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest block font-mono">
+                      {activeCrime.district || "Unknown District"}
+                    </span>
+                    <h3 className="font-bold text-white text-base mt-0.5 leading-snug">
+                      {activeCrime.title || activeCrime.fir_number || "Unspecified Crime"}
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
+                      <span className="text-[9px] text-slate-500 block uppercase font-bold">FIR Number</span>
+                      <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                        {activeCrime.fir_number || "N/A"}
+                      </span>
+                    </div>
+                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
+                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Status</span>
+                      <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                        {activeCrime.status || "Unknown"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Crime Type</span>
+                    <span className="font-semibold text-slate-300 block">{activeCrime.crime_type || "N/A"}</span>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Police Station</span>
+                    <span className="font-semibold text-slate-300 block">{activeCrime.station || "N/A"}</span>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Occurrence Date</span>
+                    <span className="font-semibold text-slate-300 block">
+                      {activeCrime.occurrence_date 
+                        ? new Date(activeCrime.occurrence_date).toLocaleString()
+                        : "N/A"}
+                    </span>
+                  </div>
+                  {activeCrime.estimated_loss && (
+                    <div className="space-y-1 text-xs">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Estimated Loss</span>
+                      <span className="font-semibold text-slate-300 block">₹{activeCrime.estimated_loss.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div className="space-y-1 text-xs bg-slate-950/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-slate-500">
+                    <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">System Note</span>
+                    This is a verified crime location sourced directly from real database records.
                   </div>
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-500 space-y-2">
-                  <Maximize2 className="h-8 w-8 text-slate-600" />
-                  <p className="text-xs font-semibold">Select a District Sector or Cluster Node</p>
-                  <p className="text-[10px] text-slate-500 max-w-[180px]">Click on the map highlights to view spatiotemporal intelligence</p>
+                  <MapIcon className="h-8 w-8 text-slate-600" />
+                  <p className="text-xs font-semibold">Select a Feature</p>
+                  <p className="text-[10px] text-slate-500 max-w-[200px]">Click on a crime point or density region to view observed intelligence details.</p>
                 </div>
               )}
             </div>

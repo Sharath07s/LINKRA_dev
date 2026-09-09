@@ -37,7 +37,7 @@ export default function CrimeHotspotsMap() {
         </div>
         
         <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800 p-2.5 rounded-xl pointer-events-auto shadow-lg flex flex-col gap-2">
-          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-1 mb-1">Top Hotspots</span>
+          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-1 mb-1">Top Crime Regions</span>
           {data.top_hotspots?.map((h: any, idx: number) => (
             <div key={idx} className="flex justify-between items-center gap-4">
               <span className="text-xs font-bold text-white">{h.district}</span>

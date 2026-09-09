@@ -180,17 +180,18 @@ function AIAssistantPageContent() {
       const aiResponse: Message = {
         id: "ai-" + Date.now(),
         role: "assistant",
-        content: response.message,
+        content: response.answer,
         intent: response.intent,
-        structuredData: response.structured_data ?? undefined,
-        recordCount: response.record_count ?? 0,
+        structuredData: response.evidence ?? undefined,
+        recordCount: response.evidence ? response.evidence.length : 0,
         xaiDetails: {
-           confidence: response.provider === "system_fallback" ? 95 : 100,
-           sources: [`Provider: ${response.provider}`, `Intent: ${response.intent || 'general'}`],
+           confidence: response.grounded ? 100 : (response.provider === "system_fallback" ? 95 : 85),
+           sources: response.sources?.length > 0 ? response.sources.map((s: any) => `${s.type}: ${s.label}`) : [`Provider: ${response.provider || 'unknown'}`, `Intent: ${response.intent || 'general'}`],
            reasoning: [
-             `Response received at: ${response.timestamp}`,
-             `Records returned: ${response.record_count ?? 0}`,
-           ]
+             `Status: ${response.status}`,
+             `Entities Found: ${response.entities ? response.entities.length : 0}`,
+             `Analytics Generated: ${response.analytics ? response.analytics.length : 0}`,
+           ].concat(response.warnings || [])
         }
       };
       

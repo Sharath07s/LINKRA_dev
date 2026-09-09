@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy import Uuid as UUID
 from app.models.base import BaseModel
+from geoalchemy2 import Geometry
 
 class District(BaseModel):
     __tablename__ = "districts"
@@ -17,6 +18,7 @@ class PoliceStation(BaseModel):
     station_code = Column(String(50), unique=True, index=True)
     latitude = Column(Numeric)
     longitude = Column(Numeric)
+    location = Column(Geometry('POINT', srid=4326))
     address = Column(String)
     
     district = relationship("District", back_populates="stations")

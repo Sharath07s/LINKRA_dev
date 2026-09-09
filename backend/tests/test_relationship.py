@@ -1,5 +1,6 @@
 import pytest
 import uuid
+import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timezone
@@ -9,7 +10,11 @@ from app.models.ingestion import IngestionJob, EntityCandidate
 from app.models.resolution import CanonicalEntity
 from app.models.relationship import EntityRelationship
 from app.ingestion.parsers import ParsedPage
-from app.nlp.relationship.extractor import extract_relationships_for_page
+from app.nlp.relationship.extractor import (
+    extract_relationships_for_page,
+    LLMRelationshipResult,
+    LLMRelationship
+)
 
 # Setup in-memory DB for isolated tests
 engine = create_engine("sqlite:///:memory:")
@@ -80,14 +85,12 @@ def test_structured_relationship_extraction(db, monkeypatch):
     rel = rels[0]
     assert rel.source_entity_id == ce1.id
     assert rel.target_entity_id == ce2.id
-    assert rel.relationship_type == "COMMUNICATED_WITH"
+    assert rel.relationship_type == "CONNECTED_TO"
     assert rel.confidence == 1.0
     assert rel.event_timestamp is not None
     assert rel.extraction_method == "STRUCTURED_CDR"
 
 def test_unstructured_relationship_extraction_with_trigger(db, monkeypatch):
-    monkeypatch.setattr("app.nlp.relationship.extractor._sync_to_neo4j", lambda x: None)
-    
     job = IngestionJob(
         id=uuid.uuid4(),
         file_name="report.txt",
@@ -125,17 +128,39 @@ def test_unstructured_relationship_extraction_with_trigger(db, monkeypatch):
     db.add_all([c1, c2])
     db.commit()
     
-    rels = extract_relationships_for_page(db, job, page, [c1, c2])
-    
+    llm_result = LLMRelationshipResult(
+        relationships=[
+            LLMRelationship(
+                source_entity="John Doe",
+                target_entity="Jane Smith",
+                relationship_type="ASSOCIATED_WITH",
+                confidence=0.9,
+                evidence_text="John Doe met with Jane Smith at the park."
+            )
+        ]
+    )
+
+    with monkeypatch.context() as m:
+        m.setattr("app.nlp.relationship.extractor._sync_to_neo4j", lambda x: None)
+        
+        class MockFB:
+            @staticmethod
+            def execute_with_fallback(*args, **kwargs):
+                return {"result": llm_result}
+                
+        m.setattr("app.nlp.relationship.extractor.FallbackManager", MockFB)
+        
+        rels = extract_relationships_for_page(db, job, page, [c1, c2])
+
     assert len(rels) == 1
     rel = rels[0]
     assert rel.source_entity_id == ce1.id
     assert rel.target_entity_id == ce2.id
-    assert rel.relationship_type == "MET_WITH"
-    assert rel.confidence == 0.8
-    assert rel.extraction_method == "NLP_TRIGGER"
+    assert rel.relationship_type == "ASSOCIATED_WITH"
+    assert rel.confidence == 0.9
+    assert rel.extraction_method == "llm_semantic"
 
-def test_unstructured_relationship_extraction_without_trigger_is_ignored(db, monkeypatch):
+def test_unstructured_relationship_extraction_evaluates_all_candidates(db, monkeypatch):
     monkeypatch.setattr("app.nlp.relationship.extractor._sync_to_neo4j", lambda x: None)
     
     job = IngestionJob(
@@ -151,7 +176,7 @@ def test_unstructured_relationship_extraction_without_trigger_is_ignored(db, mon
     db.add_all([ce1, ce2])
     db.commit()
 
-    # Simple co-occurrence, no trigger
+    # Simple co-occurrence, no explicit trigger word
     text = "John Doe and Jane Smith were seen near the vehicle."
     page = ParsedPage(page_number=1, text=text, metadata={})
     
@@ -176,7 +201,28 @@ def test_unstructured_relationship_extraction_without_trigger_is_ignored(db, mon
     db.add_all([c1, c2])
     db.commit()
     
+    # Mock LLM to return a relationship based on this co-occurrence
+    llm_result = LLMRelationshipResult(
+        relationships=[
+            LLMRelationship(
+                source_entity="John Doe",
+                target_entity="Jane Smith",
+                relationship_type="ASSOCIATED_WITH",
+                confidence=0.8,
+                evidence_text="John Doe and Jane Smith were seen near the vehicle."
+            )
+        ]
+    )
+
+    class MockFB:
+        @staticmethod
+        def execute_with_fallback(*args, **kwargs):
+            return {"result": llm_result}
+            
+    monkeypatch.setattr("app.nlp.relationship.extractor.FallbackManager", MockFB)
+    
     rels = extract_relationships_for_page(db, job, page, [c1, c2])
     
-    # Should be ignored because there's no relationship trigger
-    assert len(rels) == 0
+    # The LLM should evaluate and return the relationship regardless of triggers
+    assert len(rels) == 1
+    assert rels[0].relationship_type == "ASSOCIATED_WITH"

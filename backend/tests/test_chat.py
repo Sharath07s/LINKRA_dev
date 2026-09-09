@@ -46,6 +46,7 @@ def test_fallback_provider(monkeypatch, chat_client):
     monkeypatch.setattr(settings, "GEMINI_API_KEY", None)
     monkeypatch.setattr(settings, "ANTHROPIC_API_KEY", None)
     monkeypatch.setattr(settings, "DEEPSEEK_API_KEY", None)
+    monkeypatch.setattr(settings, "GROQ_API_KEY", None)
     
     response = chat_client.post("/api/v1/chat/", json={"query": "Hello"})
     assert response.status_code == 200

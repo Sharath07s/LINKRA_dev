@@ -81,10 +81,10 @@ export default function CaseMapPanel({ investigationId }: CaseMapPanelProps) {
             <Navigation className="h-4 w-4 text-blue-400 animate-spin" />
             <span className="text-xs font-bold text-blue-400 tracking-widest uppercase">Initializing Map Engine...</span>
           </div>
-        ) : (
+        ) : locations?.features?.length > 0 ? (
           <div className="z-20 w-full h-full relative">
             {/* Render coordinates as glowing dots on the abstract grid */}
-            {locations?.features?.map((f: any, idx: number) => {
+            {locations.features.map((f: any, idx: number) => {
               // Map lon/lat to relative percentages for abstract display
               const left = `${50 + (f.geometry.coordinates[0] % 1) * 100}%`;
               const top = `${50 + (f.geometry.coordinates[1] % 1) * 100}%`;
@@ -106,6 +106,16 @@ export default function CaseMapPanel({ investigationId }: CaseMapPanelProps) {
                 </div>
               );
             })}
+          </div>
+        ) : (
+          <div className="z-20 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center border border-slate-700/50 mb-4">
+               <Navigation className="h-5 w-5 text-slate-500" />
+            </div>
+            <h4 className="text-sm font-semibold text-slate-300 mb-1">No Verified Locations</h4>
+            <p className="text-xs text-slate-500 max-w-[200px]">
+              No geographic coordinates are currently associated with this investigation.
+            </p>
           </div>
         )}
       </div>

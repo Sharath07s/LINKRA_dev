@@ -77,17 +77,19 @@ def get_crime(
     """
     Get FIR Header details.
     """
-    # Just a mock struct if db is empty for Datathon UI demonstration
-    # Real logic: return db.query(Crime).filter(Crime.fir_number == id).first()
+    crime = db.query(Crime).filter(Crime.id == id).first()
+    if not crime:
+        raise HTTPException(status_code=404, detail="Crime not found")
+        
     return {
-        "fir_number": id,
-        "case_id": "CR-2026-X1",
-        "crime_type": "Cyber-Physical Theft",
-        "district": "Bengaluru City",
-        "station": "Indiranagar PS",
-        "date_registered": datetime.utcnow().isoformat(),
-        "status": "ACTIVE INVESTIGATION",
-        "priority": "CRITICAL"
+        "fir_number": crime.fir_number,
+        "case_id": str(crime.id),
+        "crime_type": crime.crime_type.name if crime.crime_type else "Unknown",
+        "district": crime.district.name if crime.district else "Unknown",
+        "station": crime.station.name if crime.station else "Unknown",
+        "date_registered": crime.reported_date.isoformat() if crime.reported_date else datetime.utcnow().isoformat(),
+        "status": crime.status or "ACTIVE",
+        "priority": "NORMAL"
     }
 
 @router.get("/{id}/summary")
@@ -99,29 +101,15 @@ def get_crime_summary(
     """
     Generates AI FIR Summary using FallbackManager (RAG/LLM).
     """
-    prompt = f"Analyze the FIR {id} and provide an intelligence summary covering Incident Summary, Crime Pattern, Modus Operandi, Threat Assessment, and Recommended Actions."
-    
-    try:
-        summary_response = FallbackManager.execute_with_fallback(
-            prompt=prompt,
-            temperature=0.3,
-        )
-        return {
-            "summary": summary_response["result"],
-            "provider": summary_response["provider"],
-            "confidence": 92
-        }
-    except Exception:
-        # Graceful degradation
-        return {
-            "summary": "This FIR involves cyber-physical theft where suspects compromised ATM infrastructure. The Modus Operandi aligns with the Night Owl syndicate. Threat level is High due to cross-district mobility.",
-            "pattern": "Targeting high-volume ATMs between 01:00 and 04:00.",
-            "modus_operandi": "USB malware insertion payload via compromised internal panels.",
-            "threat_assessment": "High threat. Syndicate is actively recruiting.",
-            "recommended_actions": ["Deploy unmarked surveillance", "Request cell tower dumps", "Audit ATM firmware"],
-            "provider": "system_fallback",
-            "confidence": 85
-        }
+    crime = db.query(Crime).filter(Crime.id == id).first()
+    if not crime:
+        return {"summary": "Insufficient data.", "confidence": 0}
+        
+    return {
+        "summary": crime.description or "No summary available.",
+        "provider": "PostgreSQL",
+        "confidence": 100
+    }
 
 @router.get("/{id}/entities")
 def get_crime_entities(
@@ -132,14 +120,17 @@ def get_crime_entities(
     """
     Returns extracted entities (Suspects, Vehicles, Phones, Locations)
     """
-    # Simulated DB fetch
+    crime = db.query(Crime).filter(Crime.id == id).first()
+    if not crime:
+        return {"suspects": [], "vehicles": [], "phones": [], "locations": [], "organizations": [], "evidence": []}
+    
     return {
-        "suspects": [{"name": "Ramesh Kumar", "role": "Malware Engineer"}],
-        "vehicles": [{"registration": "KA-01-MJ-4001", "type": "Toyota Fortuner"}],
-        "phones": [{"number": "+91-9876543210", "provider": "Jio"}],
-        "locations": [{"address": "100ft Road, Indiranagar", "type": "Crime Scene"}],
-        "organizations": [{"name": "Night Owl Syndicate", "type": "Criminal Group"}],
-        "evidence": [{"id": "EV-01", "type": "Digital", "name": "USB Drive"}]
+        "suspects": [{"name": s.suspect.full_name, "role": s.role} for s in crime.suspects] if crime.suspects else [],
+        "vehicles": [{"registration": v.vehicle.registration_number, "type": v.vehicle.vehicle_type} for v in crime.vehicles] if crime.vehicles else [],
+        "phones": [],
+        "locations": [],
+        "organizations": [],
+        "evidence": [{"id": str(e.id), "type": e.evidence_type, "name": e.file_name} for e in crime.evidence] if crime.evidence else []
     }
 
 @router.get("/{id}/timeline")
@@ -151,24 +142,18 @@ def get_crime_timeline(
     """
     Aggregates chronological events related to the specific FIR.
     """
-    return [
-        {
-            "id": "1",
-            "date": datetime.utcnow().isoformat(),
-            "type": "FIR Creation",
-            "title": "FIR Registered",
-            "description": "Initial complaint logged by bank branch manager.",
+    history = db.query(CrimeStatusHistory).filter(CrimeStatusHistory.crime_id == id).order_by(CrimeStatusHistory.created_at.desc()).limit(50).all()
+    timeline = []
+    for h in history:
+        timeline.append({
+            "id": str(h.id),
+            "date": h.created_at.isoformat() if hasattr(h, 'created_at') and h.created_at else datetime.utcnow().isoformat(),
+            "type": "Status Change",
+            "title": f"Status changed from {h.previous_status} to {h.new_status}",
+            "description": "System generated event",
             "entity_type": "Case Event"
-        },
-        {
-            "id": "2",
-            "date": datetime.utcnow().isoformat(),
-            "type": "Evidence",
-            "title": "USB Drive Seized",
-            "description": "Found plugged into ATM service port.",
-            "entity_type": "Evidence Event"
-        }
-    ]
+        })
+    return timeline
 
 @router.get("/{id}/similar")
 def get_similar_firs(
@@ -194,16 +179,7 @@ def get_similar_firs(
                     "similarity_score": 0.95,
                     "district": "Bengaluru",
                     "crime_type": "Theft",
-                    "linked_network": "Night Owl"
+                    "linked_network": "Unknown"
                 })
         return results
-    else:
-        return [
-            {
-                "fir_number": "BLR-FIR-2026-0399",
-                "similarity_score": 94.2,
-                "district": "Bengaluru City",
-                "crime_type": "Cyber-Physical Theft",
-                "linked_network": "Night Owl"
-            }
-        ]
+    return []

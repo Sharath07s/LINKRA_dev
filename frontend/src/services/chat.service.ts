@@ -1,32 +1,45 @@
 import axios, { AxiosError } from 'axios';
 import { apiClient } from '@/lib/api-client';
 
-// Interfaces mapping to Backend Models
-export interface ChatRequest {
+export interface CopilotQuery {
   message: string;
+  investigation_id?: string;
+  entity_id?: string;
+  conversation_id?: string;
 }
 
-export interface ChatResponse {
-  message: string;
-  provider: string;
-  timestamp: string;
+export interface CopilotCitation {
+  type: string;
+  id: string;
+  label: string;
+  context?: string;
+}
+
+export interface CopilotResponse {
   status: string;
+  answer: string;
   intent?: string;
-  structured_data?: Record<string, any>[] | null;
-  record_count?: number;
+  sources: CopilotCitation[];
+  evidence: Record<string, any>[];
+  entities: Record<string, any>[];
+  analytics: Record<string, any>[];
+  warnings: string[];
+  provider?: string;
+  grounded: boolean;
 }
 
 export const chatService = {
   /**
    * Sends a message to the backend AI chat endpoint.
    * @param message The user's query text
-   * @returns The ChatResponse from the AI
+   * @returns The CopilotResponse from the AI
    */
-  async sendMessage(message: string): Promise<ChatResponse> {
+  async sendMessage(message: string): Promise<CopilotResponse> {
     try {
-      const response = await apiClient.post<ChatResponse>(
-        `/chat/`,
-        { query: message },
+      const payload: CopilotQuery = { message };
+      const response = await apiClient.post<CopilotResponse>(
+        `/copilot/chat`,
+        payload,
         {
           timeout: 60000,
         }

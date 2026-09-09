@@ -18,54 +18,27 @@ export default function AICopilot() {
         <h3 className="text-sm font-bold text-white tracking-wide">AI Investigation Copilot</h3>
       </div>
       
-      <div className="p-5 flex-1 flex flex-col gap-5 overflow-y-auto">
-        <div className="space-y-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Executive Summary</span>
-          <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
-            Based on the initial FIR filing, this incident matches the M.O. of the "Night Owl" syndicate operating out of South Bengaluru. 
-            The insertion of malware into ATMs matches 3 other unsolved cases in the past 60 days.
-          </p>
+      <div className="p-5 flex-1 flex flex-col items-center justify-center text-center">
+        <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center border border-slate-700/50 mb-4">
+          <Sparkles className="h-5 w-5 text-purple-400/50" />
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ConfidenceMeter confidence={87} />
-          <div className="bg-slate-950/40 p-3 rounded-xl border border-slate-800/60 flex flex-col justify-center">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Actionable Insight</span>
-            <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Prioritize Suspect: Ramesh Kumar
-            </span>
-          </div>
-        </div>
-
-        <ReasoningTracePanel 
-          trace={[
-            "Analyzed FIR modus operandi text using NLP.",
-            "Found high semantic similarity (0.92) with unsolved ATM jackpotting cases in Koramangala and Indiranagar.",
-            "Cross-referenced known associates of previous suspects.",
-            "Identified Ramesh Kumar via active cell tower pings near incident location at 02:00 AM."
-          ]} 
-        />
-
-        <div className="mt-auto space-y-2 pt-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Copilot Suggestions</span>
-          <div className="grid grid-cols-2 gap-2">
-            {suggestions?.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <button 
-                  key={i}
-                  className="flex items-center gap-2 p-2 bg-slate-950/60 hover:bg-slate-800 border border-slate-800 rounded-lg text-left transition-colors group"
-                >
-                  <div className="h-6 w-6 rounded bg-slate-900 border border-slate-800 flex items-center justify-center group-hover:border-blue-500/50 group-hover:text-blue-400 transition-colors">
-                    <Icon className="h-3 w-3 text-slate-400 group-hover:text-blue-400" />
-                  </div>
-                  <span className="text-[10px] font-semibold text-slate-300 group-hover:text-slate-100">{s.label}</span>
-                  <PlusCircle className="h-3 w-3 text-slate-600 ml-auto group-hover:text-blue-400" />
-                </button>
-              );
-            })}
-          </div>
+        <h4 className="text-sm font-semibold text-slate-300 mb-1">Copilot Ready</h4>
+        <p className="text-xs text-slate-500 max-w-[250px]">
+          The AI Copilot is standing by. Ask a question or run an analysis to generate insights for this investigation.
+        </p>
+      </div>
+      
+      <div className="p-4 border-t border-slate-800/50 bg-slate-950/30">
+        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-2 px-3">
+          <input 
+            type="text" 
+            placeholder="Ask Copilot to analyze this case..." 
+            className="bg-transparent border-none outline-none text-xs text-slate-300 flex-1 placeholder:text-slate-600"
+            disabled
+          />
+          <button className="text-purple-400 opacity-50 cursor-not-allowed">
+            <Sparkles className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>

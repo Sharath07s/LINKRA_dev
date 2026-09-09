@@ -34,3 +34,5 @@ api_router.include_router(relationship.router, prefix="/relationship", tags=["re
 api_router.include_router(explainability.router, prefix="/explainability", tags=["explainability"])
 api_router.include_router(copilot.router, prefix="/copilot", tags=["copilot"])
 api_router.include_router(reports.router, prefix="/investigations", tags=["reports"])
+from app.api.v1 import geo
+api_router.include_router(geo.router, prefix="/geo", tags=["geo"])

@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Integer, Numeric, DateTime, ForeignKey, T
 from sqlalchemy.orm import relationship
 from sqlalchemy import Uuid as UUID
 from app.models.base import BaseModel
+from geoalchemy2 import Geometry
 
 class CrimeType(BaseModel):
     __tablename__ = "crime_types"
@@ -25,6 +26,7 @@ class Crime(BaseModel):
     
     latitude = Column(Numeric)
     longitude = Column(Numeric)
+    location = Column(Geometry('POINT', srid=4326))
     
     status = Column(String(100))
     estimated_loss = Column(Numeric)

@@ -24,14 +24,31 @@ export default function InvestigationBoardPage() {
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentCase, setCurrentCase] = useState<any>(null);
 
   useEffect(() => {
     const fetchInvestigations = async () => {
       try {
-        const data = await investigationService.listInvestigations();
-        setInvestigations(data);
-        if (data.length > 0) {
-          setSelectedInvestigation(data[0]);
+        // Read URL params for specific ID, else pick first
+        const params = new URLSearchParams(window.location.search);
+        const urlId = params.get('id');
+        let activeId = urlId;
+        
+        if (!activeId) {
+          const data = await investigationService.listInvestigations();
+          if (data.length > 0) {
+            activeId = data[0].id;
+          }
+        }
+        
+        if (activeId) {
+          const fullCase = await investigationService.getInvestigation(activeId);
+          setSelectedInvestigation(fullCase as any);
+          setCurrentCase({
+            ...fullCase,
+            riskLevel: "ANALYZING",
+            dateUpdated: new Date().toISOString()
+          });
         }
       } catch (err) {
         console.error("Failed to fetch investigations", err);
@@ -41,42 +58,55 @@ export default function InvestigationBoardPage() {
   }, []);
 
   useEffect(() => {
+    if (!selectedInvestigation) return;
+    
     const fetchGraphData = async () => {
       try {
         setIsLoading(true);
-        const res = await apiClient.get(`/neo4j/high-risk-networks`);
-        const data = res.data;
+        // First get entities for this investigation
+        const entitiesRes = await apiClient.get(`/investigations/${selectedInvestigation.id}/entities`);
+        const entities = entitiesRes.data;
         
-        if (data.nodes && data.edges) {
-          const subNodes = data.nodes.slice(0, 8);
-          const subNodeIds = subNodes?.map((n: any) => n.id);
-          const subEdges = data.edges?.filter((e: any) => subNodeIds.includes(e.source) && subNodeIds.includes(e.target));
-
-          setNodes(subNodes);
-          setEdges(subEdges);
+        if (entities && entities.length > 0) {
+          // Fetch subgraph for the first entity to anchor the graph
+          const firstEntityId = entities[0].entity_id;
+          const res = await apiClient.get(`/graph/subgraph/${firstEntityId}?depth=2&max_nodes=50`);
+          const data = res.data;
           
-          const coords: Record<string, {x: number, y: number}> = {};
-          const cx = 250;
-          const cy = 175;
-          const r = 100;
-          subNodes?.forEach((node: any, idx: number) => {
-            const angle = (idx / subNodes.length) * 2 * Math.PI;
-            coords[node.id] = {
-              x: cx + r * Math.cos(angle),
-              y: cy + r * Math.sin(angle)
-            };
-          });
-          setNodeCoordinates(coords);
+          if (data.nodes && data.edges) {
+            const subNodes = data.nodes;
+            const subNodeIds = subNodes?.map((n: any) => n.id);
+            const subEdges = data.edges?.filter((e: any) => subNodeIds.includes(e.source) && subNodeIds.includes(e.target));
+
+            setNodes(subNodes);
+            setEdges(subEdges);
+            
+            const coords: Record<string, {x: number, y: number}> = {};
+            const cx = 250;
+            const cy = 175;
+            const r = 100;
+            subNodes?.forEach((node: any, idx: number) => {
+              const angle = (idx / subNodes.length) * 2 * Math.PI;
+              coords[node.id] = {
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle)
+              };
+            });
+            setNodeCoordinates(coords);
+          }
+        } else {
+            setNodes([]);
+            setEdges([]);
         }
       } catch (err) {
-        console.warn("Failed to fetch knowledge graph", err);
+        console.warn("Failed to fetch knowledge graph for investigation", err);
       } finally {
         setIsLoading(false);
       }
     };
     
     fetchGraphData();
-  }, []);
+  }, [selectedInvestigation]);
 
   const handleNodeClick = (node: any) => {
     setSelectedNode(node);
@@ -86,36 +116,20 @@ export default function InvestigationBoardPage() {
     setHighlightedNodeIds([node.id, ...neighbors]);
   };
 
-  if (!selectedInvestigation) {
+  if (!currentCase) {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center h-[70vh] text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+          <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 animate-pulse">
             <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-white">No Active Investigations</h2>
-          <p className="text-slate-400 max-w-md">Upload a FIR or Police Report in the Data Sources tab to automatically extract intelligence and start an investigation.</p>
+          <h2 className="text-xl font-bold text-white">Loading Investigation...</h2>
         </div>
       </DashboardLayout>
     );
   }
-
-  // Map backend Investigation model to expected props for CaseSummary
-  const currentCase = {
-    id: selectedInvestigation.id,
-    firNumber: "AUTO-GENERATED",
-    crimeType: "Investigation",
-    district: "Jurisdiction",
-    station: "HQ",
-    investigator: "Current User",
-    status: selectedInvestigation.status || "ACTIVE",
-    priority: selectedInvestigation.priority || "NORMAL",
-    riskLevel: "ANALYZING",
-    dateOpened: selectedInvestigation.started_at || new Date().toISOString(),
-    dateUpdated: new Date().toISOString()
-  };
 
   return (
     <DashboardLayout>
@@ -154,7 +168,7 @@ export default function InvestigationBoardPage() {
               <CaseTimeline investigationId={currentCase.id} />
             </div>
             <div className="h-[300px]">
-              <EvidenceIntel />
+              <EvidenceIntel investigationId={currentCase.id} />
             </div>
           </div>
 
