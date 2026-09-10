@@ -89,3 +89,26 @@ def get_local_component(
     except Exception as e:
         logger.error(f"Graph analytics error: {e}")
         raise HTTPException(status_code=500, detail="Error querying graph analytics")
+
+from app.schemas.graph import CommunityResponse
+from app.ai.neo4j.community import neo4j_community
+
+@router.get("/communities", response_model=CommunityResponse)
+def get_communities(
+    algorithm: str = Query("louvain", description="The community detection algorithm to use (louvain or leiden)"),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
+):
+    """
+    Get structural graph communities using graph algorithms like Louvain or Leiden.
+    Executes directly against the Neo4j instance using GDS projection.
+    """
+    algorithm = algorithm.lower()
+    if algorithm not in {"louvain", "leiden"}:
+        raise HTTPException(status_code=400, detail="Invalid algorithm. Supported values: 'louvain', 'leiden'.")
+        
+    try:
+        return neo4j_community.get_communities(algorithm=algorithm)
+    except Exception as e:
+        logger.error(f"Community detection error: {e}")
+        raise HTTPException(status_code=500, detail="Error querying communities")
+

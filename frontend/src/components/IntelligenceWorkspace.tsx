@@ -6,12 +6,14 @@ import {
   Network, 
   Sliders,
   Bot,
-  ChevronDown
+  ChevronDown,
+  Users
 } from "lucide-react";
 import GraphNodeDetails from "@/components/GraphNodeDetails";
 import NetworkGraph from "@/components/NetworkGraph";
 import EdgeEvidencePanel from "@/components/EdgeEvidencePanel";
 import { CopilotPanel } from "@/components/CopilotPanel";
+import { CommunityPanel } from "@/components/CommunityPanel";
 
 interface IntelligenceWorkspaceProps {
   initialFocusId?: string | null;
@@ -28,6 +30,7 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
   const [nodeCoordinates, setNodeCoordinates] = useState<Record<string, {x: number, y: number}>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [showCommunities, setShowCommunities] = useState(false);
 
   // Focus on initial if provided
   useEffect(() => {
@@ -168,6 +171,13 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
             <Sliders className="h-4 w-4" />
             <span>Edge Weight</span>
           </button>
+          <button 
+            onClick={() => setShowCommunities(prev => !prev)}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 border text-xs font-semibold rounded-xl transition-colors ${showCommunities ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300' : 'bg-slate-950 hover:bg-slate-900 border-slate-800 text-slate-400'}`}
+          >
+            <Users className="h-4 w-4" />
+            <span>Communities</span>
+          </button>
         </div>
       </div>
 
@@ -267,6 +277,10 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
               </div>
             )}
           </div>
+          
+          {showCommunities && (
+            <CommunityPanel />
+          )}
         </div>
       </div>
     </div>

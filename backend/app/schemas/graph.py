@@ -116,3 +116,19 @@ class ExplainabilityResponse(BaseModel):
     structural_analytics: Dict[str, Any]
     anomalies: List[AnomalySignal]
     potential_links: List[PotentialLink]
+
+class CommunityMember(BaseModel):
+    entity_id: str
+    name: str
+    type: str
+
+class Community(BaseModel):
+    community_id: str
+    size: int
+    members: List[CommunityMember]
+
+class CommunityResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+    algorithm: Optional[str] = "louvain"
+    communities: List[Community] = []

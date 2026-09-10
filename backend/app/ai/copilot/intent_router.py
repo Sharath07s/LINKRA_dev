@@ -15,6 +15,7 @@ class IntentRouter:
         CopilotIntent.COMPARISON: ["compare", "difference between", "versus", "vs"],
         CopilotIntent.GRAPH_EXPLORATION: ["graph", "network", "around", "hops", "neighbors", "surrounding"],
         CopilotIntent.ENTITY_LOOKUP: ["who is", "what is", "details about", "tell me about"],
+        CopilotIntent.COMMUNITY_LOOKUP: ["community", "communities", "louvain", "leiden", "grouping"],
     }
 
     @classmethod

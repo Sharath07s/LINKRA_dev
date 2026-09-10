@@ -147,6 +147,20 @@ Context Provided:
             logger.error(f"Neo4j prediction lookup failed: {e}")
 
     @classmethod
+    def _tool_neo4j_community_lookup(cls, current_user: Any, context_data: dict):
+        """Bounded Tool: Neo4j community detection."""
+        from app.ai.neo4j.community import neo4j_community
+        try:
+            communities_response = neo4j_community.get_communities()
+            context_data["analytics"].append({
+                "community_detection_status": communities_response.status,
+                "message": communities_response.message,
+                "communities": [c.model_dump() for c in communities_response.communities]
+            })
+        except Exception as e:
+            logger.error(f"Neo4j community lookup failed: {e}")
+
+    @classmethod
     def _tool_rag_evidence_lookup(cls, query_text: str, current_user: Any, context_data: dict):
         """Bounded Tool: RAG vector search."""
         try:
@@ -198,6 +212,9 @@ Context Provided:
 
         if query.investigation_id:
             cls._tool_investigation_lookup(db, query.investigation_id, current_user, context_data)
+
+        if intent == CopilotIntent.COMMUNITY_LOOKUP:
+            cls._tool_neo4j_community_lookup(current_user, context_data)
 
         # RAG Search for Evidence Lookup or General Intelligence if we don't have enough entity context
         if intent in [CopilotIntent.EVIDENCE_LOOKUP, CopilotIntent.GENERAL_INTELLIGENCE_QUERY]:
