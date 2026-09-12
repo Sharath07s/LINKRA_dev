@@ -10,11 +10,17 @@ class GraphNode(BaseModel):
     desc: str
 
 class GraphEdge(BaseModel):
+    id: Optional[str] = None
     source: str
     target: str
     relation: str
     weight: float
     desc: str
+    confidence: Optional[float] = None
+    extraction_method: Optional[str] = None
+    source_page: Optional[int] = None
+    ingestion_job_id: Optional[str] = None
+    evidence_text: Optional[str] = None
 
 class GraphResponse(BaseModel):
     nodes: List[GraphNode]

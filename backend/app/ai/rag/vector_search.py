@@ -52,11 +52,18 @@ class VectorStore:
             with Session(self.engine) as session:
                 # Calculate distance using pgvector operator
                 distance_col = DocumentChunk.embedding.cosine_distance(query_embedding).label('distance')
-                stmt = select(DocumentChunk, distance_col).order_by(distance_col).limit(top_k)
+                stmt = (
+                    select(DocumentChunk, distance_col)
+                    .where(DocumentChunk.embedding.isnot(None))
+                    .order_by(distance_col)
+                    .limit(top_k)
+                )
                 
                 rows = session.execute(stmt).all()
                 
                 for chunk, distance in rows:
+                    if distance is None:
+                        continue
                     similarity = 1.0 - float(distance)
                     results.append({
                         "doc_id": chunk.source_id,

@@ -37,4 +37,4 @@ class CopilotResponse(BaseModel):
     analytics: List[Dict[str, Any]] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     provider: Optional[str] = None
-    grounded: bool = True
+    grounded: bool = False

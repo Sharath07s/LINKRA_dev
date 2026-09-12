@@ -59,6 +59,7 @@ class IngestionJobResponse(BaseModel):
     error_message: Optional[str] = None
     record_count: Optional[int] = None
     entity_count: Optional[int] = None
+    chunk_count: Optional[int] = None   # DocumentChunk rows written to pgvector (Step 6)
     created_at: datetime
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
