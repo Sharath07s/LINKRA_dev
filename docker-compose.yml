@@ -41,19 +41,22 @@ services:
     networks:
       - kcia-network
 
-  # ── PostgreSQL + pgvector ────────────────────────────────
+  # ── PostgreSQL + pgvector + PostGIS ───────────────────────
   postgres:
-    image: pgvector/pgvector:pg16
+    build:
+      context: .
+      dockerfile: docker/postgres.Dockerfile
+    image: linkra-postgres:16
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-kcia}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-kcia}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -82,7 +85,7 @@ services:
       - "7474:7474"
       - "7687:7687"
     environment:
-      NEO4J_AUTH: ${NEO4J_USER}/${NEO4J_PASSWORD}
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-testpassword}
     volumes:
       - neo4j_data:/data
     networks:

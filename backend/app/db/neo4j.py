@@ -12,15 +12,16 @@ class Neo4jConnection:
         self.connect()
 
     def connect(self):
-        if settings.NEO4J_URI and settings.NEO4J_USER and settings.NEO4J_PASSWORD:
+        if settings.NEO4J_URI:
             try:
+                auth = (settings.NEO4J_USER, settings.NEO4J_PASSWORD) if (settings.NEO4J_USER and settings.NEO4J_PASSWORD) else None
                 self.driver = GraphDatabase.driver(
                     settings.NEO4J_URI, 
-                    auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
+                    auth=auth
                 )
                 self.driver.verify_connectivity()
                 logger.info("Connected to Neo4j successfully.")
-            except (ServiceUnavailable, AuthError) as e:
+            except (ServiceUnavailable, AuthError, Exception) as e:
                 logger.error(f"Failed to create Neo4j driver: {e}")
                 self.driver = None
 
@@ -33,7 +34,7 @@ class Neo4jConnection:
             self.connect()
         if self.driver:
             return self.driver.session()
-        return None
+        raise ServiceUnavailable("Neo4j database service is not available or not connected.")
 
     def check_health(self):
         if not self.driver:
