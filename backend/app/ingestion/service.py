@@ -14,7 +14,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from sqlalchemy.orm import Session
 
@@ -101,12 +100,23 @@ def validate_file(filename: str, content_type: Optional[str], file_size: int) ->
 # Matches the parameters established in scripts/ingest_fir_pdfs.py.
 # chunk_size is in characters (not tokens). At ~4 chars/token this is
 # roughly 250 tokens — well within all-MiniLM-L6-v2's 256-token window.
-_CHUNK_SPLITTER = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200,
-    length_function=len,
-    is_separator_regex=False,
-)
+# Lazy-initialized so that langchain_text_splitters (and its transitive
+# dependency on torch/sentence_transformers) is only imported the first
+# time RAG chunking is actually needed, not at module import time.
+_CHUNK_SPLITTER = None
+
+
+def _get_chunk_splitter():
+    global _CHUNK_SPLITTER
+    if _CHUNK_SPLITTER is None:
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        _CHUNK_SPLITTER = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len,
+            is_separator_regex=False,
+        )
+    return _CHUNK_SPLITTER
 
 
 def process_ingestion(
@@ -313,7 +323,7 @@ def process_ingestion(
 
                 # Split page text into sub-page chunks.
                 # Short pages (< chunk_size) naturally produce a single chunk.
-                raw_chunks = _CHUNK_SPLITTER.split_text(page.text)
+                raw_chunks = _get_chunk_splitter().split_text(page.text)
                 total_chunks_on_page = len(raw_chunks)
 
                 for chunk_index, chunk_text in enumerate(raw_chunks):

@@ -1,9 +1,29 @@
+import sqlite3
 import pytest
 import uuid
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+
+# ── SpatiaLite stubs for plain SQLite ──────────────────────────────────
+# GeoAlchemy2's SQLite dialect calls SpatiaLite functions
+# (RecoverGeometryColumn, CreateSpatialIndex, etc.) during DDL events.
+# Tests use plain SQLite (no SpatiaLite extension loaded), so we register
+# lightweight no-op stubs so that Base.metadata.create_all() succeeds.
+# This listener fires for EVERY Engine (class-level), covering engines
+# created in conftest, test_models, and test_repositories.
+@event.listens_for(Engine, "connect")
+def _set_sqlite_spatialite_stubs(dbapi_conn, connection_record):
+    if isinstance(dbapi_conn, sqlite3.Connection):
+        dbapi_conn.create_function("RecoverGeometryColumn", 5, lambda *a: 1)
+        dbapi_conn.create_function("CreateSpatialIndex", 2, lambda *a: 1)
+        dbapi_conn.create_function("DiscardGeometryColumn", 2, lambda *a: 1)
+        dbapi_conn.create_function("CheckSpatialIndex", 2, lambda *a: 1)
+        dbapi_conn.create_function("DisableSpatialIndex", 2, lambda *a: 1)
+
 
 from app.main import app
 from app.api.deps import get_db, get_current_active_user, RoleChecker
