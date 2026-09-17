@@ -347,7 +347,8 @@ def _sync_to_neo4j(relationships: list[EntityRelationship]) -> None:
                     r.event_timestamp = $event_timestamp,
                     r.source_page = $source_page,
                     r.source_row = $source_row,
-                    r.ingestion_job_id = $ingestion_job_id
+                    r.ingestion_job_id = $ingestion_job_id,
+                    r.evidence_text = $evidence_text
                 """
                 session.run(query, {
                     "rel_id": str(rel.id),
@@ -359,6 +360,7 @@ def _sync_to_neo4j(relationships: list[EntityRelationship]) -> None:
                     "source_page": rel.source_page,
                     "source_row": rel.source_row,
                     "ingestion_job_id": str(rel.ingestion_job_id) if rel.ingestion_job_id else None,
+                    "evidence_text": rel.evidence_text,
                 })
     except Exception as e:
         logger.error(f"Failed to sync relationships to Neo4j: {e}")

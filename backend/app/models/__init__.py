@@ -12,3 +12,4 @@ from .event_audit_log import EventAuditLog
 from .ingestion import IngestionJob, EntityCandidate
 from .resolution import CanonicalEntity
 from .relationship import EntityRelationship
+from .evidence_link import EvidenceLink

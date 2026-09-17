@@ -24,6 +24,30 @@ jobs:
         pip install -r backend/requirements.txt
         pip install pytest flake8
         
+    - name: Start services with Docker Compose
+      run: |
+        docker compose build postgres
+        docker compose up -d postgres neo4j redis
+        
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for PostgreSQL..."
+        for i in {1..30}; do
+          if docker compose exec -T postgres pg_isready -U postgres -d kcia; then
+            echo "PostgreSQL is ready"
+            break
+          fi
+          sleep 2
+        done
+        echo "Waiting for Neo4j..."
+        for i in {1..30}; do
+          if docker compose exec -T neo4j cypher-shell -u neo4j -p testpassword "RETURN 1" > /dev/null 2>&1; then
+            echo "Neo4j is ready"
+            break
+          fi
+          sleep 2
+        done
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -36,6 +60,16 @@ jobs:
         SECRET_KEY: "test_secret_key"
         ALGORITHM: "HS256"
         ACCESS_TOKEN_EXPIRE_MINUTES: 30
+        POSTGRES_SERVER: "localhost"
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: "postgres"
+        POSTGRES_PASSWORD: "testpassword"
+        POSTGRES_DB: "kcia"
+        NEO4J_URI: "bolt://localhost:7687"
+        NEO4J_USER: "neo4j"
+        NEO4J_PASSWORD: "testpassword"
+        REDIS_URL: "redis://localhost:6379/0"
       run: |
         cd backend
         pytest app/tests/
+

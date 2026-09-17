@@ -26,6 +26,7 @@ class IngestionJob(BaseModel):
     error_message = Column(Text, nullable=True)
     record_count = Column(Integer, nullable=True)       # pages for PDF, rows for CSV
     entity_count = Column(Integer, nullable=True)       # populated after extraction
+    chunk_count = Column(Integer, nullable=True)        # DocumentChunk rows written to pgvector (Step 6)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)

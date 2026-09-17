@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, cast, String
 import uuid
 
-from app.schemas.copilot import CopilotQuery, CopilotResponse, CopilotIntent
+from app.schemas.copilot import CopilotQuery, CopilotResponse, CopilotIntent, CopilotCitation
 from app.ai.copilot.intent_router import IntentRouter
 from app.ai.provider import FallbackManager
 from app.models.resolution import CanonicalEntity
@@ -167,14 +167,66 @@ Context Provided:
             vs = VectorStore()
             results = vs.semantic_search(query_text, top_k=3)
             for res in results:
+                metadata = res.get("metadata", {})
                 context_data["evidence"].append({
                     "type": "RAG_CHUNK",
                     "title": res.get("doc_id", "Unknown Document"),
                     "description": res.get("content", ""),
-                    "similarity": res.get("similarity", 0.0)
+                    "similarity": res.get("similarity", 0.0),
+                    "metadata": metadata,
                 })
         except Exception as e:
             logger.error(f"RAG lookup failed: {e}")
+
+    @staticmethod
+    def _build_sources_from_evidence(evidence: list) -> list:
+        """Map context_data['evidence'] items to CopilotCitation objects."""
+        sources = []
+        for ev in evidence:
+            ev_type = ev.get("type", "UNKNOWN")
+            title = ev.get("title", "Unknown")
+            provenance = ev.get("provenance", {})
+            metadata = ev.get("metadata", {})
+
+            # Determine the best available ID for this evidence item
+            if provenance and provenance.get("ingestion_job_id"):
+                ev_id = provenance["ingestion_job_id"]
+            elif metadata and metadata.get("ingestion_job_id"):
+                ev_id = metadata["ingestion_job_id"]
+            else:
+                ev_id = title
+
+            # Build human-readable context from available provenance
+            context_parts = []
+            source_filename = (
+                provenance.get("file_name")
+                or metadata.get("source_filename")
+            )
+            if source_filename:
+                context_parts.append(f"File: {source_filename}")
+
+            page = provenance.get("page") or metadata.get("page_number")
+            if page is not None:
+                context_parts.append(f"Page: {page}")
+
+            similarity = ev.get("similarity")
+            if similarity is not None:
+                context_parts.append(f"Similarity: {similarity}")
+
+            source_type = (
+                provenance.get("source_type")
+                or metadata.get("source_type")
+            )
+            if source_type:
+                context_parts.append(f"Source: {source_type}")
+
+            sources.append(CopilotCitation(
+                type=ev_type,
+                id=str(ev_id),
+                label=title,
+                context=", ".join(context_parts) if context_parts else None,
+            ))
+        return sources
 
     @classmethod
     def handle_query(cls, db: Session, query: CopilotQuery, current_user: Any) -> CopilotResponse:
@@ -238,7 +290,8 @@ Context Provided:
                 status="INSUFFICIENT_DATA",
                 answer="I could not find verified evidence or entities matching your query in the current LINKRA context.",
                 intent=intent,
-                grounded=True
+                sources=[],
+                grounded=False
             )
 
         # 3. Build Prompt (User input is encapsulated in tags)
@@ -250,15 +303,17 @@ Context Provided:
         # 4. Execute with LLM
         try:
             llm_result = FallbackManager.execute_with_fallback(prompt=prompt, temperature=0.0)
+            sources = cls._build_sources_from_evidence(context_data["evidence"])
             return CopilotResponse(
                 status="ANSWERED",
                 answer=llm_result["result"],
                 intent=intent,
                 provider=llm_result["provider"],
+                sources=sources,
                 evidence=context_data["evidence"],
                 entities=context_data["entities"],
                 analytics=context_data["analytics"],
-                grounded=True
+                grounded=bool(sources)
             )
         except Exception as e:
             logger.error(f"Copilot LLM execution failed: {e}")
@@ -290,13 +345,15 @@ Context Provided:
             for ent in context_data["entities"]:
                 answer.append(f"- {ent.get('name')} (ID: {ent.get('id')})")
                 
+        sources = cls._build_sources_from_evidence(context_data["evidence"])
         return CopilotResponse(
             status="PROVIDER_UNAVAILABLE",
             answer="\n".join(answer),
             intent=intent,
             provider="deterministic_fallback",
+            sources=sources,
             evidence=context_data["evidence"],
             entities=context_data["entities"],
             analytics=context_data["analytics"],
-            grounded=True
+            grounded=bool(sources)
         )
