@@ -17,17 +17,23 @@ from app.nlp.relationship.extractor import (
 )
 
 # Setup in-memory DB for isolated tests
+_RELATIONSHIP_TABLES = [
+    IngestionJob.__table__,
+    EntityCandidate.__table__,
+    CanonicalEntity.__table__,
+    EntityRelationship.__table__,
+]
 engine = create_engine("sqlite:///:memory:")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine, tables=_RELATIONSHIP_TABLES)
 
 @pytest.fixture
 def db():
     db = SessionLocal()
     yield db
     db.close()
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.drop_all(bind=engine, tables=_RELATIONSHIP_TABLES)
+    Base.metadata.create_all(bind=engine, tables=_RELATIONSHIP_TABLES)
 
 def test_structured_relationship_extraction(db, monkeypatch):
     # Mock neo4j sync to do nothing
