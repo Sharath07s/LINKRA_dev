@@ -19,20 +19,20 @@ import EventNotificationCenter from "@/components/Predictive/EventNotificationCe
 function PredictiveIntelligenceContent() {
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col p-6 max-w-[1600px] mx-auto gap-4 bg-slate-950 text-slate-200">
+      <div className="h-full flex flex-col p-6 max-w-[1600px] mx-auto gap-4 bg-[#050505] text-[#F5F5F5]">
         
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-[#222222] pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-              <Radar className="h-6 w-6 text-blue-500" />
+            <div className="p-2 bg-[#10B981]/10 rounded-lg border border-[#10B981]/20">
+              <Radar className="h-6 w-6 text-[#10B981]" />
             </div>
             <div>
               <h1 className="text-2xl font-black text-white tracking-widest uppercase">Predictive Intelligence</h1>
-              <p className="text-xs text-slate-400 font-mono tracking-widest uppercase mt-1">Forecasting & Risk Assessment Engine</p>
+              <p className="text-xs text-[#9A9A9A] font-mono tracking-widest uppercase mt-1">Forecasting & Risk Assessment Engine</p>
             </div>
           </div>
           <div className="text-right">
-             <span className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/30">
+             <span className="text-[10px] font-mono bg-[#10B981]/10 text-[#10B981] px-2 py-1 rounded border border-[#10B981]/30">
                MODELS: ONLINE
              </span>
           </div>

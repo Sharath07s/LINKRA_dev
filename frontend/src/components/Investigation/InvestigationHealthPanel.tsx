@@ -29,7 +29,7 @@ export default function InvestigationHealthPanel({ investigationId }: HealthProp
     if (investigationId) fetchHealth();
   }, [investigationId]);
 
-  if (isLoading) return <div className="h-full flex items-center justify-center animate-pulse text-xs text-blue-400 font-bold uppercase tracking-widest">Calculating Metrics...</div>;
+  if (isLoading) return <div className="h-full flex items-center justify-center animate-pulse text-xs text-[#10B981] font-bold uppercase tracking-widest">Calculating Metrics...</div>;
   if (!data) return null;
 
   const metrics = [
@@ -41,7 +41,7 @@ export default function InvestigationHealthPanel({ investigationId }: HealthProp
   ];
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full p-5">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full p-5">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="h-4 w-4 text-emerald-500" />
         <h3 className="text-sm font-bold text-white tracking-wide">Investigation Health</h3>
@@ -70,7 +70,7 @@ export default function InvestigationHealthPanel({ investigationId }: HealthProp
         </div>
         
         <div>
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Completeness Status</span>
+          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block mb-1">Completeness Status</span>
           <span className="text-sm font-bold text-emerald-400 leading-tight block">Proceeding to Final Stages</span>
         </div>
       </div>
@@ -79,10 +79,10 @@ export default function InvestigationHealthPanel({ investigationId }: HealthProp
         {metrics?.map((m, idx) => (
           <div key={idx}>
             <div className="flex justify-between mb-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">{m.label} Coverage</span>
-              <span className="text-[10px] font-bold text-slate-300">{m.value}%</span>
+              <span className="text-[10px] font-bold text-[#9A9A9A] uppercase">{m.label} Coverage</span>
+              <span className="text-[10px] font-bold text-[#F5F5F5]">{m.value}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#0D0D0D] rounded-full overflow-hidden">
               <div 
                 className={`h-full rounded-full ${m.value < 50 ? 'bg-amber-500' : 'bg-blue-500'}`} 
                 style={{ width: `${m.value}%` }} 

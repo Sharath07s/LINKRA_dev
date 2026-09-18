@@ -84,7 +84,7 @@ function AlertCenterContent() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight">Alert Center</h1>
-              <p className="text-sm text-slate-400 font-mono">Live Intelligence Threat Stream</p>
+              <p className="text-sm text-[#9A9A9A] font-mono">Live Intelligence Threat Stream</p>
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@ function AlertCenterContent() {
         <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
           
           {/* Left Column: Feed */}
-          <div className="col-span-5 flex flex-col gap-4 bg-slate-950/50 p-4 rounded-2xl border border-slate-800">
+          <div className="col-span-5 flex flex-col gap-4 bg-[#050505]/50 p-4 rounded-2xl border border-[#222222]">
             <AlertFilters activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
             <AlertFeed 
               alerts={filteredAlerts} 

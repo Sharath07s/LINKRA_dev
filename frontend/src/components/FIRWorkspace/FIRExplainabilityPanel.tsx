@@ -32,12 +32,12 @@ export default function FIRExplainabilityPanel({ firId }: FIRExplainabilityProps
     if (firId) fetchExplainability();
   }, [firId]);
 
-  if (isLoading) return <div className="h-full bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>;
+  if (isLoading) return <div className="h-full bg-[#080808]/40 border border-[#222222] rounded-2xl animate-pulse"></div>;
   if (!data) return null;
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b border-slate-800 bg-slate-950/50 flex justify-between items-center">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-[#222222] bg-[#050505]/50 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-500" />
           <h3 className="text-sm font-bold text-white tracking-wide">AI Explainability</h3>

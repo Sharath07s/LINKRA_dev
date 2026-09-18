@@ -25,11 +25,11 @@ export default function EmergingThreats() {
     fetchThreats();
   }, []);
 
-  if (isLoading) return <div suppressHydrationWarning className="h-full bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>;
+  if (isLoading) return <div suppressHydrationWarning className="h-full bg-[#080808]/40 border border-[#222222] rounded-2xl animate-pulse"></div>;
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b border-slate-800 bg-slate-950/50 flex justify-between items-center">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-[#222222] bg-[#050505]/50 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-400" />
           <h3 className="text-sm font-bold text-white tracking-wide">Emerging Threats</h3>
@@ -45,18 +45,18 @@ export default function EmergingThreats() {
       
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {data?.map((threat, idx) => (
-          <div key={idx} className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl border-l-2 hover:bg-slate-800/50 transition-colors" 
+          <div key={idx} className="bg-[#050505]/60 border border-[#222222] p-3 rounded-xl border-l-2 hover:bg-[#0D0D0D]/50 transition-colors" 
                style={{ borderLeftColor: threat.severity === 'CRITICAL' ? '#ef4444' : threat.severity === 'HIGH' ? '#f59e0b' : '#3b82f6' }}>
             <div className="flex justify-between items-start mb-1">
               <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
                 {threat.severity === 'CRITICAL' && <AlertCircle className="h-3 w-3 text-red-500" />}
                 {threat.type}
               </h4>
-              <span className="text-[9px] font-mono text-slate-500">{new Date(threat.detected_at).toLocaleTimeString()}</span>
+              <span className="text-[9px] font-mono text-[#666666]">{new Date(threat.detected_at).toLocaleTimeString()}</span>
             </div>
             <div className="flex justify-between items-end mt-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{threat.district}</span>
-              <span className="text-[9px] font-bold bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#9A9A9A]">{threat.district}</span>
+              <span className="text-[9px] font-bold bg-[#0D0D0D] text-[#F5F5F5] px-1.5 py-0.5 rounded">
                 {threat.confidence}% Conf
               </span>
             </div>

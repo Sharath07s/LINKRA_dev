@@ -19,10 +19,10 @@ export default function TimelineIntelligencePage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Timeline Intelligence Platform</h1>
-            <p className="text-sm text-slate-400">Chronological reconstruction of criminal activities across all dimensions.</p>
+            <p className="text-sm text-[#9A9A9A]">Chronological reconstruction of criminal activities across all dimensions.</p>
           </div>
           
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600/20 border border-blue-500/50 text-blue-400 hover:bg-blue-600/30 transition-colors text-xs font-bold uppercase tracking-wider">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#10B981]/15 border border-[#10B981]/50 text-[#10B981] hover:bg-[#10B981]/30 transition-colors text-xs font-bold uppercase tracking-wider">
             <Download className="h-4 w-4" />
             Export Timeline Report
           </button>

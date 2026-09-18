@@ -25,19 +25,19 @@ export default function CrimeHotspotsMap() {
     fetchHotspots();
   }, []);
 
-  if (isLoading) return <div className="h-full bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>;
+  if (isLoading) return <div className="h-full bg-[#080808]/40 border border-[#222222] rounded-2xl animate-pulse"></div>;
   if (!data) return null;
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full overflow-hidden relative">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full overflow-hidden relative">
       <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start pointer-events-none">
-        <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800 p-2.5 rounded-xl pointer-events-auto shadow-lg flex items-center gap-2">
+        <div className="bg-[#050505]/80 backdrop-blur-md border border-[#222222] p-2.5 rounded-xl pointer-events-auto shadow-lg flex items-center gap-2">
           <MapIcon className="h-4 w-4 text-emerald-400" />
           <h3 className="text-xs font-bold text-white tracking-wide uppercase">State Heatmap</h3>
         </div>
         
-        <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800 p-2.5 rounded-xl pointer-events-auto shadow-lg flex flex-col gap-2">
-          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-800 pb-1 mb-1">Top Crime Regions</span>
+        <div className="bg-[#050505]/80 backdrop-blur-md border border-[#222222] p-2.5 rounded-xl pointer-events-auto shadow-lg flex flex-col gap-2">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-[#666666] border-b border-[#222222] pb-1 mb-1">Top Crime Regions</span>
           {data.top_hotspots?.map((h: any, idx: number) => (
             <div key={idx} className="flex justify-between items-center gap-4">
               <span className="text-xs font-bold text-white">{h.district}</span>
@@ -47,7 +47,7 @@ export default function CrimeHotspotsMap() {
         </div>
       </div>
 
-      <div className="flex-1 bg-slate-950/80 relative overflow-hidden flex items-center justify-center">
+      <div className="flex-1 bg-[#050505]/80 relative overflow-hidden flex items-center justify-center">
         {/* Abstract Map Interface for Executive Dashboard */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(30,41,59,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(30,41,59,0.3)_1px,transparent_1px)] bg-[size:40px_40px]" />
         
@@ -58,9 +58,9 @@ export default function CrimeHotspotsMap() {
            <div className="absolute w-48 h-48 bg-amber-600/30 rounded-full blur-2xl bottom-1/4 right-1/3" />
            
            {/* Map UI overlays */}
-           <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-slate-900/60 p-2 rounded-lg border border-slate-800">
-             <Layers className="h-3 w-3 text-slate-400" />
-             <span className="text-[9px] text-slate-400 font-bold uppercase">MapLibre GL JS Instance</span>
+           <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-[#080808]/60 p-2 rounded-lg border border-[#222222]">
+             <Layers className="h-3 w-3 text-[#9A9A9A]" />
+             <span className="text-[9px] text-[#9A9A9A] font-bold uppercase">MapLibre GL JS Instance</span>
            </div>
         </div>
       </div>

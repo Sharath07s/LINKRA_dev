@@ -256,12 +256,12 @@ function AIAssistantPageContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8.5rem)] min-h-[500px]">
         
         {/* Left Side Pane: History & Templates */}
-        <div className="hidden lg:flex lg:col-span-3 flex-col bg-slate-900/40 border border-slate-800 rounded-2xl p-4 overflow-hidden h-full">
-          <div className="flex justify-between items-center pb-3 border-b border-slate-800">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Intel Sessions</span>
+        <div className="hidden lg:flex lg:col-span-3 flex-col bg-[#080808]/40 border border-[#222222] rounded-2xl p-4 overflow-hidden h-full">
+          <div className="flex justify-between items-center pb-3 border-b border-[#222222]">
+            <span className="text-xs font-bold text-[#F5F5F5] uppercase tracking-wider">Intel Sessions</span>
             <button 
               onClick={clearChat}
-              className="text-slate-500 hover:text-red-400 p-1 rounded-lg transition-colors"
+              className="text-[#666666] hover:text-red-400 p-1 rounded-lg transition-colors"
               title="Clear Active Session"
             >
               <Trash2 className="h-4 w-4" />
@@ -270,16 +270,16 @@ function AIAssistantPageContent() {
 
           {/* Quick Prompts List */}
           <div className="mt-4 space-y-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Templates</span>
+            <span className="text-[10px] font-bold text-[#666666] uppercase tracking-wider block">Templates</span>
             {SUGGESTED_PROMPTS?.map((prompt, idx) => {
               const Icon = prompt.icon;
               return (
                 <button
                   key={idx}
                   onClick={() => executeSearch(prompt.text)}
-                  className="flex items-center gap-2.5 w-full text-left p-2.5 bg-slate-950/40 border border-slate-850 hover:border-slate-700/80 rounded-xl text-xs text-slate-400 hover:text-slate-200 transition-all group"
+                  className="flex items-center gap-2.5 w-full text-left p-2.5 bg-[#050505]/40 border border-slate-850 hover:border-[#2A2A2A]/80 rounded-xl text-xs text-[#9A9A9A] hover:text-[#F5F5F5] transition-all group"
                 >
-                  <Icon className="h-4 w-4 text-blue-500 shrink-0 group-hover:scale-105 transition-transform" />
+                  <Icon className="h-4 w-4 text-[#10B981] shrink-0 group-hover:scale-105 transition-transform" />
                   <span className="truncate leading-snug">{prompt.text}</span>
                 </button>
               );
@@ -288,18 +288,18 @@ function AIAssistantPageContent() {
 
           {/* History log */}
           <div className="flex-1 overflow-y-auto mt-6 space-y-2 pr-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">History Logs</span>
+            <span className="text-[10px] font-bold text-[#666666] uppercase tracking-wider block">History Logs</span>
             {HISTORIC_CONVERSATIONS?.map((hist) => (
               <div
                 key={hist.id}
                 onClick={() => executeSearch(hist.title)}
-                className="flex items-center justify-between p-2.5 rounded-xl border border-transparent hover:border-slate-800 hover:bg-slate-950/20 cursor-pointer transition-all text-xs"
+                className="flex items-center justify-between p-2.5 rounded-xl border border-transparent hover:border-[#222222] hover:bg-[#050505]/20 cursor-pointer transition-all text-xs"
               >
                 <div className="flex flex-col min-w-0">
-                  <span className="text-slate-300 font-medium truncate">{hist.title}</span>
-                  <span className="text-[9px] text-slate-500 mt-0.5">{hist.date}</span>
+                  <span className="text-[#F5F5F5] font-medium truncate">{hist.title}</span>
+                  <span className="text-[9px] text-[#666666] mt-0.5">{hist.date}</span>
                 </div>
-                <ChevronRight className="h-3.5 w-3.5 text-slate-600 shrink-0" />
+                <ChevronRight className="h-3.5 w-3.5 text-[#666666] shrink-0" />
               </div>
             ))}
           </div>
@@ -310,31 +310,31 @@ function AIAssistantPageContent() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400">LINKRA NLP CORE V2.4 ACTIVE</span>
+            <span className="text-[10px] font-semibold text-[#9A9A9A]">LINKRA NLP CORE V2.4 ACTIVE</span>
           </div>
         </div>
 
         {/* Right Side Pane: Chat Dialog */}
-        <div className="lg:col-span-9 flex flex-col bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden h-full">
+        <div className="lg:col-span-9 flex flex-col bg-[#080808]/40 border border-[#222222] rounded-2xl overflow-hidden h-full">
           
           {/* Active Header */}
-          <div className="p-4 border-b border-slate-800 bg-[#061224]/80 flex justify-between items-center">
+          <div className="p-4 border-b border-[#222222] bg-[#061224]/80 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/10">
                 <Bot className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="font-bold text-white text-sm">Conversational Intelligence Assistant</h3>
-                <p className="text-[10px] text-slate-400">Secure RAG & Explainable AI analysis engine</p>
+                <p className="text-[10px] text-[#9A9A9A]">Secure RAG & Explainable AI analysis engine</p>
               </div>
             </div>
 
             {/* Language Selector */}
-            <div className="flex items-center bg-slate-950 border border-slate-850 p-0.5 rounded-lg text-xs font-semibold">
+            <div className="flex items-center bg-[#050505] border border-slate-850 p-0.5 rounded-lg text-xs font-semibold">
               <button 
                 onClick={() => setLanguage("EN")}
                 className={`px-2 py-1 rounded-md transition-all ${
-                  language === "EN" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+                  language === "EN" ? "bg-[#10B981] text-white" : "text-[#9A9A9A] hover:text-[#F5F5F5]"
                 }`}
               >
                 ENGLISH
@@ -342,7 +342,7 @@ function AIAssistantPageContent() {
               <button 
                 onClick={() => setLanguage("KA")}
                 className={`px-2 py-1 rounded-md transition-all ${
-                  language === "KA" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+                  language === "KA" ? "bg-[#10B981] text-white" : "text-[#9A9A9A] hover:text-[#F5F5F5]"
                 }`}
               >
                 ಕನ್ನಡ
@@ -354,12 +354,12 @@ function AIAssistantPageContent() {
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto space-y-4">
-                <div className="h-12 w-12 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <div className="h-12 w-12 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center text-[#10B981]">
                   <Sparkles className="h-6 w-6" />
                 </div>
                 <div>
                   <h4 className="font-bold text-white text-sm">Initiate Analytical Query</h4>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-[#9A9A9A] mt-1">
                     Ask about specific suspects, crime trends, or spatial clusters in Karnataka. The assistant matches data patterns from CCTNS and SCRB databases.
                   </p>
                 </div>
@@ -368,7 +368,7 @@ function AIAssistantPageContent() {
                     <button
                       key={idx}
                       onClick={() => executeSearch(p.text)}
-                      className="px-4 py-2.5 bg-slate-950 border border-slate-850 hover:border-slate-700/80 rounded-xl text-xs text-slate-400 hover:text-slate-200 transition-all font-medium text-left"
+                      className="px-4 py-2.5 bg-[#050505] border border-slate-850 hover:border-[#2A2A2A]/80 rounded-xl text-xs text-[#9A9A9A] hover:text-[#F5F5F5] transition-all font-medium text-left"
                     >
                       {p.text}
                     </button>
@@ -383,7 +383,7 @@ function AIAssistantPageContent() {
                     <div key={msg.id} className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
                       {/* Avatar */}
                       {!isUser && (
-                        <div className="h-8 w-8 rounded-lg bg-blue-950 border border-blue-900 text-blue-400 flex items-center justify-center shrink-0">
+                        <div className="h-8 w-8 rounded-lg bg-blue-950 border border-blue-900 text-[#10B981] flex items-center justify-center shrink-0">
                           <Bot className="h-4.5 w-4.5" />
                         </div>
                       )}
@@ -392,16 +392,16 @@ function AIAssistantPageContent() {
                         {/* Bubble */}
                         <div className={`p-4 rounded-2xl leading-relaxed text-xs border ${
                           isUser 
-                            ? "bg-gradient-to-r from-blue-600/25 to-indigo-600/15 border-blue-500/30 text-slate-100 rounded-tr-none" 
-                            : "bg-slate-950/60 border-slate-850 text-slate-200 rounded-tl-none"
+                            ? "bg-gradient-to-r from-blue-600/25 to-indigo-600/15 border-[#10B981]/30 text-[#F5F5F5] rounded-tr-none" 
+                            : "bg-[#050505]/60 border-slate-850 text-[#F5F5F5] rounded-tl-none"
                         }`}>
-                          <div className="prose prose-sm prose-invert max-w-none [&_table]:w-full [&_table]:text-[10px] [&_th]:bg-slate-900 [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-bold [&_th]:text-slate-300 [&_th]:border [&_th]:border-slate-800 [&_td]:px-2 [&_td]:py-1.5 [&_td]:border [&_td]:border-slate-800/60 [&_td]:text-slate-300 [&_code]:text-blue-400 [&_code]:bg-slate-900/80 [&_code]:px-1 [&_code]:rounded [&_strong]:text-white [&_ul]:space-y-1 [&_li]:text-slate-300 [&_p]:text-slate-300 [&_em]:text-slate-400" dangerouslySetInnerHTML={{ __html: renderMarkdown(language === "EN" ? msg.content : (msg.kannadaContent || msg.content)) }} />
+                          <div className="prose prose-sm prose-invert max-w-none [&_table]:w-full [&_table]:text-[10px] [&_th]:bg-[#080808] [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-bold [&_th]:text-[#F5F5F5] [&_th]:border [&_th]:border-[#222222] [&_td]:px-2 [&_td]:py-1.5 [&_td]:border [&_td]:border-[#222222]/60 [&_td]:text-[#F5F5F5] [&_code]:text-[#10B981] [&_code]:bg-[#080808]/80 [&_code]:px-1 [&_code]:rounded [&_strong]:text-white [&_ul]:space-y-1 [&_li]:text-[#F5F5F5] [&_p]:text-[#F5F5F5] [&_em]:text-[#9A9A9A]" dangerouslySetInnerHTML={{ __html: renderMarkdown(language === "EN" ? msg.content : (msg.kannadaContent || msg.content)) }} />
                         </div>
 
                         {/* Rich Intel Data Component (If exists) */}
                         {!isUser && msg.intelData && (
-                          <div className="bg-slate-950/40 border border-slate-850 rounded-xl p-4 space-y-3">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">
+                          <div className="bg-[#050505]/40 border border-slate-850 rounded-xl p-4 space-y-3">
+                            <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block tracking-wider">
                               Visual Component: {msg.intelData.title}
                             </span>
                             
@@ -410,11 +410,11 @@ function AIAssistantPageContent() {
                               <div className="space-y-2.5">
                                 {msg.intelData.chartValues?.map((cv, idx) => (
                                   <div key={idx} className="space-y-1">
-                                    <div className="flex justify-between text-[10px] font-semibold text-slate-300">
+                                    <div className="flex justify-between text-[10px] font-semibold text-[#F5F5F5]">
                                       <span>{cv.label}</span>
                                       <span>{cv.value}%</span>
                                     </div>
-                                    <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                                    <div className="h-1.5 w-full bg-[#080808] rounded-full overflow-hidden">
                                       <div 
                                         className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" 
                                         style={{ width: `${cv.value}%` }}
@@ -429,13 +429,13 @@ function AIAssistantPageContent() {
                             {msg.intelData.type === "map" && msg.intelData.mapDetails && (
                               <div className="space-y-2">
                                 {msg.intelData.mapDetails?.map((md, idx) => (
-                                  <div key={idx} className="flex justify-between items-center p-2 bg-slate-900/60 rounded-lg border border-slate-850">
+                                  <div key={idx} className="flex justify-between items-center p-2 bg-[#080808]/60 rounded-lg border border-slate-850">
                                     <div className="flex items-center gap-2">
                                       <MapPin className="h-3.5 w-3.5 text-red-400" />
-                                      <span className="text-xs font-medium text-slate-200">{md.area}</span>
+                                      <span className="text-xs font-medium text-[#F5F5F5]">{md.area}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                      <span className="text-[10px] text-slate-400 font-semibold">{md.count} Incidents</span>
+                                      <span className="text-[10px] text-[#9A9A9A] font-semibold">{md.count} Incidents</span>
                                       <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
                                         md.risk === "High" ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400"
                                       }`}>
@@ -451,9 +451,9 @@ function AIAssistantPageContent() {
                             {msg.intelData.type === "network" && msg.intelData.networkLinks && (
                               <div className="space-y-2">
                                 {msg.intelData.networkLinks?.map((nl, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 text-[10px] bg-slate-900/60 p-2 rounded-lg border border-slate-850 text-slate-300">
-                                    <span className="font-semibold text-blue-400">{nl.from}</span>
-                                    <span className="text-[9px] text-slate-500 font-mono uppercase bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                                  <div key={idx} className="flex items-center gap-2 text-[10px] bg-[#080808]/60 p-2 rounded-lg border border-slate-850 text-[#F5F5F5]">
+                                    <span className="font-semibold text-[#10B981]">{nl.from}</span>
+                                    <span className="text-[9px] text-[#666666] font-mono uppercase bg-[#050505] px-2 py-0.5 rounded border border-[#222222]">
                                       {nl.relation}
                                     </span>
                                     <span className="font-semibold text-amber-500">{nl.to}</span>
@@ -469,10 +469,10 @@ function AIAssistantPageContent() {
                           <div className="border border-slate-850 rounded-xl overflow-hidden">
                             <button
                               onClick={() => setExpandedXaiId(expandedXaiId === msg.id ? null : msg.id)}
-                              className="w-full flex items-center justify-between px-4 py-2 bg-slate-950 hover:bg-slate-900 transition-colors text-[10px] font-bold tracking-wider text-slate-400 uppercase"
+                              className="w-full flex items-center justify-between px-4 py-2 bg-[#050505] hover:bg-[#080808] transition-colors text-[10px] font-bold tracking-wider text-[#9A9A9A] uppercase"
                             >
                               <span className="flex items-center gap-1.5">
-                                <Info className="h-3.5 w-3.5 text-blue-400" />
+                                <Info className="h-3.5 w-3.5 text-[#10B981]" />
                                 <span>Explainable AI (XAI) Verification</span>
                               </span>
                               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
@@ -481,7 +481,7 @@ function AIAssistantPageContent() {
                             </button>
                             
                             {expandedXaiId === msg.id && (
-                              <div className="p-4 bg-slate-950/30 border-t border-slate-850 space-y-4">
+                              <div className="p-4 bg-[#050505]/30 border-t border-slate-850 space-y-4">
                                 <ConfidenceMeter confidence={msg.xaiDetails.confidence} />
                                 <SourceAttribution sources={msg.xaiDetails.sources} />
                                 <ReasoningTracePanel reasoning={msg.xaiDetails.reasoning} />
@@ -493,13 +493,13 @@ function AIAssistantPageContent() {
                         {/* Message actions */}
                         {!isUser && (
                           <div className="flex gap-2">
-                            <button className="flex items-center gap-1 px-2.5 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-850 rounded text-[10px] font-bold text-slate-400 hover:text-slate-200 transition-colors">
+                            <button className="flex items-center gap-1 px-2.5 py-1 bg-[#050505] hover:bg-[#080808] border border-slate-850 rounded text-[10px] font-bold text-[#9A9A9A] hover:text-[#F5F5F5] transition-colors">
                               <FolderPlus className="h-3 w-3" />
                               <span>Pin to Intel Board</span>
                             </button>
                             <button 
                               onClick={() => router.push("/reports")}
-                              className="flex items-center gap-1 px-2.5 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-850 rounded text-[10px] font-bold text-slate-400 hover:text-slate-200 transition-colors"
+                              className="flex items-center gap-1 px-2.5 py-1 bg-[#050505] hover:bg-[#080808] border border-slate-850 rounded text-[10px] font-bold text-[#9A9A9A] hover:text-[#F5F5F5] transition-colors"
                             >
                               <FileDown className="h-3 w-3" />
                               <span>Export PDF Brief</span>
@@ -514,10 +514,10 @@ function AIAssistantPageContent() {
             )}
             {isTyping && (
               <div className="flex gap-3 justify-start">
-                <div className="h-8 w-8 rounded-lg bg-blue-950 border border-blue-900 text-blue-400 flex items-center justify-center shrink-0">
+                <div className="h-8 w-8 rounded-lg bg-blue-950 border border-blue-900 text-[#10B981] flex items-center justify-center shrink-0">
                   <Bot className="h-4.5 w-4.5 animate-pulse" />
                 </div>
-                <div className="bg-slate-950/60 border border-slate-850 px-4 py-3.5 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
+                <div className="bg-[#050505]/60 border border-slate-850 px-4 py-3.5 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100"></span>
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-200"></span>
@@ -528,7 +528,7 @@ function AIAssistantPageContent() {
           </div>
 
           {/* Form Input Footer */}
-          <div className="p-4 bg-[#061224]/80 border-t border-slate-800/80">
+          <div className="p-4 bg-[#061224]/80 border-t border-[#222222]/80">
             <form onSubmit={handleSendSubmit} className="flex gap-3 max-w-5xl mx-auto relative items-center">
               
               {/* Mic Icon */}
@@ -538,7 +538,7 @@ function AIAssistantPageContent() {
                 className={`p-3 rounded-xl border transition-all ${
                   isRecording 
                     ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse" 
-                    : "bg-slate-950 border-slate-850 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                    : "bg-[#050505] border-slate-850 text-[#9A9A9A] hover:text-[#F5F5F5] hover:border-[#2A2A2A]"
                 }`}
                 title="Simulate Voice Input"
               >
@@ -548,7 +548,7 @@ function AIAssistantPageContent() {
               <div className="relative flex-1">
                 <input
                   type="text"
-                  className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-200 placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all pr-10"
+                  className="w-full bg-[#050505] border border-slate-850 hover:border-[#222222] rounded-xl px-4 py-3 text-xs text-[#F5F5F5] placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 transition-all pr-10"
                   placeholder={
                     isRecording 
                       ? "Listening to voice input... Click mic icon to submit"
@@ -565,7 +565,7 @@ function AIAssistantPageContent() {
               <button 
                 type="submit" 
                 disabled={!input.trim() || isTyping}
-                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 p-3 rounded-xl text-white transition-all shadow-md shadow-blue-600/10"
+                className="bg-[#10B981] hover:bg-blue-500 disabled:opacity-40 p-3 rounded-xl text-white transition-all shadow-md shadow-blue-600/10"
               >
                 <Send className="h-5 w-5" />
               </button>
@@ -596,8 +596,8 @@ export default function AIAssistantPage() {
     <Suspense fallback={
       <div className="flex h-screen w-screen items-center justify-center bg-[#030914] text-white">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-          <p className="text-sm font-medium text-slate-400">Loading AI Assistant...</p>
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#10B981] border-t-transparent"></div>
+          <p className="text-sm font-medium text-[#9A9A9A]">Loading AI Assistant...</p>
         </div>
       </div>
     }>

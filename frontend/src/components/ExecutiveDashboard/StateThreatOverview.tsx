@@ -25,7 +25,7 @@ export default function StateThreatOverview() {
     fetchThreatLevel();
   }, []);
 
-  if (isLoading) return <div className="h-full bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>;
+  if (isLoading) return <div className="h-full bg-[#080808]/40 border border-[#222222] rounded-2xl animate-pulse"></div>;
   if (!data) return null;
 
   const getLevelColor = (level: string) => {
@@ -45,12 +45,12 @@ export default function StateThreatOverview() {
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-current"></div>
-            <div className="h-16 w-16 rounded-full border-2 border-current bg-slate-950 flex items-center justify-center relative z-10">
+            <div className="h-16 w-16 rounded-full border-2 border-current bg-[#050505] flex items-center justify-center relative z-10">
               <AlertTriangle className="h-8 w-8" />
             </div>
           </div>
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-300 mb-1">Strategic Threat Level</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-[#F5F5F5] mb-1">Strategic Threat Level</h2>
             <div className="flex items-end gap-3">
               <span className="text-4xl md:text-5xl font-bold tracking-tighter leading-none">{data.level}</span>
               <span className="text-xl font-bold mb-1 opacity-80">({data.score}/100)</span>
@@ -59,10 +59,10 @@ export default function StateThreatOverview() {
         </div>
 
         <div className="flex flex-col gap-2 w-full md:w-auto">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-current/20 pb-1 mb-1">Driving Factors</span>
+          <span className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-widest border-b border-current/20 pb-1 mb-1">Driving Factors</span>
           {data.factors?.map((factor: any, idx: number) => (
             <div key={idx} className="flex justify-between items-center gap-6 text-xs font-medium">
-              <span className="text-slate-200 flex items-center gap-1.5"><Activity className="h-3 w-3" /> {factor.name}</span>
+              <span className="text-[#F5F5F5] flex items-center gap-1.5"><Activity className="h-3 w-3" /> {factor.name}</span>
               <span className="uppercase tracking-widest text-[10px] opacity-80">{factor.impact}</span>
             </div>
           ))}

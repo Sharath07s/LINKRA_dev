@@ -70,7 +70,7 @@ function CommandWallContent() {
   }, [lastEvent]);
 
   return (
-    <div className="h-screen w-screen bg-black overflow-hidden flex flex-col text-slate-200">
+    <div className="h-screen w-screen bg-black overflow-hidden flex flex-col text-[#F5F5F5]">
       <CommandWallHeader />
       
       {/* 

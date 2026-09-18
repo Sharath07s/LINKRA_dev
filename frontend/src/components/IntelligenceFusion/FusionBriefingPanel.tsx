@@ -6,7 +6,7 @@ export default function FusionBriefingPanel({ data }: { data: any }) {
   const [briefing, setBriefing] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (!data) return <div className="h-full bg-slate-900/50 rounded-xl border border-slate-800 animate-pulse"></div>;
+  if (!data) return <div className="h-full bg-[#080808]/50 rounded-xl border border-[#222222] animate-pulse"></div>;
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -21,9 +21,9 @@ export default function FusionBriefingPanel({ data }: { data: any }) {
   };
 
   return (
-    <div className="h-full bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col">
+    <div className="h-full bg-[#080808]/50 rounded-xl border border-[#222222] p-4 flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-bold text-[#F5F5F5] uppercase tracking-widest flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-cyan-400" />
           AI Commander Briefing
         </h3>
@@ -37,11 +37,11 @@ export default function FusionBriefingPanel({ data }: { data: any }) {
         </button>
       </div>
 
-      <div className="flex-1 bg-black/40 rounded-lg border border-slate-800/50 p-4 overflow-y-auto">
+      <div className="flex-1 bg-black/40 rounded-lg border border-[#222222]/50 p-4 overflow-y-auto">
         {briefing ? (
-          <p className="text-sm text-slate-300 leading-relaxed font-mono whitespace-pre-wrap">{briefing}</p>
+          <p className="text-sm text-[#F5F5F5] leading-relaxed font-mono whitespace-pre-wrap">{briefing}</p>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-slate-500">
+          <div className="h-full flex flex-col items-center justify-center text-[#666666]">
             <Bot className="h-8 w-8 mb-2 opacity-50" />
             <p className="text-xs font-mono">Awaiting Commander Request</p>
             <p className="text-[10px] mt-2 max-w-xs text-center">Generates a situational report constrained exclusively to real, validated intelligence signals.</p>

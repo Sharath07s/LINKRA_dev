@@ -32,23 +32,24 @@ class Neo4jCommunityAnalytics:
         
         try:
             driver = self._get_driver()
-            with driver.session(database=self.user) as session:
+            with driver.session() as session:
                 # 1. Drop existing projection if any
                 try:
                     session.run("CALL gds.graph.drop('linkra_community_graph', false)")
                 except Exception:
                     pass
 
-                # 2. Project the graph with inline memory parameter
+                # 2. Project the graph with UNDIRECTED orientation for community detection
                 logger.info("Projecting graph for community detection...")
                 session.run("""
                     CALL gds.graph.project(
                         'linkra_community_graph',
                         '*',
-                        '*',
                         {
-                            undirectedRelationshipTypes: ['*'],
-                            memory: '2GB'
+                            _ALL_: {
+                                type: '*',
+                                orientation: 'UNDIRECTED'
+                            }
                         }
                     )
                 """)
@@ -65,7 +66,7 @@ class Neo4jCommunityAnalytics:
                     YIELD nodeId, communityId
                     RETURN gds.util.asNode(nodeId).id AS entity_id,
                            gds.util.asNode(nodeId).name AS name,
-                           labels(gds.util.asNode(nodeId))[0] AS type,
+                           gds.util.asNode(nodeId).entity_type AS type,
                            communityId
                     ORDER BY communityId, entity_id
                 """)

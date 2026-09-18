@@ -29,21 +29,21 @@ export default function ExtractedEntitiesPanel({ firId }: EntitiesProps) {
     if (firId) fetchEntities();
   }, [firId]);
 
-  if (isLoading) return <div className="h-full bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>;
+  if (isLoading) return <div className="h-full bg-[#080808]/40 border border-[#222222] rounded-2xl animate-pulse"></div>;
   if (!data) return null;
 
   const entityGroups = [
     { title: "Suspects", icon: Users, items: data.suspects, key1: "name", key2: "role", color: "text-red-400" },
     { title: "Vehicles", icon: Car, items: data.vehicles, key1: "registration", key2: "type", color: "text-amber-400" },
-    { title: "Phones", icon: Smartphone, items: data.phones, key1: "number", key2: "provider", color: "text-blue-400" },
+    { title: "Phones", icon: Smartphone, items: data.phones, key1: "number", key2: "provider", color: "text-[#10B981]" },
     { title: "Locations", icon: MapPin, items: data.locations, key1: "address", key2: "type", color: "text-emerald-400" },
     { title: "Organizations", icon: Building, items: data.organizations, key1: "name", key2: "type", color: "text-purple-400" },
-    { title: "Evidence", icon: Package, items: data.evidence, key1: "name", key2: "type", color: "text-slate-400" },
+    { title: "Evidence", icon: Package, items: data.evidence, key1: "name", key2: "type", color: "text-[#9A9A9A]" },
   ];
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b border-slate-800 bg-slate-950/50">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-[#222222] bg-[#050505]/50">
         <h3 className="text-sm font-bold text-white tracking-wide">Extracted Entities</h3>
       </div>
       <div className="p-4 flex-1 overflow-y-auto space-y-4">
@@ -57,9 +57,9 @@ export default function ExtractedEntitiesPanel({ firId }: EntitiesProps) {
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {group.items?.map((item: any, i: number) => (
-                  <div key={i} className="bg-slate-950/60 border border-slate-800 p-2.5 rounded-lg flex flex-col group hover:border-slate-700 transition-colors cursor-pointer">
-                    <span className="text-xs font-bold text-slate-200">{item[group.key1]}</span>
-                    <span className="text-[10px] text-slate-500">{item[group.key2]}</span>
+                  <div key={i} className="bg-[#050505]/60 border border-[#222222] p-2.5 rounded-lg flex flex-col group hover:border-[#2A2A2A] transition-colors cursor-pointer">
+                    <span className="text-xs font-bold text-[#F5F5F5]">{item[group.key1]}</span>
+                    <span className="text-[10px] text-[#666666]">{item[group.key2]}</span>
                   </div>
                 ))}
               </div>

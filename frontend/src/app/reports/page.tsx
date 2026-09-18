@@ -112,9 +112,9 @@ export default function ReportsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Intelligence Reporting Center</h1>
-            <p className="text-sm text-slate-400">Generate verified, cryptographically signed crime intelligence summaries and case briefs</p>
+            <p className="text-sm text-[#9A9A9A]">Generate verified, cryptographically signed crime intelligence summaries and case briefs</p>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-[10px] font-bold text-blue-400 uppercase">
+          <div className="flex items-center gap-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 px-3 py-1 text-[10px] font-bold text-[#10B981] uppercase">
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
             <span>FIPS 140-2 COMPLIANT</span>
           </div>
@@ -124,20 +124,20 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Create Report Form */}
-          <div className="lg:col-span-5 bg-slate-900/40 border border-slate-800 p-5 rounded-2xl">
-            <h3 className="font-bold text-white text-base border-b border-slate-800 pb-3 mb-4">
+          <div className="lg:col-span-5 bg-[#080808]/40 border border-[#222222] p-5 rounded-2xl">
+            <h3 className="font-bold text-white text-base border-b border-[#222222] pb-3 mb-4">
               Formulate Intelligence Report
             </h3>
             
             <form onSubmit={startCompilation} className="space-y-4">
               {/* Title */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Report Subject / Title</label>
+                <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider">Report Subject / Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Vicky Saluja Interstate Auto-smuggling Brief"
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-[#F5F5F5] placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-[#10B981]"
                   value={title}
                   disabled={compilingStep > 0 && compilingStep < 6}
                   onChange={(e) => setTitle(e.target.value)}
@@ -146,9 +146,9 @@ export default function ReportsPage() {
 
               {/* Type Select */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Report Template</label>
+                <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider">Report Template</label>
                 <select
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none"
+                  className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-[#F5F5F5] focus:outline-none"
                   value={type}
                   disabled={compilingStep > 0 && compilingStep < 6}
                   onChange={(e) => setType(e.target.value)}
@@ -162,9 +162,9 @@ export default function ReportsPage() {
 
               {/* Scope Select */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Investigation Scope</label>
+                <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider">Investigation Scope</label>
                 <select
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none"
+                  className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-2.5 text-xs text-[#F5F5F5] focus:outline-none"
                   value={scope}
                   disabled={compilingStep > 0 && compilingStep < 6}
                   onChange={(e) => setScope(e.target.value)}
@@ -190,24 +190,24 @@ export default function ReportsPage() {
           </div>
 
           {/* Compile Progress Console */}
-          <div className="lg:col-span-7 bg-slate-950/40 border border-slate-800 p-5 rounded-2xl flex flex-col min-h-[268px]">
+          <div className="lg:col-span-7 bg-[#050505]/40 border border-[#222222] p-5 rounded-2xl flex flex-col min-h-[268px]">
             <h3 className="font-bold text-white text-sm uppercase tracking-wider border-b border-slate-850 pb-3 mb-4">
               Cryptographic Compiler Output
             </h3>
 
             {compilingStep === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-500 space-y-2">
+              <div className="flex-1 flex flex-col items-center justify-center text-center text-[#666666] space-y-2">
                 <BookOpen className="h-8 w-8 text-slate-650" />
                 <p className="text-xs font-semibold">Compiler Idle</p>
-                <p className="text-[10px] text-slate-600 max-w-[200px]">Configure parameters on the left to start compiling official files</p>
+                <p className="text-[10px] text-[#666666] max-w-[200px]">Configure parameters on the left to start compiling official files</p>
               </div>
             ) : (
               <div className="flex-1 flex flex-col justify-between space-y-4">
                 
                 {/* Steps logs */}
                 <div className="space-y-2.5 font-mono text-[11px]">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <span className="text-blue-400 font-bold">&#8250;</span>
+                  <div className="flex items-center gap-2 text-[#9A9A9A]">
+                    <span className="text-[#10B981] font-bold">&#8250;</span>
                     <span>{compilingLog}</span>
                   </div>
                   
@@ -219,7 +219,7 @@ export default function ReportsPage() {
                         className={`h-2.5 rounded transition-all ${
                           compilingStep >= s 
                             ? "bg-gradient-to-r from-blue-500 to-indigo-500 shadow-md shadow-blue-500/20" 
-                            : "bg-slate-900 border border-slate-850"
+                            : "bg-[#080808] border border-slate-850"
                         }`}
                       />
                     ))}
@@ -235,8 +235,8 @@ export default function ReportsPage() {
                     </div>
 
                     <div className="text-xs space-y-1.5 text-slate-350">
-                      <p><span className="font-semibold text-slate-200">Title:</span> {newlyGeneratedReport.title}</p>
-                      <p><span className="font-semibold text-slate-200">Secure Hash:</span> <span className="font-mono text-slate-300">{newlyGeneratedReport.hash}</span></p>
+                      <p><span className="font-semibold text-[#F5F5F5]">Title:</span> {newlyGeneratedReport.title}</p>
+                      <p><span className="font-semibold text-[#F5F5F5]">Secure Hash:</span> <span className="font-mono text-[#F5F5F5]">{newlyGeneratedReport.hash}</span></p>
                     </div>
 
                     <div className="flex gap-2">
@@ -252,7 +252,7 @@ export default function ReportsPage() {
                 )}
 
                 {/* Audit Warning */}
-                <div className="p-3 bg-slate-950 border border-slate-850 rounded-xl flex items-start gap-2 text-[9px] text-slate-500">
+                <div className="p-3 bg-[#050505] border border-slate-850 rounded-xl flex items-start gap-2 text-[9px] text-[#666666]">
                   <AlertCircle className="h-4 w-4 text-slate-550 shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
                     Compiling documents registers an entry in the national audit log detailing badge code, system parameters, and active IP. Exported PDFs contain digital classification watermarks.
@@ -266,13 +266,13 @@ export default function ReportsPage() {
         </div>
 
         {/* Existing generated reports list */}
-        <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl">
-          <div className="flex justify-between items-center border-b border-slate-800/80 pb-4 mb-4">
+        <div className="p-6 bg-[#080808]/40 border border-[#222222] rounded-2xl">
+          <div className="flex justify-between items-center border-b border-[#222222]/80 pb-4 mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Generated Intelligence Briefings</h3>
-              <p className="text-xs text-slate-400">Archived PDF files signed with platform key credentials</p>
+              <p className="text-xs text-[#9A9A9A]">Archived PDF files signed with platform key credentials</p>
             </div>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-lg text-xs font-semibold transition-colors">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#050505] border border-[#222222] hover:bg-[#080808] text-[#9A9A9A] hover:text-[#F5F5F5] rounded-lg text-xs font-semibold transition-colors">
               <Sliders className="h-3.5 w-3.5" />
               <span>Manage Archives</span>
             </button>
@@ -283,20 +283,20 @@ export default function ReportsPage() {
             {reports?.map((report) => (
               <div 
                 key={report.id} 
-                className="p-4 bg-slate-950/40 hover:bg-slate-950/70 border border-slate-850 hover:border-slate-750/80 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
+                className="p-4 bg-[#050505]/40 hover:bg-[#050505]/70 border border-slate-850 hover:border-slate-750/80 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
               >
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 shrink-0">
+                  <div className="h-10 w-10 rounded-xl bg-[#080808] border border-[#222222] flex items-center justify-center text-[#9A9A9A] shrink-0">
                     <FileText className="h-5.5 w-5.5" />
                   </div>
                   <div className="min-w-0">
                     <h4 className="font-bold text-slate-250 text-xs md:text-sm truncate">{report.title}</h4>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-500 font-medium">
-                      <span>TYPE: <span className="text-slate-400 font-semibold">{report.type}</span></span>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[10px] text-[#666666] font-medium">
+                      <span>TYPE: <span className="text-[#9A9A9A] font-semibold">{report.type}</span></span>
                       <span>•</span>
-                      <span>SCOPE: <span className="text-slate-400 font-semibold">{report.scope}</span></span>
+                      <span>SCOPE: <span className="text-[#9A9A9A] font-semibold">{report.scope}</span></span>
                       <span>•</span>
-                      <span>DATE: <span className="text-slate-400 font-mono">{report.createdDate}</span></span>
+                      <span>DATE: <span className="text-[#9A9A9A] font-mono">{report.createdDate}</span></span>
                     </div>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ export default function ReportsPage() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => handleDownload(report)}
-                      className="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-slate-100 rounded-lg transition-all"
+                      className="p-2.5 bg-[#080808] hover:bg-[#0D0D0D] border border-[#222222] hover:border-[#2A2A2A] text-slate-350 hover:text-[#F5F5F5] rounded-lg transition-all"
                       title="Download PDF"
                     >
                       <Download className="h-4.5 w-4.5" />
