@@ -19,15 +19,15 @@ export default function RecidivismIntelligence() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="h-full bg-slate-900 border border-slate-800 rounded-xl animate-pulse"></div>;
+  if (loading) return <div className="h-full bg-[#080808] border border-[#222222] rounded-xl animate-pulse"></div>;
 
   const isInsufficient = data?.status === "insufficient_data" || data?.status === "error";
 
   return (
-    <div className="h-full bg-slate-900 border border-slate-800 rounded-xl flex flex-col overflow-hidden">
-      <div className="p-3 border-b border-slate-800 bg-slate-950/50 flex items-center gap-2">
+    <div className="h-full bg-[#080808] border border-[#222222] rounded-xl flex flex-col overflow-hidden">
+      <div className="p-3 border-b border-[#222222] bg-[#050505]/50 flex items-center gap-2">
         <UserMinus className="h-4 w-4 text-rose-500" />
-        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest">Recidivism Risk (Sample)</h3>
+        <h3 className="text-xs font-bold text-[#F5F5F5] uppercase tracking-widest">Recidivism Risk (Sample)</h3>
       </div>
       
       <div className="flex-1 p-4 flex flex-col justify-center relative">
@@ -35,23 +35,23 @@ export default function RecidivismIntelligence() {
           <div className="text-center">
             <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-2 opacity-50" />
             <h4 className="text-sm font-bold text-amber-500 mb-1">Target Not Found / Insufficient Data</h4>
-            <p className="text-xs text-slate-400 font-mono mb-2">{data.message}</p>
+            <p className="text-xs text-[#9A9A9A] font-mono mb-2">{data.message}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Reoffend Probability</span>
+              <span className="text-xs text-[#9A9A9A] font-bold uppercase tracking-widest">Reoffend Probability</span>
               <span className="text-2xl font-black text-rose-500">{(data?.probability * 100).toFixed(0)}%</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Risk Classification</span>
+              <span className="text-xs text-[#9A9A9A] font-bold uppercase tracking-widest">Risk Classification</span>
               <span className={`text-xs font-mono px-2 py-0.5 rounded border ${data?.risk_level === 'HIGH' ? 'text-rose-500 bg-rose-500/10 border-rose-500/20' : 'text-amber-500 bg-amber-500/10 border-amber-500/20'}`}>
                 {data?.risk_level}
               </span>
             </div>
-            <div className="mt-2 pt-2 border-t border-slate-800">
-              <span className="block text-[10px] text-slate-500 uppercase tracking-widest mb-2">Algorithm Evidence</span>
-              <ul className="text-[10px] text-slate-400 font-mono space-y-1 list-disc pl-4">
+            <div className="mt-2 pt-2 border-t border-[#222222]">
+              <span className="block text-[10px] text-[#666666] uppercase tracking-widest mb-2">Algorithm Evidence</span>
+              <ul className="text-[10px] text-[#9A9A9A] font-mono space-y-1 list-disc pl-4">
                 {data?.evidence?.map((ev: string, i: number) => <li key={i}>{ev}</li>)}
               </ul>
             </div>

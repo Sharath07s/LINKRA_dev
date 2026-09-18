@@ -13,11 +13,11 @@ export default function ConfidenceMeter({ confidence }: { confidence: number }) 
 
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-[9px] font-bold text-slate-400">
+      <div className="flex justify-between text-[9px] font-bold text-[#9A9A9A]">
         <span>AI CONFIDENCE COEFFICIENT</span>
         <span className={textColor}>{confidence}%</span>
       </div>
-      <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+      <div className="h-1.5 w-full bg-[#080808] rounded-full overflow-hidden">
         <div 
           className={`h-full bg-gradient-to-r ${colorClass} rounded-full`} 
           style={{ width: `${confidence}%` }}

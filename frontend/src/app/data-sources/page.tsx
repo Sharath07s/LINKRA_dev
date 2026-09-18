@@ -30,7 +30,7 @@ import {
 
 // ── Entity type icon/color mapping ─────────────────────────────────────
 const ENTITY_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  PERSON: { icon: <User className="h-3.5 w-3.5" />, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
+  PERSON: { icon: <User className="h-3.5 w-3.5" />, color: "text-[#10B981]", bg: "bg-[#10B981]/10 border-[#10B981]/20" },
   ORGANIZATION: { icon: <Building className="h-3.5 w-3.5" />, color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
   LOCATION: { icon: <MapPin className="h-3.5 w-3.5" />, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
   PHONE: { icon: <Phone className="h-3.5 w-3.5" />, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
@@ -39,8 +39,8 @@ const ENTITY_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  QUEUED: { label: "Queued", color: "text-slate-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
-  PROCESSING: { label: "Processing", color: "text-blue-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  QUEUED: { label: "Queued", color: "text-[#9A9A9A]", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  PROCESSING: { label: "Processing", color: "text-[#10B981]", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   PARSED: { label: "Parsed", color: "text-amber-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   EXTRACTED: { label: "Extracting", color: "text-indigo-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   COMPLETED: { label: "Completed", color: "text-emerald-400", icon: <CheckCircle className="h-3.5 w-3.5" /> },
@@ -152,12 +152,12 @@ export default function DataSourcesPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">Data Ingestion</h1>
-            <p className="text-slate-400 mt-1">Upload and process intelligence source documents.</p>
+            <p className="text-[#9A9A9A] mt-1">Upload and process intelligence source documents.</p>
           </div>
           <button
             onClick={loadJobs}
             disabled={isLoadingJobs}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#080808] border border-[#222222] hover:bg-[#0D0D0D] text-[#9A9A9A] hover:text-white rounded-lg text-xs font-semibold transition-colors"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isLoadingJobs ? "animate-spin" : ""}`} />
             <span>Refresh</span>
@@ -172,12 +172,12 @@ export default function DataSourcesPage() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`relative bg-slate-900/40 border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+              className={`relative bg-[#080808]/40 border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
                 isDragging
-                  ? "border-blue-500 bg-blue-500/5"
+                  ? "border-[#10B981] bg-blue-500/5"
                   : selectedFile
                   ? "border-emerald-500/40 bg-emerald-500/5"
-                  : "border-slate-700 hover:border-slate-600"
+                  : "border-[#2A2A2A] hover:border-[#2A2A2A]"
               }`}
             >
               {selectedFile ? (
@@ -186,27 +186,27 @@ export default function DataSourcesPage() {
                     <FileText className="h-8 w-8 text-emerald-400" />
                     <div className="text-left">
                       <p className="text-sm font-semibold text-white">{selectedFile.name}</p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-[#9A9A9A]">
                         {(selectedFile.size / 1024).toFixed(1)} KB • {selectedFile.type || "unknown type"}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setSelectedFile(null)}
-                    className="text-[10px] text-slate-500 hover:text-slate-300 uppercase tracking-wider"
+                    className="text-[10px] text-[#666666] hover:text-[#F5F5F5] uppercase tracking-wider"
                   >
                     Remove
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <UploadCloud className="h-10 w-10 text-slate-500 mx-auto" />
+                  <UploadCloud className="h-10 w-10 text-[#666666] mx-auto" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-300">Drop files here or click to browse</p>
-                    <p className="text-[11px] text-slate-500 mt-1">Supports PDF, CSV, JSON, and TXT files (max 50 MB)</p>
+                    <p className="text-sm font-semibold text-[#F5F5F5]">Drop files here or click to browse</p>
+                    <p className="text-[11px] text-[#666666] mt-1">Supports PDF, CSV, JSON, and TXT files (max 50 MB)</p>
                   </div>
                   <label className="inline-block cursor-pointer">
-                    <span className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition-colors border border-slate-700">
+                    <span className="px-4 py-2 bg-[#0D0D0D] hover:bg-[#111111] text-[#F5F5F5] hover:text-white rounded-lg text-xs font-semibold transition-colors border border-[#2A2A2A]">
                       Browse Files
                     </span>
                     <input
@@ -225,15 +225,15 @@ export default function DataSourcesPage() {
           </div>
 
           {/* Source Type + Upload Button */}
-          <div className="lg:col-span-5 bg-slate-900/40 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <h3 className="font-bold text-white text-sm border-b border-slate-800 pb-3">Upload Configuration</h3>
+          <div className="lg:col-span-5 bg-[#080808]/40 border border-[#222222] rounded-2xl p-5 space-y-4">
+            <h3 className="font-bold text-white text-sm border-b border-[#222222] pb-3">Upload Configuration</h3>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Source Type</label>
+              <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider">Source Type</label>
               <select
                 value={sourceType}
                 onChange={(e) => setSourceType(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-[#050505] border border-[#222222] rounded-xl px-3 py-2.5 text-xs text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981]"
               >
                 {SOURCE_TYPES.map((st) => (
                   <option key={st.value} value={st.value}>{st.label}</option>
@@ -266,8 +266,8 @@ export default function DataSourcesPage() {
               </div>
             )}
 
-            <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-start gap-2 text-[9px] text-slate-500">
-              <Database className="h-4 w-4 text-slate-600 shrink-0 mt-0.5" />
+            <div className="p-3 bg-[#050505] border border-[#222222] rounded-xl flex items-start gap-2 text-[9px] text-[#666666]">
+              <Database className="h-4 w-4 text-[#666666] shrink-0 mt-0.5" />
               <p className="leading-relaxed">
                 Uploaded files are parsed, normalized, and processed through the NLP extraction pipeline. Extracted entity candidates are stored with full provenance.
               </p>
@@ -276,27 +276,27 @@ export default function DataSourcesPage() {
         </div>
 
         {/* Ingestion Jobs List */}
-        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
-          <div className="flex justify-between items-center border-b border-slate-800/80 pb-4 mb-4">
+        <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl p-6">
+          <div className="flex justify-between items-center border-b border-[#222222]/80 pb-4 mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Ingestion Jobs</h3>
-              <p className="text-xs text-slate-400">Processed documents and extracted intelligence</p>
+              <p className="text-xs text-[#9A9A9A]">Processed documents and extracted intelligence</p>
             </div>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-[#666666] uppercase tracking-wider">
               {jobs.length} {jobs.length === 1 ? "Job" : "Jobs"}
             </span>
           </div>
 
           {isLoadingJobs && !hasLoaded ? (
-            <div className="flex items-center justify-center py-12 gap-2 text-slate-500">
+            <div className="flex items-center justify-center py-12 gap-2 text-[#666666]">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Loading ingestion jobs...</span>
             </div>
           ) : jobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <UploadCloud className="h-10 w-10 text-slate-600 mb-3" />
-              <p className="text-sm font-semibold text-slate-400">No ingested datasets yet</p>
-              <p className="text-[11px] text-slate-500 mt-1 max-w-[300px]">
+              <UploadCloud className="h-10 w-10 text-[#666666] mb-3" />
+              <p className="text-sm font-semibold text-[#9A9A9A]">No ingested datasets yet</p>
+              <p className="text-[11px] text-[#666666] mt-1 max-w-[300px]">
                 Upload a document above to begin real intelligence extraction.
               </p>
             </div>
@@ -307,22 +307,22 @@ export default function DataSourcesPage() {
                 const isExpanded = expandedJobId === job.id;
 
                 return (
-                  <div key={job.id} className="border border-slate-800 rounded-xl overflow-hidden">
+                  <div key={job.id} className="border border-[#222222] rounded-xl overflow-hidden">
                     {/* Job row */}
                     <button
                       onClick={() => toggleJobDetail(job.id)}
-                      className="w-full p-4 flex items-center justify-between gap-4 hover:bg-slate-950/50 transition-colors text-left"
+                      className="w-full p-4 flex items-center justify-between gap-4 hover:bg-[#050505]/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {isExpanded ? (
-                          <ChevronDown className="h-4 w-4 text-slate-500 shrink-0" />
+                          <ChevronDown className="h-4 w-4 text-[#666666] shrink-0" />
                         ) : (
-                          <ChevronRight className="h-4 w-4 text-slate-500 shrink-0" />
+                          <ChevronRight className="h-4 w-4 text-[#666666] shrink-0" />
                         )}
-                        <FileText className="h-5 w-5 text-slate-400 shrink-0" />
+                        <FileText className="h-5 w-5 text-[#9A9A9A] shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold text-slate-200 truncate">{job.file_name}</p>
-                          <div className="flex gap-2 mt-0.5 text-[10px] text-slate-500">
+                          <p className="text-xs font-semibold text-[#F5F5F5] truncate">{job.file_name}</p>
+                          <div className="flex gap-2 mt-0.5 text-[10px] text-[#666666]">
                             <span>{job.source_type}</span>
                             <span>•</span>
                             <span>{job.file_type.toUpperCase()}</span>
@@ -338,7 +338,7 @@ export default function DataSourcesPage() {
 
                       <div className="flex items-center gap-4 shrink-0">
                         {job.entity_count != null && job.status === "COMPLETED" && (
-                          <span className="text-[10px] font-bold text-slate-400">
+                          <span className="text-[10px] font-bold text-[#9A9A9A]">
                             {job.entity_count} entities
                           </span>
                         )}
@@ -351,9 +351,9 @@ export default function DataSourcesPage() {
 
                     {/* Expanded detail */}
                     {isExpanded && (
-                      <div className="border-t border-slate-800 p-4 bg-slate-950/30">
+                      <div className="border-t border-[#222222] p-4 bg-[#050505]/30">
                         {isLoadingDetail ? (
-                          <div className="flex items-center justify-center py-6 gap-2 text-slate-500">
+                          <div className="flex items-center justify-center py-6 gap-2 text-[#666666]">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span className="text-xs">Loading extracted entities...</span>
                           </div>
@@ -367,9 +367,9 @@ export default function DataSourcesPage() {
                                 { label: "Status", value: jobDetail.status },
                                 { label: "Created", value: new Date(jobDetail.created_at).toLocaleString() },
                               ].map((item) => (
-                                <div key={item.label} className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
-                                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{item.label}</p>
-                                  <p className="text-xs font-semibold text-slate-200 mt-0.5">{String(item.value)}</p>
+                                <div key={item.label} className="bg-[#080808]/60 border border-[#222222] rounded-lg p-2.5">
+                                  <p className="text-[9px] font-bold text-[#666666] uppercase tracking-wider">{item.label}</p>
+                                  <p className="text-xs font-semibold text-[#F5F5F5] mt-0.5">{String(item.value)}</p>
                                 </div>
                               ))}
                             </div>
@@ -384,15 +384,15 @@ export default function DataSourcesPage() {
                             {/* Entities grouped by type */}
                             {jobDetail.entities.length > 0 ? (
                               <div className="space-y-3">
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Extracted Entity Candidates</h4>
+                                <h4 className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider">Extracted Entity Candidates</h4>
                                 {Object.entries(groupEntities(jobDetail.entities)).map(([type, entities]) => {
-                                  const config = ENTITY_CONFIG[type] || { icon: <Database className="h-3.5 w-3.5" />, color: "text-slate-400", bg: "bg-slate-500/10 border-slate-500/20" };
+                                  const config = ENTITY_CONFIG[type] || { icon: <Database className="h-3.5 w-3.5" />, color: "text-[#9A9A9A]", bg: "bg-slate-500/10 border-slate-500/20" };
                                   return (
                                     <div key={type} className="space-y-1.5">
                                       <div className={`flex items-center gap-1.5 ${config.color}`}>
                                         {config.icon}
                                         <span className="text-[10px] font-bold uppercase tracking-wider">{type}</span>
-                                        <span className="text-[9px] text-slate-500 ml-1">({entities.length})</span>
+                                        <span className="text-[9px] text-[#666666] ml-1">({entities.length})</span>
                                       </div>
                                       <div className="flex flex-wrap gap-1.5">
                                         {entities.map((ent) => (
@@ -410,7 +410,7 @@ export default function DataSourcesPage() {
                                 })}
                               </div>
                             ) : jobDetail.status === "COMPLETED" ? (
-                              <p className="text-xs text-slate-500 text-center py-4">No entities were extracted from this document.</p>
+                              <p className="text-xs text-[#666666] text-center py-4">No entities were extracted from this document.</p>
                             ) : null}
                           </div>
                         ) : null}

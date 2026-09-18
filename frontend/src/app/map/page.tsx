@@ -115,18 +115,18 @@ export default function CrimeMapPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Geospatial Intelligence Map</h1>
-            <p className="text-sm text-slate-400">Observed crime locations and spatial density analysis</p>
+            <p className="text-sm text-[#9A9A9A]">Observed crime locations and spatial density analysis</p>
           </div>
         </div>
 
         {/* Filters and Controls Toolbar */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-900/40 border border-slate-800 p-4 rounded-2xl items-end">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-[#080808]/40 border border-[#222222] p-4 rounded-2xl items-end">
           <div className="md:col-span-2 space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <MapPin className="h-3 w-3 text-blue-500" /> District
+            <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-[#10B981]" /> District
             </label>
             <select
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-2 text-xs text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981]"
               value={selectedDistrict}
               onChange={(e) => setSelectedDistrict(e.target.value)}
             >
@@ -136,11 +136,11 @@ export default function CrimeMapPage() {
           </div>
 
           <div className="md:col-span-2 space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider flex items-center gap-1">
               <Sliders className="h-3 w-3 text-indigo-400" /> Crime Type
             </label>
             <select
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-2 text-xs text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981]"
               value={selectedCrime}
               onChange={(e) => setSelectedCrime(e.target.value)}
             >
@@ -150,11 +150,11 @@ export default function CrimeMapPage() {
           </div>
 
           <div className="md:col-span-2 space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider flex items-center gap-1">
               <ShieldAlert className="h-3 w-3 text-rose-500" /> Investigation
             </label>
             <select
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-2 text-xs text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981]"
               value={selectedInvestigation}
               onChange={(e) => setSelectedInvestigation(e.target.value)}
               disabled={!filterOptions || filterOptions.investigations.length === 0}
@@ -167,20 +167,20 @@ export default function CrimeMapPage() {
           </div>
 
           <div className="md:col-span-3 space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider flex items-center gap-1">
               <Calendar className="h-3 w-3 text-amber-500" /> Date Range
             </label>
             <div className="flex gap-2">
               <input 
                 type="date"
-                className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981]"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
-              <span className="text-slate-500 self-center">→</span>
+              <span className="text-[#666666] self-center">→</span>
               <input 
                 type="date"
-                className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-[#050505] border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981]"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -190,27 +190,27 @@ export default function CrimeMapPage() {
           <div className="md:col-span-1 flex items-end">
             <button
               onClick={handleResetFilters}
-              className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors"
+              className="w-full py-2 bg-[#0D0D0D] hover:bg-[#111111] text-[#F5F5F5] text-xs font-bold rounded-xl transition-colors"
             >
               Reset
             </button>
           </div>
 
           <div className="md:col-span-2 space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider flex items-center gap-1">
               <Layers className="h-3 w-3 text-emerald-400" /> Layers
             </label>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDensity(!showDensity)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-bold border transition-colors ${
-                  showDensity ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-slate-950 border-slate-850 text-slate-500"
+                  showDensity ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-[#050505] border-slate-850 text-[#666666]"
                 }`}
               >Density</button>
               <button
                 onClick={() => setShowPoints(!showPoints)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-bold border transition-colors ${
-                  showPoints ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-slate-950 border-slate-850 text-slate-500"
+                  showPoints ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-[#050505] border-slate-850 text-[#666666]"
                 }`}
               >Points</button>
             </div>
@@ -219,17 +219,17 @@ export default function CrimeMapPage() {
 
         {/* Map Viewport Area */}
         <div className="flex-1 min-h-[500px] grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          <div className="lg:col-span-8 bg-slate-950/40 border border-slate-800 rounded-2xl p-2 relative overflow-hidden h-[500px]">
+          <div className="lg:col-span-8 bg-[#050505]/40 border border-[#222222] rounded-2xl p-2 relative overflow-hidden h-[500px]">
             {isLoading && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm">
-                 <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-2 rounded-full shadow-lg">
-                   <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-                   <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Loading geospatial intelligence...</span>
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#050505]/50 backdrop-blur-sm">
+                 <div className="flex items-center gap-2 bg-[#080808] border border-[#222222] px-4 py-2 rounded-full shadow-lg">
+                   <Loader2 className="h-4 w-4 text-[#10B981] animate-spin" />
+                   <span className="text-xs font-bold text-[#F5F5F5] uppercase tracking-widest">Loading geospatial intelligence...</span>
                  </div>
               </div>
             )}
             {error && (
-               <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm">
+               <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#050505]/50 backdrop-blur-sm">
                  <div className="flex items-center gap-2 bg-red-950/40 border border-red-900 px-4 py-3 rounded-lg shadow-lg max-w-sm text-center flex-col">
                    <ShieldAlert className="h-6 w-6 text-red-500 mb-2" />
                    <span className="text-sm font-bold text-red-400 uppercase tracking-widest">{error}</span>
@@ -305,24 +305,24 @@ export default function CrimeMapPage() {
             {/* Density legend */}
             {showDensity && densityData && densityData.features.length > 0 && (
               <div className="absolute bottom-4 left-4 z-10">
-                <div className="bg-slate-950/90 backdrop-blur-sm border border-slate-800 px-3 py-2 rounded-lg shadow-lg">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Observed Crime Density</span>
+                <div className="bg-[#050505]/90 backdrop-blur-sm border border-[#222222] px-3 py-2 rounded-lg shadow-lg">
+                  <span className="text-[9px] font-bold text-[#9A9A9A] uppercase tracking-widest block mb-1.5">Observed Crime Density</span>
                   <div className="flex items-center gap-1.5 text-[9px]">
                     <div className="w-3 h-3 rounded-sm bg-amber-500/30 border border-amber-500/50" />
-                    <span className="text-slate-400">Lower</span>
+                    <span className="text-[#9A9A9A]">Lower</span>
                     <div className="w-8 h-1.5 bg-gradient-to-r from-amber-500/30 via-orange-500/40 to-red-600/50 rounded-full mx-1" />
                     <div className="w-3 h-3 rounded-sm bg-red-600/50 border border-red-500/70" />
-                    <span className="text-slate-400">Higher</span>
+                    <span className="text-[#9A9A9A]">Higher</span>
                   </div>
-                  <span className="text-[8px] text-slate-500 mt-1 block">Method: PostGIS ST_ClusterDBSCAN</span>
+                  <span className="text-[8px] text-[#666666] mt-1 block">Method: PostGIS ST_ClusterDBSCAN</span>
                 </div>
               </div>
             )}
             
             {!isLoading && !error && geoData?.features?.length === 0 && (
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-                 <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-800 px-4 py-2 rounded-full shadow-lg">
-                   <span className="text-xs font-semibold text-slate-400">No verified crime locations available for the current view.</span>
+                 <div className="bg-[#080808]/90 backdrop-blur-sm border border-[#222222] px-4 py-2 rounded-full shadow-lg">
+                   <span className="text-xs font-semibold text-[#9A9A9A]">No verified crime locations available for the current view.</span>
                  </div>
               </div>
             )}
@@ -330,10 +330,10 @@ export default function CrimeMapPage() {
 
           {/* Right panel: Active Feature Details */}
           <div className="lg:col-span-4 flex flex-col gap-4">
-            <div className="flex-1 bg-slate-900/40 border border-slate-800 p-5 rounded-2xl flex flex-col min-h-[300px]">
+            <div className="flex-1 bg-[#080808]/40 border border-[#222222] p-5 rounded-2xl flex flex-col min-h-[300px]">
               {activeCluster ? (
                 <div className="space-y-4 flex-1 flex flex-col">
-                  <div className="border-b border-slate-800 pb-3">
+                  <div className="border-b border-[#222222] pb-3">
                     <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block font-mono">
                       Observed Spatial Cluster
                     </span>
@@ -342,32 +342,32 @@ export default function CrimeMapPage() {
                     </h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
-                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Observed Crimes</span>
+                    <div className="bg-[#050505]/50 p-2.5 rounded-lg border border-slate-850 text-center">
+                      <span className="text-[9px] text-[#666666] block uppercase font-bold">Observed Crimes</span>
                       <span className="text-lg font-extrabold text-amber-400">{activeCluster.crime_count}</span>
                     </div>
-                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
-                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Density Score</span>
-                      <span className="text-lg font-extrabold text-slate-200">{activeCluster.density_score}</span>
+                    <div className="bg-[#050505]/50 p-2.5 rounded-lg border border-slate-850 text-center">
+                      <span className="text-[9px] text-[#666666] block uppercase font-bold">Density Score</span>
+                      <span className="text-lg font-extrabold text-[#F5F5F5]">{activeCluster.density_score}</span>
                     </div>
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Spatial Method</span>
-                    <span className="font-semibold text-slate-300 block">PostGIS ST_ClusterDBSCAN (eps=0.05°, minpoints=5)</span>
+                    <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block">Spatial Method</span>
+                    <span className="font-semibold text-[#F5F5F5] block">PostGIS ST_ClusterDBSCAN (eps=0.05°, minpoints=5)</span>
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Geometry</span>
-                    <span className="font-semibold text-slate-300 block">Convex Hull of clustered crime locations</span>
+                    <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block">Geometry</span>
+                    <span className="font-semibold text-[#F5F5F5] block">Convex Hull of clustered crime locations</span>
                   </div>
-                  <div className="space-y-1 text-xs bg-slate-950/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-slate-500">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">System Note</span>
+                  <div className="space-y-1 text-xs bg-[#050505]/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-[#666666]">
+                    <span className="text-[9px] font-bold text-[#666666] uppercase block mb-1">System Note</span>
                     This is an observed spatial density cluster, not a predictive hotspot. The boundary represents the convex hull of {activeCluster.crime_count} real crime records spatially concentrated within ~5.5km of each other.
                   </div>
                 </div>
               ) : activeCrime ? (
                 <div className="space-y-4 flex-1 flex flex-col">
-                  <div className="border-b border-slate-800 pb-3">
-                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest block font-mono">
+                  <div className="border-b border-[#222222] pb-3">
+                    <span className="text-[9px] font-bold text-[#10B981] uppercase tracking-widest block font-mono">
                       {activeCrime.district || "Unknown District"}
                     </span>
                     <h3 className="font-bold text-white text-base mt-0.5 leading-snug">
@@ -375,30 +375,30 @@ export default function CrimeMapPage() {
                     </h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
-                      <span className="text-[9px] text-slate-500 block uppercase font-bold">FIR Number</span>
-                      <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                    <div className="bg-[#050505]/50 p-2.5 rounded-lg border border-slate-850 text-center">
+                      <span className="text-[9px] text-[#666666] block uppercase font-bold">FIR Number</span>
+                      <span className="text-sm font-semibold text-[#F5F5F5] mt-1 block">
                         {activeCrime.fir_number || "N/A"}
                       </span>
                     </div>
-                    <div className="bg-slate-950/50 p-2.5 rounded-lg border border-slate-850 text-center">
-                      <span className="text-[9px] text-slate-500 block uppercase font-bold">Status</span>
-                      <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                    <div className="bg-[#050505]/50 p-2.5 rounded-lg border border-slate-850 text-center">
+                      <span className="text-[9px] text-[#666666] block uppercase font-bold">Status</span>
+                      <span className="text-sm font-semibold text-[#F5F5F5] mt-1 block">
                         {activeCrime.status || "Unknown"}
                       </span>
                     </div>
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Crime Type</span>
-                    <span className="font-semibold text-slate-300 block">{activeCrime.crime_type || "N/A"}</span>
+                    <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block">Crime Type</span>
+                    <span className="font-semibold text-[#F5F5F5] block">{activeCrime.crime_type || "N/A"}</span>
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Police Station</span>
-                    <span className="font-semibold text-slate-300 block">{activeCrime.station || "N/A"}</span>
+                    <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block">Police Station</span>
+                    <span className="font-semibold text-[#F5F5F5] block">{activeCrime.station || "N/A"}</span>
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Occurrence Date</span>
-                    <span className="font-semibold text-slate-300 block">
+                    <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block">Occurrence Date</span>
+                    <span className="font-semibold text-[#F5F5F5] block">
                       {activeCrime.occurrence_date 
                         ? new Date(activeCrime.occurrence_date).toLocaleString()
                         : "N/A"}
@@ -406,20 +406,20 @@ export default function CrimeMapPage() {
                   </div>
                   {activeCrime.estimated_loss && (
                     <div className="space-y-1 text-xs">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Estimated Loss</span>
-                      <span className="font-semibold text-slate-300 block">₹{activeCrime.estimated_loss.toLocaleString()}</span>
+                      <span className="text-[10px] font-bold text-[#9A9A9A] uppercase block">Estimated Loss</span>
+                      <span className="font-semibold text-[#F5F5F5] block">₹{activeCrime.estimated_loss.toLocaleString()}</span>
                     </div>
                   )}
-                  <div className="space-y-1 text-xs bg-slate-950/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-slate-500">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">System Note</span>
+                  <div className="space-y-1 text-xs bg-[#050505]/40 p-3 rounded-lg border border-slate-850 leading-relaxed text-[#666666]">
+                    <span className="text-[9px] font-bold text-[#666666] uppercase block mb-1">System Note</span>
                     This is a verified crime location sourced directly from real database records.
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-500 space-y-2">
-                  <MapIcon className="h-8 w-8 text-slate-600" />
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-[#666666] space-y-2">
+                  <MapIcon className="h-8 w-8 text-[#666666]" />
                   <p className="text-xs font-semibold">Select a Feature</p>
-                  <p className="text-[10px] text-slate-500 max-w-[200px]">Click on a crime point or density region to view observed intelligence details.</p>
+                  <p className="text-[10px] text-[#666666] max-w-[200px]">Click on a crime point or density region to view observed intelligence details.</p>
                 </div>
               )}
             </div>

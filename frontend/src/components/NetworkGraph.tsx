@@ -202,7 +202,7 @@ export default function NetworkGraph({
             >
               {/* Ring highlight glow */}
               {isSelected && (
-                <circle r="16" className="fill-blue-500/10 stroke-blue-500/30 stroke-[2.5px] animate-ping opacity-75" />
+                <circle r="16" className="fill-[#10B981]/10 stroke-blue-500/30 stroke-[2.5px] animate-ping opacity-75" />
               )}
               
               {/* Node circle */}

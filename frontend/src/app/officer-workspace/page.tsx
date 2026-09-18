@@ -70,7 +70,7 @@ function OfficerWorkspaceContent() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col p-6 max-w-[1600px] mx-auto gap-4 bg-slate-950">
+      <div className="h-full flex flex-col p-6 max-w-[1600px] mx-auto gap-4 bg-[#050505]">
         
         <OfficerHeader user={user} />
         

@@ -5,7 +5,7 @@ import { DatabaseBackup, Play } from "lucide-react";
 export default function BackupStatusPanel({ data }: { data: any }) {
   const [triggering, setTriggering] = useState(false);
 
-  if (!data) return <div className="h-full bg-slate-900/50 rounded-xl border border-slate-800 animate-pulse"></div>;
+  if (!data) return <div className="h-full bg-[#080808]/50 rounded-xl border border-[#222222] animate-pulse"></div>;
 
   const handleTrigger = async () => {
     setTriggering(true);
@@ -17,9 +17,9 @@ export default function BackupStatusPanel({ data }: { data: any }) {
   };
 
   return (
-    <div className="h-full bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col">
+    <div className="h-full bg-[#080808]/50 rounded-xl border border-[#222222] p-4 flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-bold text-[#F5F5F5] uppercase tracking-widest flex items-center gap-2">
           <DatabaseBackup className="h-4 w-4 text-amber-400" />
           Backup Status
         </h3>
@@ -30,11 +30,11 @@ export default function BackupStatusPanel({ data }: { data: any }) {
 
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex justify-between items-center text-xs font-mono">
-          <span className="text-slate-500">PostgreSQL Backup:</span>
+          <span className="text-[#666666]">PostgreSQL Backup:</span>
           <span className={data.postgres_ready ? "text-emerald-400" : "text-red-400"}>{data.postgres_ready ? "Available" : "Missing Tool"}</span>
         </div>
         <div className="flex justify-between items-center text-xs font-mono">
-          <span className="text-slate-500">Neo4j Backup:</span>
+          <span className="text-[#666666]">Neo4j Backup:</span>
           <span className={data.neo4j_ready ? "text-emerald-400" : "text-red-400"}>{data.neo4j_ready ? "Available" : "Missing Tool"}</span>
         </div>
         

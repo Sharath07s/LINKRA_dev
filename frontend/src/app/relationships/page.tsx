@@ -49,7 +49,7 @@ export default function RelationshipExplorer() {
                 onChange={(e) => setEntityId(e.target.value)}
                 className="bg-[#0B0D11] border-gray-800 text-white w-96"
               />
-              <Button onClick={fetchRelationships} disabled={loading || !entityId} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={fetchRelationships} disabled={loading || !entityId} className="bg-[#10B981] hover:bg-blue-700">
                 {loading ? 'Querying...' : 'Fetch Links'}
               </Button>
             </div>
@@ -72,7 +72,7 @@ export default function RelationshipExplorer() {
                     {relationships.map((rel) => (
                       <tr key={rel.id} className="border-b border-gray-800 hover:bg-[#2A2F3A] transition-colors">
                         <td className="px-4 py-3">
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-900/30 text-blue-400 border border-blue-800">
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-900/30 text-[#10B981] border border-blue-800">
                             {rel.relationship_type}
                           </span>
                         </td>

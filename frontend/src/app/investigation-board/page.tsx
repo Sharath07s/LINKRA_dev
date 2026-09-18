@@ -120,8 +120,8 @@ export default function InvestigationBoardPage() {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center h-[70vh] text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 animate-pulse">
-            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 rounded-full bg-[#0D0D0D] flex items-center justify-center border border-[#2A2A2A] animate-pulse">
+            <svg className="w-8 h-8 text-[#9A9A9A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
@@ -138,7 +138,7 @@ export default function InvestigationBoardPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Investigation Workspace</h1>
-            <p className="text-sm text-slate-400">Comprehensive case context, AI analysis, and intelligence mapping.</p>
+            <p className="text-sm text-[#9A9A9A]">Comprehensive case context, AI analysis, and intelligence mapping.</p>
           </div>
           <div className="flex gap-3 h-24">
             <InvestigationActionsPanel investigationId={currentCase.id} />
@@ -178,12 +178,12 @@ export default function InvestigationBoardPage() {
               <CaseMapPanel investigationId={currentCase.id} />
             </div>
             
-            <div className="h-[400px] bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col overflow-hidden">
-              <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+            <div className="h-[400px] bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-[#222222] flex justify-between items-center bg-[#050505]/50">
                 <h3 className="text-sm font-bold text-white tracking-wide">Network Intelligence</h3>
-                {isLoading && <span className="text-[10px] text-blue-400 animate-pulse uppercase tracking-widest font-bold">Syncing...</span>}
+                {isLoading && <span className="text-[10px] text-[#10B981] animate-pulse uppercase tracking-widest font-bold">Syncing...</span>}
               </div>
-              <div className="flex-1 p-2 bg-slate-950/20 relative">
+              <div className="flex-1 p-2 bg-[#050505]/20 relative">
                 {!isLoading && nodes.length > 0 ? (
                   <NetworkGraph 
                     nodes={nodes}
@@ -195,7 +195,7 @@ export default function InvestigationBoardPage() {
                     className="h-full w-full"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-500 font-semibold">
+                  <div className="absolute inset-0 flex items-center justify-center text-xs text-[#666666] font-semibold">
                     Initializing local graph...
                   </div>
                 )}

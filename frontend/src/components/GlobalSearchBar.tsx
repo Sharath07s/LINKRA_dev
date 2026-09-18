@@ -40,7 +40,7 @@ export default function GlobalSearchBar() {
   return (
     <div className="relative flex-1 max-w-2xl mx-4">
       <div className="relative flex items-center w-full">
-        <div className="absolute left-3 text-slate-400">
+        <div className="absolute left-3 text-[#9A9A9A]">
           <Search className="h-4 w-4" />
         </div>
         <input
@@ -48,26 +48,26 @@ export default function GlobalSearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Global Search (Entities, FIRs, Vehicles, Phones)..."
-          className="w-full bg-slate-900 border border-slate-700 text-slate-100 text-sm rounded-lg pl-10 pr-10 py-2 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-500"
+          className="w-full bg-[#080808] border border-[#2A2A2A] text-[#F5F5F5] text-sm rounded-lg pl-10 pr-10 py-2 focus:ring-1 focus:ring-[#10B981] focus:border-[#10B981] outline-none transition-all placeholder-slate-500"
         />
-        <div className="absolute right-3 text-slate-400">
+        <div className="absolute right-3 text-[#9A9A9A]">
           {isSearching && <Loader2 className="h-4 w-4 animate-spin" />}
         </div>
       </div>
       
       {showDropdown && (
-        <div className="absolute mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg shadow-xl shadow-black/50 z-50 overflow-hidden">
+        <div className="absolute mt-2 w-full bg-[#080808] border border-[#2A2A2A] rounded-lg shadow-xl shadow-black/50 z-50 overflow-hidden">
           {results.length > 0 ? (
             <ul>
               {results?.map((r, i) => (
-                <li key={i} className="px-4 py-3 hover:bg-slate-800 border-b border-slate-800/50 cursor-pointer flex flex-col transition-colors">
-                  <span className="text-sm font-semibold text-blue-400">{r.title}</span>
-                  <span className="text-xs text-slate-400">{r.type.toUpperCase()} • {r.subtitle}</span>
+                <li key={i} className="px-4 py-3 hover:bg-[#0D0D0D] border-b border-[#222222]/50 cursor-pointer flex flex-col transition-colors">
+                  <span className="text-sm font-semibold text-[#10B981]">{r.title}</span>
+                  <span className="text-xs text-[#9A9A9A]">{r.type.toUpperCase()} • {r.subtitle}</span>
                 </li>
               ))}
             </ul>
           ) : !isSearching ? (
-            <div className="px-4 py-6 text-center text-sm text-slate-500">
+            <div className="px-4 py-6 text-center text-sm text-[#666666]">
               No results found for "{query}".
             </div>
           ) : null}

@@ -50,7 +50,7 @@ export default function EventNotificationCenter() {
   if (!toast) return null;
 
   const bgColors = {
-    info: 'bg-blue-600 border-blue-400',
+    info: 'bg-[#10B981] border-blue-400',
     warning: 'bg-amber-600 border-amber-400',
     error: 'bg-red-600 border-red-400',
     success: 'bg-emerald-600 border-emerald-400'

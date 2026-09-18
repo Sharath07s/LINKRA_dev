@@ -25,11 +25,11 @@ export default function HighRiskOffenders() {
     fetchOffenders();
   }, []);
 
-  if (isLoading) return <div className="h-full bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>;
+  if (isLoading) return <div className="h-full bg-[#080808]/40 border border-[#222222] rounded-2xl animate-pulse"></div>;
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b border-slate-800 bg-slate-950/50 flex justify-between items-center">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-[#222222] bg-[#050505]/50 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-red-400" />
           <h3 className="text-sm font-bold text-white tracking-wide">High Risk Offenders</h3>
@@ -42,7 +42,7 @@ export default function HighRiskOffenders() {
       <div className="flex-1 overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-950/80 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <tr className="bg-[#050505]/80 border-b border-[#222222] text-[10px] font-bold text-[#666666] uppercase tracking-widest">
               <th className="p-3 pl-4">Name</th>
               <th className="p-3">Risk Score</th>
               <th className="p-3">District</th>
@@ -52,8 +52,8 @@ export default function HighRiskOffenders() {
           </thead>
           <tbody>
             {data?.map((offender, idx) => (
-              <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-                <td className="p-3 pl-4 text-xs font-bold text-slate-200">
+              <tr key={idx} className="border-b border-[#222222]/50 hover:bg-[#0D0D0D]/20 transition-colors">
+                <td className="p-3 pl-4 text-xs font-bold text-[#F5F5F5]">
                   <div className="flex items-center gap-2">
                     {offender.threat_level === 'CRITICAL' && <AlertTriangle className="h-3 w-3 text-red-500" />}
                     {offender.name}
@@ -64,9 +64,9 @@ export default function HighRiskOffenders() {
                     {offender.risk_score}
                   </span>
                 </td>
-                <td className="p-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">{offender.district}</td>
-                <td className="p-3 text-xs font-medium text-slate-400">{offender.crimes}</td>
-                <td className="p-3 text-xs font-medium text-slate-400">{offender.network_size}</td>
+                <td className="p-3 text-[10px] font-bold uppercase tracking-widest text-[#9A9A9A]">{offender.district}</td>
+                <td className="p-3 text-xs font-medium text-[#9A9A9A]">{offender.crimes}</td>
+                <td className="p-3 text-xs font-medium text-[#9A9A9A]">{offender.network_size}</td>
               </tr>
             ))}
           </tbody>

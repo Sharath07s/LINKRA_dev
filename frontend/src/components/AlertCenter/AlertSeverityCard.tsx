@@ -26,7 +26,7 @@ export default function AlertSeverityCard({ severity, count }: AlertSeverityCard
       config = { color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/30", icon: <AlertCircle className="h-5 w-5 text-yellow-500" />, label: "Medium Priority" };
       break;
     case "LOW":
-      config = { color: "text-blue-500 bg-blue-500/10 border-blue-500/30", icon: <Info className="h-5 w-5 text-blue-500" />, label: "Low Priority" };
+      config = { color: "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30", icon: <Info className="h-5 w-5 text-[#10B981]" />, label: "Low Priority" };
       break;
   }
 

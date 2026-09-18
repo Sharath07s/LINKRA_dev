@@ -33,8 +33,8 @@ export default function ThreatAssessmentPanel({ investigationId }: ThreatAssessm
   if (!data) return null;
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full">
-      <div className="p-4 border-b border-slate-800 flex items-center gap-2">
+    <div className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full">
+      <div className="p-4 border-b border-[#222222] flex items-center gap-2">
         <ShieldAlert className="h-4 w-4 text-red-500" />
         <h3 className="text-sm font-bold text-white tracking-wide">Threat Assessment</h3>
       </div>
@@ -42,10 +42,10 @@ export default function ThreatAssessmentPanel({ investigationId }: ThreatAssessm
         
         <div className="flex items-end justify-between">
           <div>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Threat Score</span>
+            <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block mb-1">Threat Score</span>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-black text-red-500 tracking-tighter">{data.threat_score}</span>
-              <span className="text-sm text-slate-400 font-bold">/100</span>
+              <span className="text-sm text-[#9A9A9A] font-bold">/100</span>
             </div>
           </div>
           <div className="px-3 py-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-widest">
@@ -56,31 +56,31 @@ export default function ThreatAssessmentPanel({ investigationId }: ThreatAssessm
         <div className="space-y-3">
           <div>
             <div className="flex justify-between mb-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Network Influence</span>
+              <span className="text-[10px] font-bold text-[#9A9A9A] uppercase">Network Influence</span>
               <span className="text-[10px] font-bold text-amber-400">{(data.network_influence * 100).toFixed(0)}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#0D0D0D] rounded-full overflow-hidden">
               <div className="h-full bg-amber-500 rounded-full" style={{ width: `${data.network_influence * 100}%` }} />
             </div>
           </div>
           <div>
             <div className="flex justify-between mb-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Recidivism Risk</span>
+              <span className="text-[10px] font-bold text-[#9A9A9A] uppercase">Recidivism Risk</span>
               <span className="text-[10px] font-bold text-red-400">{(data.recidivism_score * 100).toFixed(0)}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#0D0D0D] rounded-full overflow-hidden">
               <div className="h-full bg-red-500 rounded-full" style={{ width: `${data.recidivism_score * 100}%` }} />
             </div>
           </div>
         </div>
 
-        <div className="pt-3 border-t border-slate-800/50">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Key Risk Factors</span>
+        <div className="pt-3 border-t border-[#222222]/50">
+          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block mb-2">Key Risk Factors</span>
           <div className="space-y-2">
             {data.risk_factors?.map((factor: string, idx: number) => (
               <div key={idx} className="flex items-center gap-2">
                 <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
-                <span className="text-xs font-medium text-slate-300">{factor}</span>
+                <span className="text-xs font-medium text-[#F5F5F5]">{factor}</span>
               </div>
             ))}
           </div>

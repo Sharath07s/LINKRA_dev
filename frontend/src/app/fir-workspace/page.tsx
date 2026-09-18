@@ -80,7 +80,7 @@ export default function FIRWorkspacePage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">FIR Intelligence Workspace</h1>
-            <p className="text-sm text-slate-400">Deep semantic analysis and entity extraction for individual incident reports.</p>
+            <p className="text-sm text-[#9A9A9A]">Deep semantic analysis and entity extraction for individual incident reports.</p>
           </div>
           <div className="h-16 w-full md:w-96">
             <FIRActionsPanel />
@@ -124,12 +124,12 @@ export default function FIRWorkspacePage() {
               <RelatedFIRsPanel firId={firId} />
             </div>
 
-            <div className="flex-1 min-h-[250px] bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col overflow-hidden">
-              <div className="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+            <div className="flex-1 min-h-[250px] bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col overflow-hidden">
+              <div className="p-3 border-b border-[#222222] flex justify-between items-center bg-[#050505]/50">
                 <h3 className="text-sm font-bold text-white tracking-wide">Associated Network</h3>
-                {isLoadingGraph && <span className="text-[9px] text-blue-400 animate-pulse uppercase tracking-widest font-bold">Querying Neo4j...</span>}
+                {isLoadingGraph && <span className="text-[9px] text-[#10B981] animate-pulse uppercase tracking-widest font-bold">Querying Neo4j...</span>}
               </div>
-              <div className="flex-1 p-2 bg-slate-950/20 relative">
+              <div className="flex-1 p-2 bg-[#050505]/20 relative">
                 {!isLoadingGraph && nodes.length > 0 ? (
                   <NetworkGraph 
                     nodes={nodes}
@@ -141,7 +141,7 @@ export default function FIRWorkspacePage() {
                     className="h-full w-full"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-500 font-semibold">
+                  <div className="absolute inset-0 flex items-center justify-center text-xs text-[#666666] font-semibold">
                     Initializing local graph...
                   </div>
                 )}

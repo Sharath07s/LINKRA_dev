@@ -37,38 +37,38 @@ export default function InvestigationAuditTrail({ investigationId }: AuditTrailP
   }, [investigationId]);
 
   const getActionIcon = (action: string) => {
-    if (action.includes("View")) return <Eye className="h-3.5 w-3.5 text-blue-400" />;
+    if (action.includes("View")) return <Eye className="h-3.5 w-3.5 text-[#10B981]" />;
     if (action.includes("Generate") || action.includes("Export")) return <Download className="h-3.5 w-3.5 text-emerald-400" />;
     if (action.includes("Query") || action.includes("Search")) return <Search className="h-3.5 w-3.5 text-amber-400" />;
     if (action.includes("Opened") || action.includes("Assign")) return <CheckCircle2 className="h-3.5 w-3.5 text-purple-400" />;
-    return <Settings className="h-3.5 w-3.5 text-slate-400" />;
+    return <Settings className="h-3.5 w-3.5 text-[#9A9A9A]" />;
   };
 
   return (
-    <div suppressHydrationWarning className="bg-slate-900/40 border border-slate-800 rounded-2xl flex flex-col h-full overflow-hidden">
-      <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-        <List className="h-4 w-4 text-slate-400" />
+    <div suppressHydrationWarning className="bg-[#080808]/40 border border-[#222222] rounded-2xl flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-[#222222] flex items-center gap-2">
+        <List className="h-4 w-4 text-[#9A9A9A]" />
         <h3 className="text-sm font-bold text-white tracking-wide">Secure Audit Trail</h3>
       </div>
       
       <div className="flex-1 overflow-y-auto p-2">
         {isLoading ? (
-          <div className="flex h-full items-center justify-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">
+          <div className="flex h-full items-center justify-center text-xs text-[#666666] font-bold uppercase tracking-widest animate-pulse">
             Syncing Ledger...
           </div>
         ) : (
           <div className="space-y-1">
             {logs?.map((log) => (
-              <div key={log.id} className="flex items-center gap-3 p-3 hover:bg-slate-800/50 rounded-xl group transition-colors">
-                <div className="h-7 w-7 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0">
+              <div key={log.id} className="flex items-center gap-3 p-3 hover:bg-[#0D0D0D]/50 rounded-xl group transition-colors">
+                <div className="h-7 w-7 rounded-lg bg-[#050505] border border-[#222222] flex items-center justify-center shrink-0">
                   {getActionIcon(log.action)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
-                    <span className="text-xs font-semibold text-slate-200 truncate pr-2">{log.action}</span>
-                    <span className="text-[9px] text-slate-500 font-mono shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    <span className="text-xs font-semibold text-[#F5F5F5] truncate pr-2">{log.action}</span>
+                    <span className="text-[9px] text-[#666666] font-mono shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{log.module}</span>
+                  <span className="text-[10px] font-bold text-[#666666] uppercase tracking-wider">{log.module}</span>
                 </div>
               </div>
             ))}

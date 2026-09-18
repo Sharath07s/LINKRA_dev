@@ -90,12 +90,12 @@ function SystemHealthContent() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col p-6 max-w-[1600px] mx-auto gap-4 bg-slate-950 text-slate-200">
+      <div className="h-full flex flex-col p-6 max-w-[1600px] mx-auto gap-4 bg-[#050505] text-[#F5F5F5]">
         
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-[#222222] pb-4">
           <div>
             <h1 className="text-2xl font-black text-white tracking-widest uppercase">System Health Center</h1>
-            <p className="text-xs text-slate-400 font-mono tracking-widest uppercase mt-1">Platform Diagnostics & Observability</p>
+            <p className="text-xs text-[#9A9A9A] font-mono tracking-widest uppercase mt-1">Platform Diagnostics & Observability</p>
           </div>
         </div>
 

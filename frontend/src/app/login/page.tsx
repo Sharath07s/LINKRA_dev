@@ -108,23 +108,23 @@ export default function LoginPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl bg-clip-text bg-gradient-to-r from-slate-100 via-slate-200 to-slate-400">
             LINKRA
           </h1>
-          <p className="text-sm font-semibold tracking-widest text-blue-400 uppercase mt-1">
+          <p className="text-sm font-semibold tracking-widest text-[#10B981] uppercase mt-1">
             AI-Powered Criminal Intelligence Network
           </p>
-          <p className="text-xs text-slate-500 mt-2 max-w-sm">
+          <p className="text-xs text-[#666666] mt-2 max-w-sm">
             National Criminal Intelligence Network • Law Enforcement Only
           </p>
         </div>
 
         {/* Form Console Container */}
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 shadow-2xl shadow-slate-950/50">
+        <div className="bg-[#080808]/50 backdrop-blur-xl border border-[#222222]/80 rounded-2xl p-8 shadow-2xl shadow-slate-950/50">
           
           {/* Classification Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+          <div className="flex items-center justify-between border-b border-[#222222] pb-4 mb-6">
             <span className="text-[10px] font-bold text-red-500 bg-red-500/15 border border-red-500/30 px-2.5 py-0.5 rounded tracking-wider uppercase">
               CONFIDENTIAL // NO-FORN
             </span>
-            <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+            <span className="text-[10px] text-[#9A9A9A] font-mono flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
               PORT SECURE
             </span>
@@ -145,7 +145,7 @@ export default function LoginPage() {
               
               {/* Role Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Access Clearance Level</label>
+                <label className="text-xs font-bold text-[#F5F5F5] uppercase tracking-wider">Access Clearance Level</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {roles?.map((r) => (
                     <button
@@ -154,8 +154,8 @@ export default function LoginPage() {
                       onClick={() => setRole(r)}
                       className={`px-3 py-2 text-left rounded-xl border text-[11px] font-medium transition-all ${
                         role === r 
-                          ? "bg-blue-600/15 border-blue-500/80 text-blue-400 font-semibold" 
-                          : "bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                          ? "bg-[#10B981]/15 border-[#10B981]/50 text-[#10B981] font-semibold" 
+                          : "bg-[#050505]/40 border-[#222222] text-[#9A9A9A] hover:border-[#2A2A2A] hover:text-[#F5F5F5]"
                       }`}
                     >
                       {r}
@@ -166,16 +166,16 @@ export default function LoginPage() {
 
               {/* Badge Number */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Officer Badge Number</label>
+                <label className="text-xs font-bold text-[#F5F5F5] uppercase tracking-wider">Officer Badge Number</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#666666]">
                     <User className="h-4 w-4" />
                   </div>
                   <input
                     type="text"
                     required
                     placeholder="e.g. LEO-4892-IND"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
+                    className="w-full pl-10 pr-4 py-3 bg-[#050505]/70 border border-[#222222] rounded-xl text-sm text-[#F5F5F5] placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#10B981]/50 focus:border-[#10B981] transition-all font-mono"
                     value={badge}
                     onChange={(e) => setBadge(e.target.value)}
                   />
@@ -184,16 +184,16 @@ export default function LoginPage() {
 
               {/* Password */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Agency Security Key</label>
+                <label className="text-xs font-bold text-[#F5F5F5] uppercase tracking-wider">Agency Security Key</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#666666]">
                     <Key className="h-4 w-4" />
                   </div>
                   <input
                     type="password"
                     required
                     placeholder="••••••••••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
+                    className="w-full pl-10 pr-4 py-3 bg-[#050505]/70 border border-[#222222] rounded-xl text-sm text-[#F5F5F5] placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#10B981]/50 focus:border-[#10B981] transition-all font-mono"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -224,23 +224,23 @@ export default function LoginPage() {
             /* STEP 2: OTP */
             <form onSubmit={handleOtpSubmit} className="space-y-6">
               
-              <div className="text-center bg-slate-950/40 border border-slate-800/60 rounded-xl p-4 mb-4">
-                <p className="text-xs text-slate-300 font-medium">
-                  CLEARANCE ROLE: <span className="text-blue-400 font-semibold">{role}</span>
+              <div className="text-center bg-[#050505]/40 border border-[#222222]/60 rounded-xl p-4 mb-4">
+                <p className="text-xs text-[#F5F5F5] font-medium">
+                  CLEARANCE ROLE: <span className="text-[#10B981] font-semibold">{role}</span>
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Secure access token sent to registered device linked to <span className="font-mono text-slate-300">{badge}</span>
+                <p className="text-xs text-[#9A9A9A] mt-1">
+                  Secure access token sent to registered device linked to <span className="font-mono text-[#F5F5F5]">{badge}</span>
                 </p>
               </div>
 
               {/* OTP Code */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">6-Digit Access Token (OTP)</label>
-                  <span className="text-[10px] text-slate-500 font-mono">Use "123456" for demo</span>
+                  <label className="text-xs font-bold text-[#F5F5F5] uppercase tracking-wider">6-Digit Access Token (OTP)</label>
+                  <span className="text-[10px] text-[#666666] font-mono">Use "123456" for demo</span>
                 </div>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#666666]">
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -248,7 +248,7 @@ export default function LoginPage() {
                     maxLength={6}
                     required
                     placeholder="Enter 6-digit verification code"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-center text-lg font-bold tracking-widest text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
+                    className="w-full pl-10 pr-4 py-3 bg-[#050505]/70 border border-[#222222] rounded-xl text-center text-lg font-bold tracking-widest text-[#F5F5F5] placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#10B981]/50 focus:border-[#10B981] transition-all font-mono"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                   />
@@ -260,7 +260,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-1/3 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl border border-slate-700 transition-colors"
+                  className="w-1/3 py-3 px-4 bg-[#0D0D0D] hover:bg-[#111111] text-[#F5F5F5] text-sm font-semibold rounded-xl border border-[#2A2A2A] transition-colors"
                 >
                   Back
                 </button>
@@ -287,7 +287,7 @@ export default function LoginPage() {
 
         {/* Footer Notes */}
         <div className="text-center mt-6">
-          <p className="text-[10px] text-slate-600">
+          <p className="text-[10px] text-[#666666]">
             WARNING: Unauthorized access to this platform constitutes a federal offence in violation of the Information Technology Act. All access sessions, IPs, and actions are logged and subject to audit by the Cyber Crime Division.
           </p>
         </div>

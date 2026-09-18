@@ -15,10 +15,10 @@ export default function ExecutiveDashboardPage() {
       <div className="flex flex-col h-full space-y-6">
         
         {/* Workspace Title */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#222222] pb-4">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Executive Intelligence Dashboard</h1>
-            <p className="text-sm text-slate-400">State Command Central • Real-time Threat Aggregation</p>
+            <p className="text-sm text-[#9A9A9A]">State Command Central • Real-time Threat Aggregation</p>
           </div>
           
           <div className="bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg text-red-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">

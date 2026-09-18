@@ -126,6 +126,11 @@ class Community(BaseModel):
     community_id: str
     size: int
     members: List[CommunityMember]
+    influential_entity: Optional[str] = None
+    bridge_candidates: Optional[List[str]] = None
+    relationships: Optional[int] = 0
+    relationship_types: Optional[List[str]] = None
+    evidence: Optional[str] = None
 
 class CommunityResponse(BaseModel):
     status: str

@@ -11,7 +11,7 @@ interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 export function EmptyState({
   title = "No Data Available",
   description = "There are no records to display at this time.",
-  icon = <FolderOpen className="h-10 w-10 text-slate-500" />,
+  icon = <FolderOpen className="h-10 w-10 text-[#666666]" />,
   className,
   ...props
 }: EmptyStateProps) {
