@@ -14,7 +14,17 @@ from app.models.base import BaseModel
 class IngestionJob(BaseModel):
     """
     Represents a single file ingestion + processing job.
-    Lifecycle: QUEUED → PROCESSING → PARSED → EXTRACTED → COMPLETED | FAILED
+    Lifecycle: QUEUED → PROCESSING → PARSED → EXTRACTED → COMPLETED | COMPLETED_PARTIAL | FAILED
+
+    Status semantics:
+        COMPLETED         — All pipeline steps succeeded, including full vector indexing
+                            (or the document contained no indexable text).
+        COMPLETED_PARTIAL — Entity/relationship extraction succeeded; vector indexing was
+                            only partially successful (some chunks failed). RAG coverage
+                            may be incomplete.
+        FAILED            — A critical pipeline step failed (parsing, extraction, or
+                            complete vector-indexing failure). Entity/relationship data
+                            created before the failure point is preserved.
     """
     __tablename__ = "ingestion_jobs"
 

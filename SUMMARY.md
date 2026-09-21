@@ -400,4 +400,17 @@ The previously identified RAG gap (M15.1) has been completely resolved and empir
 
 ---
 
+
+## 12. Ingestion Vector Status, Frontend Evidence Integration & Final RAG Verification
+
+The frontend criminal network graph now displays authentic, chunk-level document evidence directly in the investigator interface. The frontend service in frontend/src/services/relationship.service.ts defines complete TypeScript contracts for EvidenceLink and RelationshipEvidenceResponse and consumes the GET /api/v1/relationship/{relationship_id}/evidence endpoint. The graph component frontend/src/components/EdgeEvidencePanel.tsx fetches and renders this granular provenance, presenting source filenames, page numbers, character offsets, and verified quotation snippets with dedicated loading, empty, and error states. Frontend type-checking was validated with zero errors via npx tsc --noEmit.
+
+The backend ingestion pipeline in backend/app/ingestion/service.py was corrected to resolve misleading job completion states when vector indexing encounters errors. The pipeline now tracks the exact count of successfully indexed chunks in job.chunk_count and appropriately assigns COMPLETED_PARTIAL if some chunks succeed while others fail. When vector indexing fails completely (zero of N attempted chunks stored), the job status is set to FAILED with a descriptive error message rather than falsely marking the job as COMPLETED. Extracted entity and relationship records are preserved in all partial and vector failure scenarios, ensuring no extracted intelligence is discarded. Furthermore, a failure on an individual chunk does not halt the indexing of subsequent chunks. The lifecycle and status semantics were documented in backend/app/models/ingestion.py.
+
+Semantic retrieval robustness was verified through RAG_MIN_SIMILARITY threshold enforcement in backend/app/ai/rag/vector_search.py and secondary defense-in-depth filtering in backend/app/ai/copilot/intent_router.py. Unrelated or sub-threshold chunks are discarded, ensuring Copilot provides citations and asserts groundedness only when corroborated by retrieved document evidence.
+
+A comprehensive regression verification confirmed that all 46 RAG, EvidenceLink, VectorStore, Copilot sources, Copilot grounding, similarity threshold, and ingestion status tests pass cleanly across the backend test suite. Read-only inspection of the PostgreSQL database confirmed operational pgvector extension version 0.8.2, intact document chunk records, and zero regression impact on existing data.
+
+---
+
 *SUMMARY.md synthesized from: PRD.md, TRD.md, IMPLEMENTATION_PLAN.md, BACKEND_SCHEMA.md, PROJECT_STATUS.md, PROJECT_STATUS_PHASE8_1.md, and live codebase audit — September 2026*

@@ -1,9 +1,12 @@
 import os
-from typing import List, Dict
+import logging
+from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, select
 from langchain_huggingface import HuggingFaceEmbeddings
 from app.models.document import DocumentChunk
+
+logger = logging.getLogger(__name__)
 
 class VectorStore:
     def __init__(self, connection_string: str = None):
@@ -25,6 +28,12 @@ class VectorStore:
         """
         try:
             embedding = self.embedding_model.embed_query(text)
+            if not embedding or len(embedding) != 384:
+                logger.error(
+                    f"Invalid embedding for {source_id}: "
+                    f"expected 384 dimensions, got {len(embedding) if embedding else None}"
+                )
+                return False
             
             with Session(self.engine) as session:
                 chunk = DocumentChunk(
@@ -37,13 +46,20 @@ class VectorStore:
                 session.commit()
             return True
         except Exception as e:
-            print(f"Error indexing document {source_id}: {e}")
+            logger.error(f"Error indexing document {source_id}: {e}", exc_info=True)
             return False
 
-    def semantic_search(self, query: str, top_k: int = 5) -> List[Dict]:
+    def semantic_search(
+        self,
+        query: str,
+        top_k: int = 5,
+        source_id: Optional[str] = None,
+        ingestion_job_id: Optional[str] = None,
+        min_similarity: Optional[float] = None,
+    ) -> List[Dict]:
         """
         Converts the query to an embedding and performs a cosine similarity
-        search in PGVector.
+        search in PGVector with optional metadata and threshold filtering.
         """
         try:
             query_embedding = self.embedding_model.embed_query(query)
@@ -55,9 +71,16 @@ class VectorStore:
                 stmt = (
                     select(DocumentChunk, distance_col)
                     .where(DocumentChunk.embedding.isnot(None))
-                    .order_by(distance_col)
-                    .limit(top_k)
                 )
+                
+                if source_id:
+                    stmt = stmt.where(DocumentChunk.source_id == source_id)
+                if ingestion_job_id:
+                    stmt = stmt.where(
+                        DocumentChunk.metadata_json["ingestion_job_id"].as_string() == str(ingestion_job_id)
+                    )
+                
+                stmt = stmt.order_by(distance_col).limit(top_k)
                 
                 rows = session.execute(stmt).all()
                 
@@ -65,7 +88,10 @@ class VectorStore:
                     if distance is None:
                         continue
                     similarity = 1.0 - float(distance)
+                    if min_similarity is not None and similarity < min_similarity:
+                        continue
                     results.append({
+                        "chunk_id": str(chunk.id),
                         "doc_id": chunk.source_id,
                         "content": chunk.content,
                         "metadata": chunk.metadata_json,
@@ -73,5 +99,5 @@ class VectorStore:
                     })
             return results
         except Exception as e:
-            print(f"Error in semantic search: {e}")
+            logger.error(f"Error in semantic search: {e}", exc_info=True)
             return []
