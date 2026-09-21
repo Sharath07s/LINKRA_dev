@@ -46,7 +46,8 @@ def test_rag_ingestion_end_to_end():
     job = None
     try:
         # Gracefully mock neo4j sync in case Neo4j is not locally running during test
-        with patch("app.nlp.relationship.extractor._sync_to_neo4j", return_value=None):
+        with patch("app.nlp.relationship.extractor._sync_to_neo4j", return_value=None), \
+             patch("app.nlp.resolution.engine.neo4j_intelligence.sync_canonical_entity", return_value=None):
             job = process_ingestion(
                 db=db,
                 file_path=str(temp_file_path),

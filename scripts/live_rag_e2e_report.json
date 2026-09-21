@@ -1,0 +1,249 @@
+{
+  "ingestion": {
+    "job_id": "5a5b925e-6d9e-4807-8d22-67329ca32c36",
+    "file_name": "linkra_sih_2026_synthetic_dataset.pdf",
+    "status": "FAILED",
+    "chunk_count": null,
+    "entity_count": null,
+    "record_count": 4,
+    "error_message": "Neo4j database service is not available or not connected.",
+    "duration_sec": 160.65
+  },
+  "entity_extraction": {
+    "total_candidates": 0,
+    "by_type": {},
+    "resolved": 0,
+    "canonical_entities": 0
+  },
+  "relationships": {
+    "neo4j_status": "OFFLINE: Neo4j database service is not available or not connected.",
+    "total": 0,
+    "types": []
+  },
+  "document_chunks": {
+    "total": 0,
+    "embedded": 0,
+    "not_embedded": 0
+  },
+  "vector_search": {
+    "queries": [
+      {
+        "query": "What people are involved in CASE-1024?",
+        "results": [
+          {
+            "chunk_id": "7892cf4d-f3de-4482-ad44-acfc49a9e416",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.395,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "The complainant further stated that the accused snatched her handbag containing a mobile phone (contact number 9876543210), cash of Rs. 15,000, and identity documents. The accused fled towards the Eji"
+          },
+          {
+            "chunk_id": "2f941368-0475-4ab4-8426-1bd69bfd76b1",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.368,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "FIRST INFORMATION REPORT (FIR)\nCase No: FIR/2026/BLR/0847\nPolice Station: Koramangala PS, Bengaluru City\n\nDate of Incident: 14 August 2026\nTime of Incident: Approximately 22:30 hours\n\nComplainant: Pri"
+          }
+        ],
+        "pass": false
+      },
+      {
+        "query": "What vehicle is associated with the investigation?",
+        "results": [
+          {
+            "chunk_id": "7892cf4d-f3de-4482-ad44-acfc49a9e416",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.4132,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "The complainant further stated that the accused snatched her handbag containing a mobile phone (contact number 9876543210), cash of Rs. 15,000, and identity documents. The accused fled towards the Eji"
+          },
+          {
+            "chunk_id": "2f941368-0475-4ab4-8426-1bd69bfd76b1",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.3681,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "FIRST INFORMATION REPORT (FIR)\nCase No: FIR/2026/BLR/0847\nPolice Station: Koramangala PS, Bengaluru City\n\nDate of Incident: 14 August 2026\nTime of Incident: Approximately 22:30 hours\n\nComplainant: Pri"
+          }
+        ],
+        "pass": false
+      },
+      {
+        "query": "What relationships connect the entities in CASE-1024?",
+        "results": [
+          {
+            "chunk_id": "2f941368-0475-4ab4-8426-1bd69bfd76b1",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.2646,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "FIRST INFORMATION REPORT (FIR)\nCase No: FIR/2026/BLR/0847\nPolice Station: Koramangala PS, Bengaluru City\n\nDate of Incident: 14 August 2026\nTime of Incident: Approximately 22:30 hours\n\nComplainant: Pri"
+          }
+        ],
+        "pass": false
+      },
+      {
+        "query": "What financial transactions are documented in the case?",
+        "results": [],
+        "pass": false
+      },
+      {
+        "query": "What phone records are associated with the investigation?",
+        "results": [
+          {
+            "chunk_id": "7892cf4d-f3de-4482-ad44-acfc49a9e416",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.4085,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "The complainant further stated that the accused snatched her handbag containing a mobile phone (contact number 9876543210), cash of Rs. 15,000, and identity documents. The accused fled towards the Eji"
+          },
+          {
+            "chunk_id": "2f941368-0475-4ab4-8426-1bd69bfd76b1",
+            "doc_id": "test_fir_459d3651.txt",
+            "similarity": 0.354,
+            "from_our_pdf": false,
+            "has_relevant_content": true,
+            "passed_threshold": true,
+            "page": 1,
+            "snippet": "FIRST INFORMATION REPORT (FIR)\nCase No: FIR/2026/BLR/0847\nPolice Station: Koramangala PS, Bengaluru City\n\nDate of Incident: 14 August 2026\nTime of Incident: Approximately 22:30 hours\n\nComplainant: Pri"
+          }
+        ],
+        "pass": false
+      }
+    ]
+  },
+  "evidence_links": {
+    "total": 0,
+    "details": [],
+    "pass": false
+  },
+  "copilot": {
+    "responses": [
+      {
+        "question": "What people are involved in CASE-1024?",
+        "status": "INSUFFICIENT_DATA",
+        "provider": null,
+        "grounded": false,
+        "has_rag_source": false,
+        "sources": [],
+        "answer_snippet": "I could not find verified evidence or entities matching your query in the current LINKRA context.",
+        "pass": false,
+        "duration_sec": 6.69
+      },
+      {
+        "question": "What vehicles are connected to the investigation?",
+        "status": "INSUFFICIENT_DATA",
+        "provider": null,
+        "grounded": false,
+        "has_rag_source": false,
+        "sources": [],
+        "answer_snippet": "I could not find verified evidence or entities matching your query in the current LINKRA context.",
+        "pass": false,
+        "duration_sec": 9.61
+      },
+      {
+        "question": "What relationships connect the main entities in CASE-1024?",
+        "status": "INSUFFICIENT_DATA",
+        "provider": null,
+        "grounded": false,
+        "has_rag_source": false,
+        "sources": [],
+        "answer_snippet": "I could not find verified evidence or entities matching your query in the current LINKRA context.",
+        "pass": false,
+        "duration_sec": 0.0
+      },
+      {
+        "question": "What financial transactions are recorded?",
+        "status": "INSUFFICIENT_DATA",
+        "provider": null,
+        "grounded": false,
+        "has_rag_source": false,
+        "sources": [],
+        "answer_snippet": "I could not find verified evidence or entities matching your query in the current LINKRA context.",
+        "pass": false,
+        "duration_sec": 20.14
+      },
+      {
+        "question": "What phone activity is documented?",
+        "status": "INSUFFICIENT_DATA",
+        "provider": null,
+        "grounded": false,
+        "has_rag_source": false,
+        "sources": [],
+        "answer_snippet": "I could not find verified evidence or entities matching your query in the current LINKRA context.",
+        "pass": false,
+        "duration_sec": 34.05
+      },
+      {
+        "question": "What evidence connects Ravi Kumar to Suresh Sharma?",
+        "status": "ANSWERED",
+        "provider": "gemini",
+        "grounded": true,
+        "has_rag_source": true,
+        "sources": [
+          {
+            "type": "RAG_CHUNK",
+            "id": "2f941368-0475-4ab4-8426-1bd69bfd76b1",
+            "label": "test_fir_459d3651.txt"
+          }
+        ],
+        "answer_snippet": "I don't have enough verified information in the current LINKRA data to answer that. \n\nThe provided context from the First Information Report (Case No: `FIR/2026/BLR/0847` in document `test_fir_459d3651.txt`, Chunk ID: `2f941368-0475-4ab4-8426-1bd69bfd76b1`) contains details regarding:\n* **Ravi Kumar",
+        "pass": true,
+        "duration_sec": 25.69
+      }
+    ]
+  },
+  "negative_test": {
+    "question": "What was the suspect's blood type and DNA profile?",
+    "status": "INSUFFICIENT_DATA",
+    "grounded": false,
+    "sources": 0,
+    "answer_snippet": "I could not find verified evidence or entities matching your query in the current LINKRA context.",
+    "pass": true
+  },
+  "e2e_trace": {
+    "question": "What people are involved in CASE-1024?",
+    "embedding_dim": 384,
+    "pgvector_top_hit": {
+      "chunk_id": "7892cf4d-f3de-4482-ad44-acfc49a9e416",
+      "similarity": 0.395
+    },
+    "document_chunk_source": "linkra_sih_2026_synthetic_dataset.pdf",
+    "evidence_link": "N/A",
+    "copilot_status": "INSUFFICIENT_DATA",
+    "copilot_grounded": false,
+    "copilot_answer": "I could not find verified evidence or entities matching your query in the current LINKRA context."
+  },
+  "verdict": "FAIL",
+  "parsing": {
+    "pages": 4,
+    "total_chars": 9856,
+    "content_checks": {
+      "INV-1024": true,
+      "Ravi Kumar": true,
+      "ORG-001": true,
+      "Metro Logistics": true,
+      "TX-001": true,
+      "CDR-001": true,
+      "REL-001": true,
+      "84,500": true,
+      "Peenya Industrial Area": true
+    }
+  }
+}

@@ -307,9 +307,11 @@ def process_ingestion(
         # ── Step 6: RAG Vector Indexing ──────────────────────────────────
         # Deliberately isolated from the main try/except so that vector-
         # indexing failures never revert already-committed entity/relationship
-        # work. The job is still marked COMPLETED even if indexing fails,
-        # but chunk_count will remain 0 and a WARNING is logged.
+        # work. The job is still marked COMPLETED, but chunk_count will
+        # accurately reflect indexed chunks, and any failure is logged and
+        # recorded on error_message for observability.
         chunk_count = 0
+        attempted_chunks = 0
         try:
             from app.ai.rag.vector_search import VectorStore
             # Instantiate once — the embedding model (~90 MB) is loaded here,
@@ -330,6 +332,7 @@ def process_ingestion(
                     if not chunk_text.strip():
                         continue
 
+                    attempted_chunks += 1
                     # Build metadata from data already available in scope.
                     # Do NOT invent FIR numbers, station names, or districts —
                     # those are not reliably structured at this stage.
@@ -367,7 +370,7 @@ def process_ingestion(
 
             logger.info(
                 f"Ingestion job {job.id} ({file_name}): "
-                f"vector indexing complete — {chunk_count} chunk(s) stored in pgvector."
+                f"vector indexing complete — {chunk_count}/{attempted_chunks} chunk(s) stored in pgvector."
             )
 
             # ── Step 7: Phase 2 Evidence Linking ─────────────────────────────
@@ -381,16 +384,60 @@ def process_ingestion(
                         f"Ingestion job {job.id} ({file_name}): "
                         f"Evidence linking encountered an error: {link_err}"
                     )
+
+            # ── Determine final vector-indexing status ───────────────────────
+            # CASE A: no chunks were attempted (doc has no indexable text)
+            #         → COMPLETED is accurate; chunk_count = 0 is expected
+            # CASE B: all attempted chunks succeeded
+            #         → COMPLETED
+            # CASE C: some chunks succeeded, some failed
+            #         → COMPLETED_PARTIAL — partial RAG coverage, entities preserved
+            # CASE D: all attempted chunks failed (0 out of N)
+            #         → FAILED for the vector step; entity/relationship data preserved
+            if attempted_chunks == 0 or chunk_count == attempted_chunks:
+                # Case A or Case B — full success (or no indexable text)
+                final_status = "COMPLETED"
+            elif chunk_count > 0:
+                # Case C — partial failure
+                final_status = "COMPLETED_PARTIAL"
+                failed_chunks = attempted_chunks - chunk_count
+                job.error_message = (
+                    f"Partial RAG indexing: {chunk_count}/{attempted_chunks} chunks "
+                    f"indexed successfully; {failed_chunks} chunk(s) failed. "
+                    f"Entity and relationship data are preserved."
+                )[:2000]
+                logger.warning(
+                    f"Ingestion job {job.id} ({file_name}): partial vector indexing — "
+                    f"{chunk_count} succeeded, {failed_chunks} failed."
+                )
+            else:
+                # Case D — complete failure (attempted > 0, chunk_count == 0)
+                final_status = "FAILED"
+                job.error_message = (
+                    f"Vector indexing failed: 0/{attempted_chunks} chunks indexed into pgvector. "
+                    f"RAG retrieval will be unavailable for this document. "
+                    f"Entity and relationship data are preserved."
+                )[:2000]
+                logger.error(
+                    f"Ingestion job {job.id} ({file_name}): complete vector indexing failure — "
+                    f"0/{attempted_chunks} chunks indexed."
+                )
+
         except Exception as vec_err:
             logger.warning(
                 f"Ingestion job {job.id} ({file_name}): "
-                f"vector indexing failed — entity/relationship data is preserved. "
+                f"vector indexing failed with exception — entity/relationship data is preserved. "
                 f"Error: {vec_err}"
             )
-            # chunk_count stays 0; job is still marked COMPLETED below.
+            # Exception path: treat as complete vector failure
+            final_status = "FAILED"
+            job.error_message = (
+                f"Vector indexing failed: {vec_err}. "
+                f"Entity and relationship data are preserved."
+            )[:2000]
 
         job.chunk_count = chunk_count
-        job.status = "COMPLETED"
+        job.status = final_status
         job.completed_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(job)

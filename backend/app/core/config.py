@@ -75,5 +75,8 @@ class Settings(BaseSettings):
     RESOLUTION_THRESHOLD_REVIEW: float = 0.65
     RESOLUTION_TEMPORAL_PENALTY: float = 0.10
 
+    # RAG Grounding Settings
+    RAG_MIN_SIMILARITY: float = 0.25
+
 settings = Settings()
 

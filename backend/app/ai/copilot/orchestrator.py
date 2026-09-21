@@ -17,10 +17,12 @@ from app.ai.neo4j.intelligence import Neo4jIntelligenceService
 from app.ai.neo4j.anomaly import Neo4jAnomalyService
 from app.ai.neo4j.predictions import Neo4jPotentialLinkService
 from app.ai.rag.vector_search import VectorStore
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 class CopilotOrchestrator:
+    RAG_MIN_SIMILARITY: float = getattr(settings, "RAG_MIN_SIMILARITY", 0.25)
     
     SYSTEM_PROMPT = """You are the LINKRA AI Copilot, an analytical assistant for investigators.
 You MUST follow these rules strictly:
@@ -165,14 +167,22 @@ Context Provided:
         """Bounded Tool: RAG vector search."""
         try:
             vs = VectorStore()
-            results = vs.semantic_search(query_text, top_k=3)
+            results = vs.semantic_search(
+                query_text,
+                top_k=3,
+                min_similarity=cls.RAG_MIN_SIMILARITY,
+            )
             for res in results:
+                similarity = res.get("similarity", 0.0)
+                if cls.RAG_MIN_SIMILARITY is not None and similarity < cls.RAG_MIN_SIMILARITY:
+                    continue
                 metadata = res.get("metadata", {})
                 context_data["evidence"].append({
                     "type": "RAG_CHUNK",
                     "title": res.get("doc_id", "Unknown Document"),
                     "description": res.get("content", ""),
-                    "similarity": res.get("similarity", 0.0),
+                    "similarity": similarity,
+                    "chunk_id": res.get("chunk_id"),
                     "metadata": metadata,
                 })
         except Exception as e:
@@ -189,7 +199,9 @@ Context Provided:
             metadata = ev.get("metadata", {})
 
             # Determine the best available ID for this evidence item
-            if provenance and provenance.get("ingestion_job_id"):
+            if ev.get("chunk_id"):
+                ev_id = ev["chunk_id"]
+            elif provenance and provenance.get("ingestion_job_id"):
                 ev_id = provenance["ingestion_job_id"]
             elif metadata and metadata.get("ingestion_job_id"):
                 ev_id = metadata["ingestion_job_id"]
@@ -268,8 +280,12 @@ Context Provided:
         if intent == CopilotIntent.COMMUNITY_LOOKUP:
             cls._tool_neo4j_community_lookup(current_user, context_data)
 
-        # RAG Search for Evidence Lookup or General Intelligence if we don't have enough entity context
-        if intent in [CopilotIntent.EVIDENCE_LOOKUP, CopilotIntent.GENERAL_INTELLIGENCE_QUERY]:
+        # RAG Search for Evidence Lookup or General Intelligence,
+        # or whenever the question explicitly requests evidence / document proof
+        evidence_keywords = ("evidence", "document", "proof", "source", "record", "fir", "report")
+        query_requests_evidence = any(kw in query.message.lower() for kw in evidence_keywords)
+
+        if intent in [CopilotIntent.EVIDENCE_LOOKUP, CopilotIntent.GENERAL_INTELLIGENCE_QUERY] or query_requests_evidence:
             cls._tool_rag_evidence_lookup(query.message, current_user, context_data)
 
         if not query.entity_id and intent in [CopilotIntent.ENTITY_LOOKUP, CopilotIntent.GENERAL_INTELLIGENCE_QUERY]:
