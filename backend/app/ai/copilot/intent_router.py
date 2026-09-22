@@ -7,10 +7,10 @@ class IntentRouter:
     """Lightweight rule-based intent router with LLM fallback."""
     
     KEYWORD_MAP = {
+        CopilotIntent.EVIDENCE_LOOKUP: ["evidence", "proof", "source", "document", "where is this from", "support", "supporting evidence"],
         CopilotIntent.ANOMALY_EXPLANATION: ["anomaly", "anomalous", "flagged", "weird", "unusual", "suspicious structure"],
         CopilotIntent.POTENTIAL_LINK_EXPLANATION: ["potential link", "suggested link", "why is this linked", "why link", "suggested connection", "potential connection", "predict"],
         CopilotIntent.RELATIONSHIP_LOOKUP: ["relationship", "connection", "connect", "link", "how are they related", "associates", "knows"],
-        CopilotIntent.EVIDENCE_LOOKUP: ["evidence", "proof", "source", "document", "where is this from", "support"],
         CopilotIntent.INVESTIGATION_SUMMARY: ["summarize", "summary", "brief", "what is this investigation about"],
         CopilotIntent.COMPARISON: ["compare", "difference between", "versus", "vs"],
         CopilotIntent.GRAPH_EXPLORATION: ["graph", "network", "around", "hops", "neighbors", "surrounding"],

@@ -14,7 +14,17 @@ from app.models.base import BaseModel
 class IngestionJob(BaseModel):
     """
     Represents a single file ingestion + processing job.
-    Lifecycle: QUEUED → PROCESSING → PARSED → EXTRACTED → COMPLETED | FAILED
+    Lifecycle: QUEUED → PROCESSING → PARSED → EXTRACTED → COMPLETED | COMPLETED_PARTIAL | FAILED
+
+    Status semantics:
+        COMPLETED         — All pipeline steps succeeded, including full vector indexing
+                            (or the document contained no indexable text).
+        COMPLETED_PARTIAL — Entity/relationship extraction succeeded; vector indexing was
+                            only partially successful (some chunks failed). RAG coverage
+                            may be incomplete.
+        FAILED            — A critical pipeline step failed (parsing, extraction, or
+                            complete vector-indexing failure). Entity/relationship data
+                            created before the failure point is preserved.
     """
     __tablename__ = "ingestion_jobs"
 
@@ -26,6 +36,7 @@ class IngestionJob(BaseModel):
     error_message = Column(Text, nullable=True)
     record_count = Column(Integer, nullable=True)       # pages for PDF, rows for CSV
     entity_count = Column(Integer, nullable=True)       # populated after extraction
+    chunk_count = Column(Integer, nullable=True)        # DocumentChunk rows written to pgvector (Step 6)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)

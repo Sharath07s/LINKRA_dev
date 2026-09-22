@@ -3,10 +3,16 @@ from pydantic import AnyHttpUrl, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import json
 
+import os
+from pathlib import Path
+
+_ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
+_ENV_PATH = _ROOT_DIR / ".env"
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         case_sensitive=True,
-        env_file=".env",
+        env_file=(str(_ENV_PATH), ".env", "../.env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -52,9 +58,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # AI Providers
-    AI_PROVIDER: str = "openai"
+    AI_PROVIDER: str = "gemini"
     OPENAI_API_KEY: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-3.6-flash"
     ANTHROPIC_API_KEY: Optional[str] = None
     DEEPSEEK_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
@@ -67,6 +74,9 @@ class Settings(BaseSettings):
     RESOLUTION_THRESHOLD_AUTO_MATCH: float = 0.80
     RESOLUTION_THRESHOLD_REVIEW: float = 0.65
     RESOLUTION_TEMPORAL_PENALTY: float = 0.10
+
+    # RAG Grounding Settings
+    RAG_MIN_SIMILARITY: float = 0.25
 
 settings = Settings()
 

@@ -168,6 +168,7 @@ class Neo4jIntelligenceService:
             })
 
         for r in edges:
+            ev_text = r.get("evidence_text")
             formatted_edges.append({
                 "id": str(r.get("id", r.element_id)),
                 "source": str(r.start_node.get("id", r.start_node.element_id)),
@@ -178,7 +179,8 @@ class Neo4jIntelligenceService:
                 "extraction_method": r.get("extraction_method"),
                 "source_page": r.get("source_page"),
                 "ingestion_job_id": r.get("ingestion_job_id"),
-                "desc": f"{r.type} (Conf: {r.get('confidence', 1.0):.2f})"
+                "evidence_text": ev_text,
+                "desc": ev_text if ev_text else f"{r.type} (Conf: {r.get('confidence', 1.0):.2f})"
             })
 
         return {"nodes": formatted_nodes, "edges": formatted_edges}

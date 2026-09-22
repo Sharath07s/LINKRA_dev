@@ -1,37 +1,74 @@
-import pytest
+import os
+import sqlite3
 import uuid
+import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.main import app
-from app.api.deps import get_db, get_current_active_user, RoleChecker
-from app.models.base import Base
-from app.models.user import User
+from app.core.config import settings
 
-# In-memory SQLite database for testing
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+# Determine database URL: use PostgreSQL if configured via environment, else SQLite
+TEST_DB_URL = os.getenv("TEST_DATABASE_URL")
+if not TEST_DB_URL and os.getenv("POSTGRES_SERVER") and os.getenv("POSTGRES_PASSWORD"):
+    TEST_DB_URL = settings.SQLALCHEMY_DATABASE_URI
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+if not TEST_DB_URL:
+    TEST_DB_URL = "sqlite:///:memory:"
+
+IS_SQLITE = TEST_DB_URL.startswith("sqlite")
+
+if IS_SQLITE:
+    engine = create_engine(
+        TEST_DB_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    # SpatiaLite no-op stubs for plain SQLite test runs
+    @event.listens_for(Engine, "connect")
+    def _set_sqlite_spatialite_stubs(dbapi_conn, connection_record):
+        if isinstance(dbapi_conn, sqlite3.Connection):
+            dbapi_conn.create_function("RecoverGeometryColumn", 5, lambda *a: 1)
+            dbapi_conn.create_function("CreateSpatialIndex", 2, lambda *a: 1)
+            dbapi_conn.create_function("DiscardGeometryColumn", 2, lambda *a: 1)
+            dbapi_conn.create_function("CheckSpatialIndex", 2, lambda *a: 1)
+            dbapi_conn.create_function("DisableSpatialIndex", 2, lambda *a: 1)
+else:
+    engine = create_engine(TEST_DB_URL, pool_pre_ping=True)
+
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+from app.main import app
+from app.api.deps import get_db, get_current_active_user
+from app.models.base import Base
+from app.models.user import User, Role
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
+    if not IS_SQLITE:
+        with engine.connect() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            conn.commit()
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
-    from app.models.user import Role
-    import uuid
-    admin_role = Role(id=uuid.UUID("00000000-0000-0000-0000-000000000000"), name="ADMIN", description="Admin role")
-    db.add(admin_role)
+    for role_name, role_id in [
+        ("ADMIN", "00000000-0000-0000-0000-000000000000"),
+        ("OFFICER", "00000000-0000-0000-0000-000000000003"),
+        ("EXECUTIVE", "00000000-0000-0000-0000-000000000004"),
+    ]:
+        existing = db.query(Role).filter(Role.name == role_name).first()
+        if not existing:
+            db.add(Role(id=uuid.UUID(role_id), name=role_name, description=f"{role_name} role"))
     db.commit()
     db.close()
     yield
     Base.metadata.drop_all(bind=engine)
+
 
 @pytest.fixture
 def db():
@@ -40,8 +77,10 @@ def db():
     session = TestingSessionLocal(bind=connection)
     yield session
     session.close()
-    transaction.rollback()
+    if transaction.is_active:
+        transaction.rollback()
     connection.close()
+
 
 @pytest.fixture
 def client(db):
@@ -53,7 +92,8 @@ def client(db):
 
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
-    del app.dependency_overrides[get_db]
+    app.dependency_overrides.pop(get_db, None)
+
 
 @pytest.fixture
 def normal_user(db):
@@ -66,6 +106,7 @@ def normal_user(db):
     db.add(user)
     db.commit()
     return user
+
 
 @pytest.fixture
 def admin_user(db):
@@ -80,6 +121,7 @@ def admin_user(db):
     db.commit()
     return user
 
+
 @pytest.fixture
 def auth_client(client, normal_user):
     def override_get_current_active_user():
@@ -87,7 +129,8 @@ def auth_client(client, normal_user):
 
     app.dependency_overrides[get_current_active_user] = override_get_current_active_user
     yield client
-    del app.dependency_overrides[get_current_active_user]
+    app.dependency_overrides.pop(get_current_active_user, None)
+
 
 @pytest.fixture
 def admin_client(client, admin_user):
@@ -96,4 +139,4 @@ def admin_client(client, admin_user):
 
     app.dependency_overrides[get_current_active_user] = override_get_current_active_user
     yield client
-    del app.dependency_overrides[get_current_active_user]
+    app.dependency_overrides.pop(get_current_active_user, None)

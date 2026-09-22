@@ -33,20 +33,35 @@ class OpenAIProvider(AIProvider):
         response = model.invoke(prompt)
         return response.content
 
+import re
+
 class GeminiProvider(AIProvider):
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, model_name: Optional[str] = None):
         if not api_key:
             raise ValueError("GEMINI_API_KEY is required for GeminiProvider")
         self.api_key = api_key
+        from app.core.config import settings
+        self.model_name = model_name or getattr(settings, "GEMINI_MODEL", "gemini-3.6-flash")
 
     def get_chat_model(self, temperature: float = 0.0) -> BaseChatModel:
         from langchain_google_genai import ChatGoogleGenerativeAI
-        return ChatGoogleGenerativeAI(google_api_key=self.api_key, temperature=temperature, model="gemini-3.6-flash")
+        return ChatGoogleGenerativeAI(google_api_key=self.api_key, temperature=temperature, model=self.model_name)
 
     def generate_response(self, prompt: str, **kwargs) -> str:
         model = self.get_chat_model()
         response = model.invoke(prompt)
-        return response.content
+        content = response.content
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                if isinstance(part, dict) and "text" in part:
+                    text_parts.append(part["text"])
+                elif isinstance(part, str):
+                    text_parts.append(part)
+            text = "".join(text_parts)
+        else:
+            text = str(content)
+        return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 class ClaudeProvider(AIProvider):
     def __init__(self, api_key: str):
@@ -91,12 +106,28 @@ class GroqProvider(AIProvider):
 
     def get_chat_model(self, temperature: float = 0.0) -> BaseChatModel:
         from langchain_groq import ChatGroq
-        return ChatGroq(groq_api_key=self.api_key, temperature=temperature, model="qwen/qwen3.6-27b")
+        return ChatGroq(
+            groq_api_key=self.api_key,
+            temperature=temperature,
+            model="qwen/qwen3.6-27b",
+            max_tokens=800
+        )
 
     def generate_response(self, prompt: str, **kwargs) -> str:
         model = self.get_chat_model()
         response = model.invoke(prompt)
-        return response.content
+        content = response.content
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                if isinstance(part, dict) and "text" in part:
+                    text_parts.append(part["text"])
+                elif isinstance(part, str):
+                    text_parts.append(part)
+            text = "".join(text_parts)
+        else:
+            text = str(content)
+        return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 def get_ai_provider(provider_name: str, **kwargs) -> AIProvider:
     """Factory method to get the configured AI provider."""
@@ -130,8 +161,10 @@ class FallbackManager:
         """
         from app.core.config import settings
         
-        # Priority: Groq -> Gemini -> OpenAI -> DeepSeek
-        fallback_sequence = ["groq", "gemini", "openai", "deepseek"]
+        # Primary provider first, followed by others
+        primary = getattr(settings, "AI_PROVIDER", "gemini").lower()
+        candidates = ["gemini", "groq", "openai", "deepseek"]
+        fallback_sequence = [primary] + [p for p in candidates if p != primary]
         
         last_error = None
         
@@ -168,6 +201,8 @@ class FallbackManager:
                         result = "".join(text_parts)
                     else:
                         result = str(content)
+                    if isinstance(result, str):
+                        result = re.sub(r"<think>.*?</think>", "", result, flags=re.DOTALL).strip()
                     
                 return {"result": result, "provider": provider_name}
                 

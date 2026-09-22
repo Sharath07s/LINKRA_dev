@@ -97,3 +97,4 @@ langchain-huggingface
 pypdf
 psutil==6.0.0
 GeoAlchemy2==0.14.7
+langchain-text-splitters

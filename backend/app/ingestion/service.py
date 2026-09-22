@@ -2,6 +2,7 @@
 Ingestion service: orchestrates the full pipeline.
 
 File Upload → Validation → Parsing → NLP Extraction → Persistence
+→ RAG Vector Indexing (Step 6)
 
 This service is synchronous. For M1.3, this is appropriate since
 we are not introducing Celery/Redis complexity yet.
@@ -12,6 +13,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+
 
 from sqlalchemy.orm import Session
 
@@ -94,6 +96,29 @@ def validate_file(filename: str, content_type: Optional[str], file_size: int) ->
 
 # ── Pipeline ────────────────────────────────────────────────────────────
 
+# ── RAG Chunking Configuration ──────────────────────────────────────────
+# Matches the parameters established in scripts/ingest_fir_pdfs.py.
+# chunk_size is in characters (not tokens). At ~4 chars/token this is
+# roughly 250 tokens — well within all-MiniLM-L6-v2's 256-token window.
+# Lazy-initialized so that langchain_text_splitters (and its transitive
+# dependency on torch/sentence_transformers) is only imported the first
+# time RAG chunking is actually needed, not at module import time.
+_CHUNK_SPLITTER = None
+
+
+def _get_chunk_splitter():
+    global _CHUNK_SPLITTER
+    if _CHUNK_SPLITTER is None:
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        _CHUNK_SPLITTER = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len,
+            is_separator_regex=False,
+        )
+    return _CHUNK_SPLITTER
+
+
 def process_ingestion(
     db: Session,
     file_path: str,
@@ -106,11 +131,17 @@ def process_ingestion(
     """
     Execute the full ingestion pipeline synchronously.
 
+    Steps:
     1. Create IngestionJob record
-    2. Parse the file
-    3. Run NLP extraction on parsed text
-    4. Persist EntityCandidate records
-    5. Update IngestionJob status
+    2. Parse the file into ParsedDocument/ParsedPage objects
+    3. Run NLP (spaCy + regex) and LLM entity extraction
+    4. Entity resolution → CanonicalEntity (PostgreSQL)
+    5. Relationship extraction → EntityRelationship (PostgreSQL + Neo4j)
+    6. RAG vector indexing → DocumentChunk (pgvector)
+
+    Step 6 is wrapped in its own try/except block so that a vector-indexing
+    failure never rolls back entity/relationship/Neo4j work already committed
+    in Steps 3–5.
 
     Args:
         db: SQLAlchemy session
@@ -272,14 +303,149 @@ def process_ingestion(
                 extract_relationships_for_page(db, job, page, page_candidates)
 
         job.entity_count = len(all_candidates)
-        job.status = "COMPLETED"
+
+        # ── Step 6: RAG Vector Indexing ──────────────────────────────────
+        # Deliberately isolated from the main try/except so that vector-
+        # indexing failures never revert already-committed entity/relationship
+        # work. The job is still marked COMPLETED, but chunk_count will
+        # accurately reflect indexed chunks, and any failure is logged and
+        # recorded on error_message for observability.
+        chunk_count = 0
+        attempted_chunks = 0
+        try:
+            from app.ai.rag.vector_search import VectorStore
+            # Instantiate once — the embedding model (~90 MB) is loaded here,
+            # not inside the per-chunk loop.
+            vs = VectorStore()
+            doc_total_pages = parsed.record_count
+
+            for page in parsed.pages:
+                if not page.text.strip():
+                    continue
+
+                # Split page text into sub-page chunks.
+                # Short pages (< chunk_size) naturally produce a single chunk.
+                raw_chunks = _get_chunk_splitter().split_text(page.text)
+                total_chunks_on_page = len(raw_chunks)
+
+                for chunk_index, chunk_text in enumerate(raw_chunks):
+                    if not chunk_text.strip():
+                        continue
+
+                    attempted_chunks += 1
+                    # Build metadata from data already available in scope.
+                    # Do NOT invent FIR numbers, station names, or districts —
+                    # those are not reliably structured at this stage.
+                    metadata: dict = {
+                        "ingestion_job_id": str(job.id),
+                        "source_filename": file_name,
+                        "source_type": source_type,
+                        "file_type": file_type,
+                        "page_number": page.page_number,
+                        "chunk_index": chunk_index,
+                        "total_chunks_on_page": total_chunks_on_page,
+                        "total_pages": doc_total_pages,
+                    }
+
+                    # Preserve any structured metadata already on the page
+                    # (e.g., page_index from PDF parser, fields from CSV parser).
+                    # Only copy safe scalar types to avoid deep-nesting issues.
+                    for k, v in page.metadata.items():
+                        if isinstance(v, (str, int, float, bool)) and k not in metadata:
+                            metadata[k] = v
+
+                    success = vs.index_document(
+                        source_id=file_name,
+                        text=chunk_text,
+                        metadata=metadata,
+                    )
+                    if success:
+                        chunk_count += 1
+                    else:
+                        logger.warning(
+                            f"Ingestion job {job.id} ({file_name}): "
+                            f"index_document() returned False for page "
+                            f"{page.page_number} chunk {chunk_index}."
+                        )
+
+            logger.info(
+                f"Ingestion job {job.id} ({file_name}): "
+                f"vector indexing complete — {chunk_count}/{attempted_chunks} chunk(s) stored in pgvector."
+            )
+
+            # ── Step 7: Phase 2 Evidence Linking ─────────────────────────────
+            # Ground persisted EntityRelationship rows to supporting DocumentChunks
+            if chunk_count > 0:
+                try:
+                    from app.ingestion.evidence_linker import link_evidence_for_job
+                    link_evidence_for_job(db, job)
+                except Exception as link_err:
+                    logger.warning(
+                        f"Ingestion job {job.id} ({file_name}): "
+                        f"Evidence linking encountered an error: {link_err}"
+                    )
+
+            # ── Determine final vector-indexing status ───────────────────────
+            # CASE A: no chunks were attempted (doc has no indexable text)
+            #         → COMPLETED is accurate; chunk_count = 0 is expected
+            # CASE B: all attempted chunks succeeded
+            #         → COMPLETED
+            # CASE C: some chunks succeeded, some failed
+            #         → COMPLETED_PARTIAL — partial RAG coverage, entities preserved
+            # CASE D: all attempted chunks failed (0 out of N)
+            #         → FAILED for the vector step; entity/relationship data preserved
+            if attempted_chunks == 0 or chunk_count == attempted_chunks:
+                # Case A or Case B — full success (or no indexable text)
+                final_status = "COMPLETED"
+            elif chunk_count > 0:
+                # Case C — partial failure
+                final_status = "COMPLETED_PARTIAL"
+                failed_chunks = attempted_chunks - chunk_count
+                job.error_message = (
+                    f"Partial RAG indexing: {chunk_count}/{attempted_chunks} chunks "
+                    f"indexed successfully; {failed_chunks} chunk(s) failed. "
+                    f"Entity and relationship data are preserved."
+                )[:2000]
+                logger.warning(
+                    f"Ingestion job {job.id} ({file_name}): partial vector indexing — "
+                    f"{chunk_count} succeeded, {failed_chunks} failed."
+                )
+            else:
+                # Case D — complete failure (attempted > 0, chunk_count == 0)
+                final_status = "FAILED"
+                job.error_message = (
+                    f"Vector indexing failed: 0/{attempted_chunks} chunks indexed into pgvector. "
+                    f"RAG retrieval will be unavailable for this document. "
+                    f"Entity and relationship data are preserved."
+                )[:2000]
+                logger.error(
+                    f"Ingestion job {job.id} ({file_name}): complete vector indexing failure — "
+                    f"0/{attempted_chunks} chunks indexed."
+                )
+
+        except Exception as vec_err:
+            logger.warning(
+                f"Ingestion job {job.id} ({file_name}): "
+                f"vector indexing failed with exception — entity/relationship data is preserved. "
+                f"Error: {vec_err}"
+            )
+            # Exception path: treat as complete vector failure
+            final_status = "FAILED"
+            job.error_message = (
+                f"Vector indexing failed: {vec_err}. "
+                f"Entity and relationship data are preserved."
+            )[:2000]
+
+        job.chunk_count = chunk_count
+        job.status = final_status
         job.completed_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(job)
 
         logger.info(
             f"Ingestion job {job.id} completed: "
-            f"{job.record_count} records, {job.entity_count} entities extracted."
+            f"{job.record_count} records, {job.entity_count} entities extracted, "
+            f"{chunk_count} vector chunk(s) indexed."
         )
 
     except Exception as e:
