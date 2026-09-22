@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+
 import DashboardLayout from "@/components/DashboardLayout";
 import {
   UploadCloud,
@@ -19,6 +20,10 @@ import {
   RefreshCw,
   AlertCircle,
   Database,
+  RotateCcw,
+  AlertTriangle,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react";
 import {
   ingestionService,
@@ -44,6 +49,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   PARSED: { label: "Parsed", color: "text-amber-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   EXTRACTED: { label: "Extracting", color: "text-indigo-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   COMPLETED: { label: "Completed", color: "text-emerald-400", icon: <CheckCircle className="h-3.5 w-3.5" /> },
+  COMPLETED_PARTIAL: { label: "Partial RAG", color: "text-amber-400", icon: <AlertCircle className="h-3.5 w-3.5" /> },
   FAILED: { label: "Failed", color: "text-red-400", icon: <XCircle className="h-3.5 w-3.5" /> },
 };
 
@@ -64,6 +70,11 @@ export default function DataSourcesPage() {
   const [jobDetail, setJobDetail] = useState<IngestionJobDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
+  // Retry modal & action state
+  const [retryModalJob, setRetryModalJob] = useState<IngestionJob | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [retryFeedback, setRetryFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
 
@@ -82,9 +93,10 @@ export default function DataSourcesPage() {
   }, []);
 
   // Load on first render
-  if (!hasLoaded && !isLoadingJobs) {
+  useEffect(() => {
     loadJobs();
-  }
+  }, [loadJobs]);
+
 
   // ── Upload handler ───────────────────────────────────────────────────
   const handleUpload = async () => {
@@ -100,6 +112,37 @@ export default function DataSourcesPage() {
       setUploadError(typeof detail === "string" ? detail : JSON.stringify(detail));
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  // ── Retry handler ────────────────────────────────────────────────────
+  const confirmRetryJob = async () => {
+    if (!retryModalJob) return;
+    setIsRetrying(true);
+    setRetryFeedback(null);
+    try {
+      const updatedJob = await ingestionService.retryJob(retryModalJob.id);
+      setRetryModalJob(null);
+      setRetryFeedback({
+        type: updatedJob.status === "COMPLETED" ? "success" : "error",
+        message:
+          updatedJob.status === "COMPLETED"
+            ? `Ingestion job '${updatedJob.file_name}' completed successfully.`
+            : `Retry failed for '${updatedJob.file_name}'. ${updatedJob.error_message || ""}`,
+      });
+      await loadJobs();
+      if (expandedJobId === updatedJob.id) {
+        const detail = await ingestionService.getJobDetail(updatedJob.id);
+        setJobDetail(detail);
+      }
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail || err?.message || "Retry failed.";
+      setRetryFeedback({
+        type: "error",
+        message: typeof detail === "string" ? detail : JSON.stringify(detail),
+      });
+    } finally {
+      setIsRetrying(false);
     }
   };
 
@@ -151,8 +194,8 @@ export default function DataSourcesPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Data Ingestion</h1>
-            <p className="text-[#9A9A9A] mt-1">Upload and process intelligence source documents.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-white">Data Ingestion & Recovery</h1>
+            <p className="text-[#9A9A9A] mt-1">Upload, process, and recover intelligence source documents.</p>
           </div>
           <button
             onClick={loadJobs}
@@ -163,6 +206,25 @@ export default function DataSourcesPage() {
             <span>Refresh</span>
           </button>
         </div>
+
+        {/* Retry Toast Feedback */}
+        {retryFeedback && (
+          <div
+            className={`p-4 rounded-xl border flex items-start justify-between gap-3 ${
+              retryFeedback.type === "success"
+                ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-400"
+                : "bg-red-950/30 border-red-800/50 text-red-400"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {retryFeedback.type === "success" ? <CheckCircle className="h-5 w-5 shrink-0" /> : <AlertTriangle className="h-5 w-5 shrink-0" />}
+              <p className="text-xs font-medium">{retryFeedback.message}</p>
+            </div>
+            <button onClick={() => setRetryFeedback(null)} className="text-xs font-bold opacity-70 hover:opacity-100">
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Upload Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -265,13 +327,6 @@ export default function DataSourcesPage() {
                 <p className="text-[11px] text-red-400 leading-relaxed">{uploadError}</p>
               </div>
             )}
-
-            <div className="p-3 bg-[#050505] border border-[#222222] rounded-xl flex items-start gap-2 text-[9px] text-[#666666]">
-              <Database className="h-4 w-4 text-[#666666] shrink-0 mt-0.5" />
-              <p className="leading-relaxed">
-                Uploaded files are parsed, normalized, and processed through the NLP extraction pipeline. Extracted entity candidates are stored with full provenance.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -280,7 +335,7 @@ export default function DataSourcesPage() {
           <div className="flex justify-between items-center border-b border-[#222222]/80 pb-4 mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Ingestion Jobs</h3>
-              <p className="text-xs text-[#9A9A9A]">Processed documents and extracted intelligence</p>
+              <p className="text-xs text-[#9A9A9A]">Processed datasets, failure logs & retry recovery</p>
             </div>
             <span className="text-[10px] font-bold text-[#666666] uppercase tracking-wider">
               {jobs.length} {jobs.length === 1 ? "Job" : "Jobs"}
@@ -297,7 +352,7 @@ export default function DataSourcesPage() {
               <UploadCloud className="h-10 w-10 text-[#666666] mb-3" />
               <p className="text-sm font-semibold text-[#9A9A9A]">No ingested datasets yet</p>
               <p className="text-[11px] text-[#666666] mt-1 max-w-[300px]">
-                Upload a document above to begin real intelligence extraction.
+                Upload a document above to begin intelligence processing.
               </p>
             </div>
           ) : (
@@ -305,15 +360,19 @@ export default function DataSourcesPage() {
               {jobs.map((job) => {
                 const status = STATUS_CONFIG[job.status] || STATUS_CONFIG.QUEUED;
                 const isExpanded = expandedJobId === job.id;
+                const canRetry =
+                  (job.status === "FAILED" || job.status === "COMPLETED_PARTIAL") &&
+                  job.recovery_status !== "EXHAUSTED" &&
+                  job.recovery_status !== "PERMANENT_FAILURE";
 
                 return (
                   <div key={job.id} className="border border-[#222222] rounded-xl overflow-hidden">
-                    {/* Job row */}
-                    <button
-                      onClick={() => toggleJobDetail(job.id)}
-                      className="w-full p-4 flex items-center justify-between gap-4 hover:bg-[#050505]/50 transition-colors text-left"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
+                    {/* Job header row */}
+                    <div className="w-full p-4 flex items-center justify-between gap-4 bg-[#080808]/20 hover:bg-[#050505]/50 transition-colors">
+                      <button
+                        onClick={() => toggleJobDetail(job.id)}
+                        className="flex items-center gap-3 min-w-0 text-left flex-1"
+                      >
                         {isExpanded ? (
                           <ChevronDown className="h-4 w-4 text-[#666666] shrink-0" />
                         ) : (
@@ -322,7 +381,7 @@ export default function DataSourcesPage() {
                         <FileText className="h-5 w-5 text-[#9A9A9A] shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs font-semibold text-[#F5F5F5] truncate">{job.file_name}</p>
-                          <div className="flex gap-2 mt-0.5 text-[10px] text-[#666666]">
+                          <div className="flex flex-wrap gap-2 mt-0.5 text-[10px] text-[#666666]">
                             <span>{job.source_type}</span>
                             <span>•</span>
                             <span>{job.file_type.toUpperCase()}</span>
@@ -332,11 +391,30 @@ export default function DataSourcesPage() {
                                 <span>{(job.file_size_bytes / 1024).toFixed(1)} KB</span>
                               </>
                             )}
+                            {job.failed_step && (
+                              <>
+                                <span>•</span>
+                                <span className="text-red-400 font-medium">Step: {job.failed_step}</span>
+                              </>
+                            )}
                           </div>
                         </div>
-                      </div>
+                      </button>
 
-                      <div className="flex items-center gap-4 shrink-0">
+                      <div className="flex items-center gap-3 shrink-0">
+                        {canRetry && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRetryModalJob(job);
+                            }}
+                            className="flex items-center gap-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-bold transition-all"
+                            title="Retry ingestion job"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            <span>Retry</span>
+                          </button>
+                        )}
                         {job.entity_count != null && job.status === "COMPLETED" && (
                           <span className="text-[10px] font-bold text-[#9A9A9A]">
                             {job.entity_count} entities
@@ -347,7 +425,7 @@ export default function DataSourcesPage() {
                           <span>{status.label}</span>
                         </div>
                       </div>
-                    </button>
+                    </div>
 
                     {/* Expanded detail */}
                     {isExpanded && (
@@ -360,28 +438,59 @@ export default function DataSourcesPage() {
                         ) : jobDetail && jobDetail.id === job.id ? (
                           <div className="space-y-4">
                             {/* Job metadata */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
                               {[
                                 { label: "Records", value: jobDetail.record_count ?? "—" },
                                 { label: "Entities", value: jobDetail.entity_count ?? "—" },
-                                { label: "Status", value: jobDetail.status },
-                                { label: "Created", value: new Date(jobDetail.created_at).toLocaleString() },
+                                { label: "Vector Chunks", value: jobDetail.chunk_count ?? "—" },
+                                { label: "Retries", value: `${jobDetail.retry_count || 0} / ${jobDetail.max_retry_count || 3}` },
+                                { label: "Failed Step", value: jobDetail.failed_step || "None" },
+                                { label: "Recovery", value: jobDetail.recovery_status || "NONE" },
                               ].map((item) => (
                                 <div key={item.label} className="bg-[#080808]/60 border border-[#222222] rounded-lg p-2.5">
                                   <p className="text-[9px] font-bold text-[#666666] uppercase tracking-wider">{item.label}</p>
-                                  <p className="text-xs font-semibold text-[#F5F5F5] mt-0.5">{String(item.value)}</p>
+                                  <p className="text-xs font-semibold text-[#F5F5F5] mt-0.5 truncate">{String(item.value)}</p>
                                 </div>
                               ))}
                             </div>
 
+                            {/* M15.7.1 — Durable Source Backup indicator */}
+                            <div className={`flex items-center gap-2 p-2.5 rounded-lg border ${
+                              jobDetail.source_has_durable_backup
+                                ? "bg-emerald-950/20 border-emerald-900/30"
+                                : "bg-amber-950/15 border-amber-900/25"
+                            }`}>
+                              {jobDetail.source_has_durable_backup ? (
+                                <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+                              ) : (
+                                <ShieldAlert className="h-4 w-4 text-amber-400 shrink-0" />
+                              )}
+                              <div className="min-w-0">
+                                <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                                  jobDetail.source_has_durable_backup ? "text-emerald-400" : "text-amber-400"
+                                }`}>
+                                  {jobDetail.source_has_durable_backup ? "Source Backed Up" : "No Durable Backup"}
+                                </p>
+                                <p className="text-[10px] text-[#666666] mt-0.5">
+                                  {jobDetail.source_has_durable_backup
+                                    ? `Provider: ${jobDetail.source_storage_provider || "local"} · SHA-256: ${jobDetail.source_sha256_prefix || "—"}`
+                                    : "Original source file is stored locally only. Recovery from durable storage is not available."}
+                                </p>
+                              </div>
+                            </div>
+
                             {/* Error message */}
                             {jobDetail.error_message && (
-                              <div className="p-3 bg-red-950/20 border border-red-900/30 rounded-lg">
-                                <p className="text-[11px] text-red-400">{jobDetail.error_message}</p>
+                              <div className="p-3 bg-red-950/20 border border-red-900/30 rounded-lg space-y-1">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-red-400">
+                                  <AlertCircle className="h-3.5 w-3.5" />
+                                  <span>Failure Reason {jobDetail.error_code ? `(${jobDetail.error_code})` : ""}</span>
+                                </div>
+                                <p className="text-[11px] text-red-300 leading-relaxed font-mono">{jobDetail.error_message}</p>
                               </div>
                             )}
 
-                            {/* Entities grouped by type */}
+                            {/* Extracted Entities */}
                             {jobDetail.entities.length > 0 ? (
                               <div className="space-y-3">
                                 <h4 className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider">Extracted Entity Candidates</h4>
@@ -399,7 +508,6 @@ export default function DataSourcesPage() {
                                           <span
                                             key={ent.id}
                                             className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] font-medium ${config.bg} ${config.color}`}
-                                            title={`Method: ${ent.extraction_method}${ent.source_page ? ` | Page: ${ent.source_page}` : ""}${ent.source_row ? ` | Row: ${ent.source_row}` : ""}${ent.confidence != null ? ` | Confidence: ${ent.confidence.toFixed(2)}` : ""}`}
                                           >
                                             {ent.normalized_value || ent.raw_text}
                                           </span>
@@ -422,6 +530,67 @@ export default function DataSourcesPage() {
             </div>
           )}
         </div>
+
+        {/* Retry Confirmation Modal */}
+        {retryModalJob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <div className="bg-[#0A0A0A] border border-[#222222] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+              <div className="flex items-center gap-3 border-b border-[#222222] pb-4">
+                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+                  <RotateCcw className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">Retry Ingestion Job?</h3>
+                  <p className="text-xs text-[#9A9A9A]">Re-process document with idempotent outputs cleanup.</p>
+                </div>
+              </div>
+
+              <div className="bg-[#050505] border border-[#222222] rounded-xl p-4 space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-[#666666]">File:</span>
+                  <span className="text-white font-semibold">{retryModalJob.file_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#666666]">Failed Step:</span>
+                  <span className="text-red-400 font-semibold">{retryModalJob.failed_step || "Unknown"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#666666]">Attempt:</span>
+                  <span className="text-amber-400 font-semibold">
+                    Attempt {(retryModalJob.retry_count || 0) + 1} of {retryModalJob.max_retry_count || 3}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setRetryModalJob(null)}
+                  disabled={isRetrying}
+                  className="px-4 py-2 bg-[#111111] hover:bg-[#1A1A1A] text-[#9A9A9A] hover:text-white rounded-xl text-xs font-semibold transition-all border border-[#222222]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmRetryJob}
+                  disabled={isRetrying}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-bold rounded-xl text-xs transition-all disabled:opacity-40"
+                >
+                  {isRetrying ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Retrying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      <span>Confirm Retry</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

@@ -31,7 +31,8 @@ class VectorStore:
                        chunk_index: int = 0,
                        page_number: Optional[int] = None,
                        source_row: Optional[int] = None,
-                       metadata: dict = None) -> bool:
+                       metadata: dict = None,
+                       db: Optional[Session] = None) -> bool:
         """
         Embeds the text and inserts the embedding into PGVector with proper provenance.
         """
@@ -42,27 +43,57 @@ class VectorStore:
             embedding = self.embedding_model.embed_query(text)
             if not embedding or len(embedding) != 384:
                 logger.error(
-                    f"Invalid embedding for {source_id}: "
+                    f"Invalid embedding for job {ingestion_job_id}: "
                     f"expected 384 dimensions, got {len(embedding) if embedding else None}"
                 )
                 return False
             
-            with Session(self.engine) as session:
-                chunk = DocumentChunk(
-                    ingestion_job_id=ingestion_job_id,
-                    chunk_text=text,
-                    chunk_index=chunk_index,
-                    page_number=page_number,
-                    source_row=source_row,
-                    metadata_json=metadata,
-                    embedding=embedding
-                )
-                session.add(chunk)
-                session.commit()
+            chunk = DocumentChunk(
+                ingestion_job_id=ingestion_job_id,
+                chunk_text=text,
+                chunk_index=chunk_index,
+                page_number=page_number,
+                source_row=source_row,
+                metadata_json=metadata,
+                embedding=embedding
+            )
+
+            if db is not None:
+                db.add(chunk)
+                db.commit()
+            else:
+                with Session(self.engine) as session:
+                    session.add(chunk)
+                    session.commit()
             return True
         except Exception as e:
             logger.error(f"Error indexing chunk for job {ingestion_job_id}: {e}", exc_info=True)
             return False
+
+    def delete_job_chunks(self, ingestion_job_id: uuid.UUID, db: Optional[Session] = None) -> bool:
+        """
+        Deletes all DocumentChunks associated with the specified ingestion_job_id.
+        Used during ingestion job retry to ensure idempotent re-indexing.
+        """
+        try:
+            if db is not None:
+                db.query(DocumentChunk).filter(
+                    DocumentChunk.ingestion_job_id == ingestion_job_id
+                ).delete(synchronize_session=False)
+                db.commit()
+            else:
+                with Session(self.engine) as session:
+                    session.query(DocumentChunk).filter(
+                        DocumentChunk.ingestion_job_id == ingestion_job_id
+                    ).delete(synchronize_session=False)
+                    session.commit()
+            logger.info(f"Successfully deleted document chunks for ingestion job {ingestion_job_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting chunks for job {ingestion_job_id}: {e}", exc_info=True)
+            return False
+
+
 
     def semantic_search(
         self,

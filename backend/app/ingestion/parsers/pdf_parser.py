@@ -6,6 +6,8 @@ import logging
 from pathlib import Path
 from pypdf import PdfReader
 from app.ingestion.parsers import ParsedDocument, ParsedPage
+import pytesseract
+from pdf2image import convert_from_path
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,7 @@ def parse_pdf(file_path: str) -> ParsedDocument:
     pages: list[ParsedPage] = []
     all_text_parts: list[str] = []
     empty_page_count = 0
+    pdf_images = None
 
     for i, page in enumerate(reader.pages):
         try:
@@ -47,6 +50,26 @@ def parse_pdf(file_path: str) -> ParsedDocument:
             text = ""
 
         text = text.strip()
+        
+        if len(text) < 50:
+            logger.info(f"Page {i + 1} has insufficient text ({len(text)} chars). Falling back to OCR.")
+            try:
+                if pdf_images is None:
+                    pdf_images = convert_from_path(file_path)
+                
+                if i < len(pdf_images):
+                    ocr_text = pytesseract.image_to_string(pdf_images[i])
+                    ocr_text = ocr_text.strip()
+                    if ocr_text:
+                        text = ocr_text
+                        logger.info(f"Successfully extracted {len(text)} chars via OCR for page {i + 1}.")
+                    else:
+                        logger.warning(f"OCR yielded no text for page {i + 1}.")
+                else:
+                    logger.warning(f"Could not find image representation for page {i + 1}.")
+            except Exception as e:
+                logger.error(f"OCR fallback failed for page {i + 1}: {e}")
+
         if not text:
             empty_page_count += 1
 
@@ -61,8 +84,7 @@ def parse_pdf(file_path: str) -> ParsedDocument:
 
     if not raw_text:
         raise ValueError(
-            "PDF contains no extractable text. "
-            "Scanned/image-only PDFs require OCR, which is not currently supported."
+            "PDF contains no extractable text and OCR fallback failed."
         )
 
     metadata = {

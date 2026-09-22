@@ -23,7 +23,7 @@ from app.ingestion.schemas import (
     EntityCandidateResponse,
     SourceType,
 )
-from app.ingestion.service import validate_file, process_ingestion, UPLOAD_DIR
+from app.ingestion.service import validate_file, process_ingestion, retry_ingestion_job, UPLOAD_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +92,8 @@ async def upload_file(
             source_type=validated_source.value,
             file_size=file_size,
             user_id=current_user.id,
+            file_bytes=content,           # M15.7.1: pass in-memory bytes for durable storage
+            content_type=file.content_type or "application/octet-stream",
         )
     except Exception as e:
         logger.error(f"Ingestion processing error: {e}")
@@ -174,3 +176,60 @@ def get_job_entities(
 
     entities = query.order_by(EntityCandidate.entity_type, EntityCandidate.created_at).all()
     return entities
+
+
+@router.post("/{job_id}/retry", response_model=IngestionJobResponse)
+def retry_job(
+    job_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    _ = Depends(RoleChecker(["OFFICER", "ADMIN", "SUPER_ADMIN"]))
+):
+    """
+    Retry an ingestion job that failed or partially completed.
+    Requires OFFICER, ADMIN, or SUPER_ADMIN authorization.
+    Prevents simultaneous duplicate retries using atomic database status checks.
+    """
+    job = db.query(IngestionJob).filter(IngestionJob.id == job_id, IngestionJob.is_deleted == False).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Ingestion job not found.")
+
+    if job.status not in ("FAILED", "COMPLETED_PARTIAL"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Job status '{job.status}' is not eligible for retry."
+        )
+
+    if (job.retry_count or 0) >= (job.max_retry_count or 3) and job.recovery_status in ("EXHAUSTED", "PERMANENT_FAILURE"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Maximum retries ({job.max_retry_count}) reached for job {job_id}."
+        )
+
+    # Atomic Concurrency Lock: Transition status to PROCESSING atomically if in FAILED/COMPLETED_PARTIAL
+    affected_rows = db.query(IngestionJob).filter(
+        IngestionJob.id == job_id,
+        IngestionJob.status.in_(["FAILED", "COMPLETED_PARTIAL"])
+    ).update({"status": "PROCESSING"}, synchronize_session=False)
+    db.commit()
+
+    if affected_rows == 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Job is currently being retried or processed by another request."
+        )
+
+    try:
+        updated_job = retry_ingestion_job(db=db, job_id=job_id, user_id=current_user.id)
+        return updated_job
+    except Exception as e:
+        logger.error(f"Retry execution error for job {job_id}: {e}")
+        # Fetch fresh status after failure handler executed in service
+        updated_job = db.query(IngestionJob).filter(IngestionJob.id == job_id).first()
+        if updated_job:
+            return updated_job
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retry ingestion job: {e}"
+        )
+

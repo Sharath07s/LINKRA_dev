@@ -114,8 +114,12 @@ class Neo4jIntelligenceService:
         SET n:{sublabel}, n += $props
         """
         
-        with self.get_session() as session:
-            session.run(query, id=str(entity_id), props=properties)
+        try:
+            with self.get_session() as session:
+                session.run(query, id=str(entity_id), props=properties)
+        except Exception as e:
+            logger.warning(f"Failed to sync canonical entity {entity_id} to Neo4j: {e}")
+
 
     def sync_relationship(self, relationship_id: str, source_id: str, target_id: str, relationship_type: str, properties: Dict[str, Any]) -> None:
         """

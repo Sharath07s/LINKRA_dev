@@ -5,7 +5,7 @@ IngestionJob: Tracks each file upload and processing lifecycle.
 EntityCandidate: Stores NLP-extracted entity mentions with provenance.
 """
 import uuid
-from sqlalchemy import Column, String, Integer, Float, Text, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, BigInteger, Float, Text, DateTime, ForeignKey, JSON
 from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
@@ -40,6 +40,29 @@ class IngestionJob(BaseModel):
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Recovery and Reliability fields (M15.7)
+    failed_step = Column(String(100), nullable=True)
+    error_code = Column(String(100), nullable=True)
+    retry_count = Column(Integer, nullable=False, default=0)
+    max_retry_count = Column(Integer, nullable=False, default=3)
+    last_retry_at = Column(DateTime(timezone=True), nullable=True)
+    next_retry_at = Column(DateTime(timezone=True), nullable=True)
+    failed_at = Column(DateTime(timezone=True), nullable=True)
+    recovery_status = Column(String(50), nullable=False, default="NONE", index=True)
+
+    # Durable Source Storage fields (M15.7.1)
+    # These fields record the durable storage reference for the original source file.
+    # All nullable for backward compatibility with pre-M15.7.1 ingestion jobs.
+    # SECURITY: DO NOT store signed URLs, tokens, or secrets here — only the storage OBJECT KEY.
+    source_storage_provider = Column(String(50), nullable=True)    # 'local' | 'supabase'
+    source_storage_key = Column(String(1000), nullable=True)        # e.g. ingestion/{job_id}/source/{filename}
+    source_original_filename = Column(String(500), nullable=True)   # original user-provided filename
+    source_content_type = Column(String(200), nullable=True)        # MIME type
+    source_size_bytes = Column(BigInteger, nullable=True)           # byte count of original source
+    source_sha256 = Column(String(64), nullable=True)               # hex SHA-256 checksum
+    source_storage_bucket = Column(String(200), nullable=True)      # bucket name (Supabase / S3)
+    source_uploaded_at = Column(DateTime(timezone=True), nullable=True)  # when durable upload completed
 
     # Relationships
     uploader = relationship("User")

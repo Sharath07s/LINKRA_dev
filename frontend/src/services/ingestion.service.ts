@@ -30,10 +30,26 @@ export interface IngestionJob {
   error_message: string | null;
   record_count: number | null;
   entity_count: number | null;
+  chunk_count: number | null;
   created_at: string;
   started_at: string | null;
   completed_at: string | null;
+  failed_step?: string | null;
+  error_code?: string | null;
+  retry_count?: number;
+  max_retry_count?: number;
+  last_retry_at?: string | null;
+  next_retry_at?: string | null;
+  failed_at?: string | null;
+  recovery_status?: string;
+  // M15.7.1 — Durable Source Storage
+  source_storage_provider?: string | null;
+  source_has_durable_backup?: boolean | null;
+  source_sha256_prefix?: string | null;
+  source_size_bytes?: number | null;
+  source_uploaded_at?: string | null;
 }
+
 
 export interface IngestionJobDetail extends IngestionJob {
   entities: EntityCandidate[];
@@ -100,4 +116,17 @@ export const ingestionService = {
     );
     return response.data;
   },
+
+  /**
+   * Retry a failed or partial ingestion job.
+   */
+  async retryJob(jobId: string): Promise<IngestionJob> {
+    const response = await apiClient.post<IngestionJob>(
+      `/ingestion/${jobId}/retry`,
+      {},
+      { timeout: 120000 }
+    );
+    return response.data;
+  },
 };
+
