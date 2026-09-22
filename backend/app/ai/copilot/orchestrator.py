@@ -167,11 +167,21 @@ Context Provided:
             vs = VectorStore()
             results = vs.semantic_search(query_text, top_k=3)
             for res in results:
+                # Include provenance details in evidence context
+                meta = res.get("metadata", {})
+                title = meta.get("file_name", "Unknown Document")
+                if res.get("page_number"):
+                    title += f" (Page {res.get('page_number')})"
+                elif res.get("source_row"):
+                    title += f" (Row {res.get('source_row')})"
+                
                 context_data["evidence"].append({
-                    "type": "RAG_CHUNK",
-                    "title": res.get("doc_id", "Unknown Document"),
-                    "description": res.get("content", ""),
-                    "similarity": res.get("similarity", 0.0)
+                    "type": "DOCUMENT_CHUNK",
+                    "title": title,
+                    "description": res.get("chunk_text", ""),
+                    "similarity": res.get("similarity", 0.0),
+                    "chunk_id": res.get("chunk_id"),
+                    "job_id": res.get("ingestion_job_id")
                 })
         except Exception as e:
             logger.error(f"RAG lookup failed: {e}")

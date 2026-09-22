@@ -186,7 +186,7 @@ function AIAssistantPageContent() {
         recordCount: response.evidence ? response.evidence.length : 0,
         xaiDetails: {
            confidence: response.grounded ? 100 : (response.provider === "system_fallback" ? 95 : 85),
-           sources: response.sources?.length > 0 ? response.sources.map((s: any) => `${s.type}: ${s.label}`) : [`Provider: ${response.provider || 'unknown'}`, `Intent: ${response.intent || 'general'}`],
+           sources: response.evidence?.length > 0 ? response.evidence.map((s: any) => `${s.type}: ${s.title}`) : [`Provider: ${response.provider || 'unknown'}`, `Intent: ${response.intent || 'general'}`],
            reasoning: [
              `Status: ${response.status}`,
              `Entities Found: ${response.entities ? response.entities.length : 0}`,

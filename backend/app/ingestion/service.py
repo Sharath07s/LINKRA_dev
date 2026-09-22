@@ -26,6 +26,8 @@ from app.nlp.llm_extractor import extract_entities_llm
 from app.nlp.resolution.engine import resolve_candidate
 from app.nlp.resolution.normalization import normalize_entity
 from app.nlp.resolution.schemas import ResolutionContext
+from app.ai.rag.vector_search import VectorStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +154,31 @@ def process_ingestion(
         job.status = "PARSED"
         job.record_count = parsed.record_count
         db.commit()
+
+        # ── Step 2b: Vector Chunking and Indexing ─────────────────────────
+        vector_store = VectorStore()
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=500,
+            chunk_overlap=50,
+            length_function=len
+        )
+        
+        chunk_idx = 0
+        for page in parsed.pages:
+            if not page.text.strip():
+                continue
+                
+            page_chunks = text_splitter.split_text(page.text)
+            for chunk_text in page_chunks:
+                vector_store.index_document(
+                    ingestion_job_id=job.id,
+                    text=chunk_text,
+                    chunk_index=chunk_idx,
+                    page_number=page.page_number if file_type in ("pdf", "txt") else None,
+                    source_row=page.page_number if file_type in ("csv", "json") else None,
+                    metadata={"file_name": job.file_name, "source_type": job.source_type}
+                )
+                chunk_idx += 1
 
         # ── Step 3: NLP Extraction ──────────────────────────────────────
         all_candidates: list[EntityCandidate] = []
