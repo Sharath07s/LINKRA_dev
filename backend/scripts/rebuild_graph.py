@@ -59,6 +59,7 @@ def rebuild_graph():
             props = {
                 "confidence": rel.confidence,
                 "extraction_method": rel.extraction_method,
+                "status": rel.status,
                 "event_timestamp": rel.event_timestamp.isoformat() if rel.event_timestamp else None,
                 "source_page": rel.source_page,
                 "source_row": rel.source_row,

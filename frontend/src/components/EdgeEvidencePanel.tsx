@@ -29,6 +29,7 @@ interface EdgeEvidencePanelProps {
     source_row?: number | null;
     ingestion_job_id?: string | null;
     evidence_text?: string | null;
+    status?: string;
     desc?: string;
   } | null;
   onClose: () => void;
@@ -120,6 +121,34 @@ export default function EdgeEvidencePanel({ edge, onClose }: EdgeEvidencePanelPr
         </span>
         <p className="text-blue-300 font-mono font-bold text-sm tracking-wider">
           {edge.relation}
+        </p>
+      </div>
+
+      {/* Intelligence Status */}
+      <div className={`border rounded-lg px-3 py-2 ${
+        edge.status === 'PREDICTED' 
+          ? 'bg-purple-950/50 border-purple-800/40' 
+          : edge.status === 'INFERRED' 
+            ? 'bg-orange-950/50 border-orange-800/40' 
+            : 'bg-emerald-950/50 border-emerald-800/40'
+      }`}>
+        <span className={`text-[9px] font-semibold uppercase tracking-widest block ${
+          edge.status === 'PREDICTED' 
+            ? 'text-purple-400/70' 
+            : edge.status === 'INFERRED' 
+              ? 'text-orange-400/70' 
+              : 'text-emerald-400/70'
+        }`}>
+          Intelligence Status
+        </span>
+        <p className={`font-mono font-bold text-sm tracking-wider ${
+          edge.status === 'PREDICTED' 
+            ? 'text-purple-300' 
+            : edge.status === 'INFERRED' 
+              ? 'text-orange-300' 
+              : 'text-emerald-300'
+        }`}>
+          {edge.status || 'CONFIRMED'}
         </p>
       </div>
 

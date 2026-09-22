@@ -113,6 +113,7 @@ class Neo4jPotentialLinkService:
                         "target_entity_name": record.get("target_name") or record["target_id"],
                         "target_entity_type": record.get("target_type") or "Unknown",
                         "score": score,
+                        "status": "PREDICTED",
                         "signals": {
                             "common_neighbors": cn,
                             "jaccard_similarity": round(jaccard, 3),

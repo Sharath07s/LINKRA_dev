@@ -17,6 +17,7 @@ class GraphEdge(BaseModel):
     weight: float
     desc: str
     confidence: Optional[float] = None
+    status: Optional[str] = "CONFIRMED"
     extraction_method: Optional[str] = None
     source_page: Optional[int] = None
     ingestion_job_id: Optional[str] = None
@@ -90,6 +91,7 @@ class PotentialLink(BaseModel):
     target_entity_name: str
     target_entity_type: str
     score: float
+    status: str = "PREDICTED"
     signals: PotentialLinkSignals
     weights: Dict[str, float]
     explanation: PotentialLinkExplanation

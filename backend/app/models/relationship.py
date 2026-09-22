@@ -16,6 +16,9 @@ class EntityRelationship(BaseModel):
     confidence = Column(Float, nullable=False)
     extraction_method = Column(String(50), nullable=False) # STRUCTURED_CDR, NLP_TRIGGER, etc.
     
+    # Intelligence Taxonomy (M16)
+    status = Column(String(50), nullable=False, server_default="CONFIRMED") # CONFIRMED | INFERRED | PREDICTED
+    
     # Provenance
     ingestion_job_id = Column(UUID(as_uuid=True), ForeignKey("ingestion_jobs.id"), nullable=False, index=True)
     source_page = Column(Integer, nullable=True)

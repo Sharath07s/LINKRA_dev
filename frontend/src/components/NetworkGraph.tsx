@@ -104,9 +104,15 @@ export default function NetworkGraph({
       return "stroke-slate-900 opacity-15";
     }
 
-    return isEdgeHighlighted 
-      ? "stroke-blue-500 stroke-[1.8px] opacity-80" 
-      : "stroke-slate-800 stroke-[1px] opacity-40";
+    if (isEdgeHighlighted) {
+      if (edge.status === "PREDICTED") return "stroke-purple-500 stroke-[1.8px] opacity-80 [stroke-dasharray:4_4]";
+      if (edge.status === "INFERRED") return "stroke-orange-500 stroke-[1.8px] opacity-80 [stroke-dasharray:2_2]";
+      return "stroke-blue-500 stroke-[1.8px] opacity-80";
+    }
+
+    if (edge.status === "PREDICTED") return "stroke-purple-800 stroke-[1px] opacity-60 [stroke-dasharray:4_4]";
+    if (edge.status === "INFERRED") return "stroke-orange-800 stroke-[1px] opacity-60 [stroke-dasharray:2_2]";
+    return "stroke-slate-800 stroke-[1px] opacity-40";
   };
 
   const handleEdgeClick = (edge: any, event: React.MouseEvent) => {

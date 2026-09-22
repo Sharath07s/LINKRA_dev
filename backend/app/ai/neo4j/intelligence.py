@@ -180,11 +180,12 @@ class Neo4jIntelligenceService:
                 "relation": r.type,
                 "weight": r.get("confidence", 0) * 100 or r.get("weight") or 80,
                 "confidence": float(r.get("confidence", 1.0)),
+                "status": r.get("status", "CONFIRMED"),
                 "extraction_method": r.get("extraction_method"),
                 "source_page": r.get("source_page"),
                 "ingestion_job_id": r.get("ingestion_job_id"),
                 "evidence_text": ev_text,
-                "desc": ev_text if ev_text else f"{r.type} (Conf: {r.get('confidence', 1.0):.2f})"
+                "desc": ev_text if ev_text else f"{r.type} (Conf: {r.get('confidence', 1.0):.2f}) [{r.get('status', 'CONFIRMED')}]"
             })
 
         return {"nodes": formatted_nodes, "edges": formatted_edges}
