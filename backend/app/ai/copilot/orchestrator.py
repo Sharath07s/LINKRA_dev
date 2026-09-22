@@ -176,14 +176,23 @@ Context Provided:
                 similarity = res.get("similarity", 0.0)
                 if cls.RAG_MIN_SIMILARITY is not None and similarity < cls.RAG_MIN_SIMILARITY:
                     continue
-                metadata = res.get("metadata", {})
+
+                # Include provenance details in evidence context
+                meta = res.get("metadata", {})
+                title = meta.get("file_name", "Unknown Document")
+                if res.get("page_number"):
+                    title += f" (Page {res.get('page_number')})"
+                elif res.get("source_row"):
+                    title += f" (Row {res.get('source_row')})"
+                
                 context_data["evidence"].append({
-                    "type": "RAG_CHUNK",
-                    "title": res.get("doc_id", "Unknown Document"),
-                    "description": res.get("content", ""),
+                    "type": "DOCUMENT_CHUNK",
+                    "title": title,
+                    "description": res.get("chunk_text", ""),
                     "similarity": similarity,
                     "chunk_id": res.get("chunk_id"),
-                    "metadata": metadata,
+                    "job_id": res.get("ingestion_job_id"),
+                    "metadata": meta
                 })
         except Exception as e:
             logger.error(f"RAG lookup failed: {e}")
