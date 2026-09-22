@@ -1,7 +1,8 @@
 import uuid
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from app.models.resolution import CanonicalEntity
 from app.models.ingestion import EntityCandidate
@@ -130,3 +131,46 @@ def _merge_attributes(canonical: CanonicalEntity, context: ResolutionContext):
     merge_list("dates", context.dates)
     
     canonical.attributes = new_attrs
+
+def get_possible_matches(db: Session, candidate: EntityCandidate) -> List[dict]:
+    """
+    Recalculates top canonical matches dynamically for the review queue.
+    Returns a list of dicts: [{"canonical_entity_id": uuid, "name": str, "match_score": float}]
+    """
+    context = ResolutionContext()
+    
+    if candidate.entity_type in ("PERSON", "ORGANIZATION", "LOCATION"):
+        same_scope = db.query(EntityCandidate).filter(
+            EntityCandidate.ingestion_job_id == candidate.ingestion_job_id,
+            EntityCandidate.id != candidate.id,
+            or_(
+                EntityCandidate.source_page == candidate.source_page,
+                EntityCandidate.source_row == candidate.source_row
+            )
+        ).all()
+        
+        for c in same_scope:
+            if c.entity_type == "PHONE" and c.normalized_value:
+                context.phones.append(c.normalized_value)
+            elif c.entity_type == "VEHICLE" and c.normalized_value:
+                context.vehicles.append(c.normalized_value)
+            elif c.entity_type == "LOCATION" and c.normalized_value:
+                context.locations.append(c.normalized_value)
+            elif c.entity_type == "ORGANIZATION" and c.normalized_value:
+                context.organizations.append(c.normalized_value)
+            elif c.entity_type == "DATE" and c.normalized_value:
+                context.dates.append(c.normalized_value)
+                
+    candidates = find_candidates(db, candidate, context)
+    matches = []
+    
+    for can in candidates:
+        details = score_match(candidate, context, can)
+        matches.append({
+            "canonical_entity_id": str(can.id),
+            "name": can.name,
+            "match_score": details["score"]
+        })
+        
+    matches.sort(key=lambda x: x["match_score"], reverse=True)
+    return matches[:5]
