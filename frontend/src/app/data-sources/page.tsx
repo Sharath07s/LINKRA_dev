@@ -46,8 +46,17 @@ const ENTITY_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   QUEUED: { label: "Queued", color: "text-[#9A9A9A]", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   PROCESSING: { label: "Processing", color: "text-[#10B981]", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  PARSING: { label: "Parsing", color: "text-amber-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   PARSED: { label: "Parsed", color: "text-amber-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
-  EXTRACTED: { label: "Extracting", color: "text-indigo-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  ENTITY_EXTRACTION: { label: "Extracting Entities", color: "text-indigo-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  EXTRACTED: { label: "Extracted", color: "text-indigo-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  ENTITY_RESOLUTION: { label: "Resolving Entities", color: "text-blue-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  RELATIONSHIP_EXTRACTION: { label: "Extracting Relationships", color: "text-purple-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  DOCUMENT_CHUNKING: { label: "Chunking Document", color: "text-teal-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  EMBEDDING_GENERATION: { label: "Generating Embeddings", color: "text-cyan-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  VECTOR_PERSISTENCE: { label: "Saving Vectors", color: "text-cyan-500", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  EVIDENCE_LINKING: { label: "Linking Evidence", color: "text-rose-400", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
+  NEO4J_SYNC: { label: "Syncing Graph", color: "text-emerald-500", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" /> },
   COMPLETED: { label: "Completed", color: "text-emerald-400", icon: <CheckCircle className="h-3.5 w-3.5" /> },
   COMPLETED_PARTIAL: { label: "Partial RAG", color: "text-amber-400", icon: <AlertCircle className="h-3.5 w-3.5" /> },
   FAILED: { label: "Failed", color: "text-red-400", icon: <XCircle className="h-3.5 w-3.5" /> },
@@ -78,24 +87,47 @@ export default function DataSourcesPage() {
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
 
-  // ── Load jobs ────────────────────────────────────────────────────────
-  const loadJobs = useCallback(async () => {
-    setIsLoadingJobs(true);
+  const loadJobs = useCallback(async (isPolling = false) => {
+    if (!isPolling) setIsLoadingJobs(true);
     try {
       const data = await ingestionService.listJobs();
       setJobs(data);
       setHasLoaded(true);
+      
+      // If we are currently expanded on a job, and we are polling, refresh its details
+      if (isPolling && expandedJobId) {
+        const detail = await ingestionService.getJobDetail(expandedJobId);
+        setJobDetail(detail);
+      }
     } catch (err: any) {
       console.error("Failed to load ingestion jobs:", err);
     } finally {
-      setIsLoadingJobs(false);
+      if (!isPolling) setIsLoadingJobs(false);
     }
-  }, []);
+  }, [expandedJobId]);
 
   // Load on first render
   useEffect(() => {
     loadJobs();
   }, [loadJobs]);
+
+  // Polling effect for active jobs
+  useEffect(() => {
+    const activeStates = [
+      "QUEUED", "PROCESSING", "PARSING", "ENTITY_EXTRACTION", 
+      "ENTITY_RESOLUTION", "RELATIONSHIP_EXTRACTION", "DOCUMENT_CHUNKING", 
+      "EMBEDDING_GENERATION", "VECTOR_PERSISTENCE", "EVIDENCE_LINKING", "NEO4J_SYNC"
+    ];
+    
+    const hasActiveJobs = jobs.some(job => activeStates.includes(job.status));
+    
+    if (hasActiveJobs) {
+      const interval = setInterval(() => {
+        loadJobs(true);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [jobs, loadJobs]);
 
 
   // ── Upload handler ───────────────────────────────────────────────────
@@ -124,11 +156,8 @@ export default function DataSourcesPage() {
       const updatedJob = await ingestionService.retryJob(retryModalJob.id);
       setRetryModalJob(null);
       setRetryFeedback({
-        type: updatedJob.status === "COMPLETED" ? "success" : "error",
-        message:
-          updatedJob.status === "COMPLETED"
-            ? `Ingestion job '${updatedJob.file_name}' completed successfully.`
-            : `Retry failed for '${updatedJob.file_name}'. ${updatedJob.error_message || ""}`,
+        type: "success",
+        message: `Retry for '${updatedJob.file_name}' queued successfully.`,
       });
       await loadJobs();
       if (expandedJobId === updatedJob.id) {
@@ -198,7 +227,7 @@ export default function DataSourcesPage() {
             <p className="text-[#9A9A9A] mt-1">Upload, process, and recover intelligence source documents.</p>
           </div>
           <button
-            onClick={loadJobs}
+            onClick={() => loadJobs(false)}
             disabled={isLoadingJobs}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#080808] border border-[#222222] hover:bg-[#0D0D0D] text-[#9A9A9A] hover:text-white rounded-lg text-xs font-semibold transition-colors"
           >
@@ -442,17 +471,34 @@ export default function DataSourcesPage() {
                               {[
                                 { label: "Records", value: jobDetail.record_count ?? "—" },
                                 { label: "Entities", value: jobDetail.entity_count ?? "—" },
+                                { label: "Relationships", value: jobDetail.relationship_count ?? "—" },
                                 { label: "Vector Chunks", value: jobDetail.chunk_count ?? "—" },
+                                { label: "Active Step", value: jobDetail.current_step || "—" },
                                 { label: "Retries", value: `${jobDetail.retry_count || 0} / ${jobDetail.max_retry_count || 3}` },
                                 { label: "Failed Step", value: jobDetail.failed_step || "None" },
                                 { label: "Recovery", value: jobDetail.recovery_status || "NONE" },
                               ].map((item) => (
-                                <div key={item.label} className="bg-[#080808]/60 border border-[#222222] rounded-lg p-2.5">
+                                <div key={item.label} className="bg-[#080808]/60 border border-[#222222] rounded-lg p-2.5 flex flex-col justify-between h-14">
                                   <p className="text-[9px] font-bold text-[#666666] uppercase tracking-wider">{item.label}</p>
                                   <p className="text-xs font-semibold text-[#F5F5F5] mt-0.5 truncate">{String(item.value)}</p>
                                 </div>
                               ))}
                             </div>
+
+                            {/* Live Progress Detail */}
+                            {jobDetail.progress_detail && Object.keys(jobDetail.progress_detail).length > 0 && (
+                               <div className="bg-[#080808]/40 border border-[#222222] rounded-lg p-3">
+                                  <p className="text-[10px] font-bold text-[#9A9A9A] uppercase tracking-wider mb-2">Live Progress Data</p>
+                                  <div className="flex flex-wrap gap-x-6 gap-y-2">
+                                     {Object.entries(jobDetail.progress_detail).map(([key, val]) => (
+                                        <div key={key} className="flex items-center gap-1.5">
+                                           <span className="text-xs text-[#666666]">{key.replace(/_/g, " ")}:</span>
+                                           <span className="text-xs font-medium text-emerald-400">{String(val)}</span>
+                                        </div>
+                                     ))}
+                                  </div>
+                               </div>
+                            )}
 
                             {/* M15.7.1 — Durable Source Backup indicator */}
                             <div className={`flex items-center gap-2 p-2.5 rounded-lg border ${
