@@ -238,7 +238,8 @@ def execute_pipeline(
     try:
         # ── Step 2: Parse ───────────────────────────────────────────────
         current_step = "PARSING"
-        job.status = "PROCESSING"
+        job.status = "PARSING"
+        job.current_step = current_step
         job.started_at = datetime.now(timezone.utc)
         db.commit()
 
@@ -250,10 +251,14 @@ def execute_pipeline(
 
         job.status = "PARSED"
         job.record_count = parsed.record_count
+        job.progress_detail = {"parsed_records": parsed.record_count}
         db.commit()
 
         # ── Step 3: NLP Extraction ──────────────────────────────────────
         current_step = "ENTITY_EXTRACTION"
+        job.status = current_step
+        job.current_step = current_step
+        db.commit()
         all_candidates: list[EntityCandidate] = []
 
         for page in parsed.pages:
@@ -319,10 +324,15 @@ def execute_pipeline(
                         all_candidates.append(candidate)
 
         job.status = "EXTRACTED"
+        job.entity_count = len(all_candidates)
+        job.progress_detail = {**job.progress_detail, "extracted_entities": len(all_candidates)} if job.progress_detail else {"extracted_entities": len(all_candidates)}
         db.commit()
 
         # ── Step 4: Persist candidates & Resolution ──────────────────────
         current_step = "ENTITY_RESOLUTION"
+        job.status = current_step
+        job.current_step = current_step
+        db.commit()
         if all_candidates:
             for candidate in all_candidates:
                 context = ResolutionContext()
@@ -358,18 +368,30 @@ def execute_pipeline(
 
             # ── Step 5: Relationship Extraction ─────────────────────────────
             current_step = "RELATIONSHIP_EXTRACTION"
+            job.status = current_step
+            job.current_step = current_step
+            db.commit()
             from app.nlp.relationship import extract_relationships_for_page
+            total_rels = 0
             for page in parsed.pages:
                 page_candidates = [
                     c for c in all_candidates 
                     if c.source_page == page.page_number or c.source_row == page.page_number
                 ]
-                extract_relationships_for_page(db, job, page, page_candidates)
+                rels = extract_relationships_for_page(db, job, page, page_candidates)
+                if rels:
+                   total_rels += len(rels)
+            job.relationship_count = total_rels
+            job.progress_detail = {**job.progress_detail, "extracted_relationships": total_rels} if job.progress_detail else {"extracted_relationships": total_rels}
+            db.commit()
 
         job.entity_count = len(all_candidates)
 
         # ── Step 6: RAG Vector Indexing ──────────────────────────────────
         current_step = "EMBEDDING_GENERATION"
+        job.status = current_step
+        job.current_step = current_step
+        db.commit()
         chunk_count = 0
         attempted_chunks = 0
         try:
@@ -418,12 +440,33 @@ def execute_pipeline(
 
             # ── Step 7: Phase 2 Evidence Linking ─────────────────────────────
             current_step = "EVIDENCE_LINKING"
+            job.status = current_step
+            job.current_step = current_step
+            db.commit()
             if chunk_count > 0:
                 try:
                     from app.ingestion.evidence_linker import link_evidence_for_job
                     link_evidence_for_job(db, job)
                 except Exception as link_err:
                     logger.warning(f"Ingestion job {job.id}: Evidence linking warning: {link_err}")
+
+            # ── Step 8: Neo4j Synchronization ────────────────────────────────
+            current_step = "NEO4J_SYNC"
+            job.status = current_step
+            job.current_step = current_step
+            db.commit()
+            
+            try:
+                from app.ai.neo4j.intelligence import neo4j_intelligence
+                # Sync relationships (and their connected entities)
+                from app.models.relationship import EntityRelationship
+                rels = db.query(EntityRelationship).filter(EntityRelationship.ingestion_job_id == job.id).all()
+                for rel in rels:
+                    neo4j_intelligence.sync_relationship(db, rel)
+                # Note: standalone entities that aren't in relationships might not get synced here,
+                # but that matches current behavior where Neo4j is primarily for the relationship graph.
+            except Exception as sync_err:
+                logger.warning(f"Ingestion job {job.id}: Neo4j sync warning: {sync_err}")
 
             if attempted_chunks == 0 or chunk_count == attempted_chunks:
                 final_status = "COMPLETED"
@@ -454,7 +497,9 @@ def execute_pipeline(
             job.failed_at = datetime.now(timezone.utc)
 
         job.chunk_count = chunk_count
+        job.progress_detail = {**job.progress_detail, "indexed_chunks": chunk_count} if job.progress_detail else {"indexed_chunks": chunk_count}
         job.status = final_status
+        job.current_step = "COMPLETED" if final_status in ("COMPLETED", "COMPLETED_PARTIAL") else "FAILED"
         if final_status in ("COMPLETED", "COMPLETED_PARTIAL"):
             job.failed_step = None
             job.error_code = None
@@ -689,6 +734,7 @@ def process_ingestion(
     user_id: Optional[uuid.UUID] = None,
     file_bytes: Optional[bytes] = None,
     content_type: Optional[str] = None,
+    execute_sync: bool = True,
 ) -> IngestionJob:
     """
     Execute the full ingestion pipeline synchronously for a new upload.
@@ -730,7 +776,9 @@ def process_ingestion(
         # Non-fatal: log and continue
         logger.warning(f"[DurableSource] Durable store failed for job {job.id}: {store_err}")
 
-    return execute_pipeline(db, job, file_path)
+    if execute_sync:
+        return execute_pipeline(db, job, file_path)
+    return job
 
 
 def retry_ingestion_job(

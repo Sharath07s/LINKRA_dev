@@ -12,11 +12,11 @@ from app.models.investigation import Investigation, InvestigationNote, Investiga
 from app.models.crime import Crime, CrimeStatusHistory
 from app.models.analytics import AuditLog
 from app.models.resolution import CanonicalEntity
-from app.schemas.investigation import InvestigationEntityCreate, InvestigationEntityResponse, InvestigationWorkspaceResponse
+from app.schemas.investigation import InvestigationEntityCreate, InvestigationEntityResponse, InvestigationWorkspaceResponse, InvestigationResponse
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/", response_model=List[InvestigationResponse])
 def get_investigations(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -49,8 +49,8 @@ def get_investigation(
         "id": str(investigation.id),
         "firNumber": crime.fir_number if crime else "UNKNOWN",
         "crimeType": crime.crime_type.name if crime and crime.crime_type else "Investigation",
-        "district": crime.district.name if crime and crime.district else "Unknown",
-        "station": crime.station.name if crime and crime.station else "Unknown",
+        "district": crime.district.district_name if crime and crime.district else "Unknown",
+        "station": crime.station.station_name if crime and crime.station else "Unknown",
         "investigator": investigation.officer.full_name if investigation.officer else "Unknown",
         "status": investigation.status or "ACTIVE",
         "priority": investigation.priority or "NORMAL",

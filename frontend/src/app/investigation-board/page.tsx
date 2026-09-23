@@ -20,7 +20,6 @@ export default function InvestigationBoardPage() {
 
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
-  const [nodeCoordinates, setNodeCoordinates] = useState<Record<string, {x: number, y: number}>>({});
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,19 +79,6 @@ export default function InvestigationBoardPage() {
 
             setNodes(subNodes);
             setEdges(subEdges);
-            
-            const coords: Record<string, {x: number, y: number}> = {};
-            const cx = 250;
-            const cy = 175;
-            const r = 100;
-            subNodes?.forEach((node: any, idx: number) => {
-              const angle = (idx / subNodes.length) * 2 * Math.PI;
-              coords[node.id] = {
-                x: cx + r * Math.cos(angle),
-                y: cy + r * Math.sin(angle)
-              };
-            });
-            setNodeCoordinates(coords);
           }
         } else {
             setNodes([]);
@@ -188,7 +174,6 @@ export default function InvestigationBoardPage() {
                   <NetworkGraph 
                     nodes={nodes}
                     edges={edges}
-                    nodeCoordinates={nodeCoordinates}
                     selectedNode={selectedNode}
                     highlightedNodeIds={highlightedNodeIds}
                     onNodeClick={handleNodeClick}

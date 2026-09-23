@@ -3,6 +3,17 @@ from uuid import UUID
 from pydantic import BaseModel
 from datetime import datetime
 
+class InvestigationResponse(BaseModel):
+    id: UUID
+    crime_id: Optional[UUID]
+    priority: Optional[str]
+    status: Optional[str]
+    summary: Optional[str]
+    started_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
 class CanonicalEntityBase(BaseModel):
     id: UUID
     entity_type: str

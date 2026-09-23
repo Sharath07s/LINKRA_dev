@@ -62,21 +62,18 @@ LIMIT $limit
 
 GET_NETWORK_NODES_EDGES = """
 MATCH path = (e:Entity {id: $entity_id})-[*1..2]-(connected:Entity)
-WITH nodes(path) AS ns, relationships(path) AS rs
-UNWIND ns AS n
-WITH collect(distinct n) AS all_nodes, rs
-UNWIND rs AS r
-WITH all_nodes, collect(distinct r) AS all_edges
-RETURN all_nodes AS nodes, all_edges AS edges
-LIMIT $limit
+WITH path, connected LIMIT $limit
+UNWIND nodes(path) AS n
+UNWIND relationships(path) AS r
+RETURN collect(distinct n) AS nodes, collect(distinct r) AS edges
 """
 
-# Fixed: previously a full graph scan of all Person nodes with no LIMIT
-# Now bounded — only fetches entities where risk_score is populated
+# Fixed: uses degree centrality to find highly connected nodes dynamically
 GET_HIGH_RISK_NETWORK = """
-MATCH (s:Entity {entity_type: 'PERSON'})
-WHERE s.risk_score IS NOT NULL AND s.risk_score >= $min_risk
-WITH s
+MATCH (s:Entity)
+WITH s, COUNT { (s)--() } AS degree
+WHERE degree > 0
+ORDER BY degree DESC
 LIMIT $limit
 MATCH path = (s)-[r]-(connected:Entity)
 UNWIND nodes(path) AS n

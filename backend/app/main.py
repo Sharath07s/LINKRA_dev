@@ -16,6 +16,13 @@ async def lifespan(app: FastAPI):
         neo4j_intelligence.initialize_constraints()
     except Exception as e:
         logger.warning(f"Neo4j constraint initialization skipped (may not be available): {e}")
+        
+    try:
+        from app.ingestion.worker import recover_stale_jobs
+        recover_stale_jobs()
+    except Exception as e:
+        logger.warning(f"Recover stale jobs failed: {e}")
+        
     yield
 
 

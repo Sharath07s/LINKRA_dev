@@ -11,8 +11,17 @@ from enum import Enum
 class JobStatus(str, Enum):
     QUEUED = "QUEUED"
     PROCESSING = "PROCESSING"
+    PARSING = "PARSING"
     PARSED = "PARSED"
+    ENTITY_EXTRACTION = "ENTITY_EXTRACTION"
     EXTRACTED = "EXTRACTED"
+    ENTITY_RESOLUTION = "ENTITY_RESOLUTION"
+    RELATIONSHIP_EXTRACTION = "RELATIONSHIP_EXTRACTION"
+    DOCUMENT_CHUNKING = "DOCUMENT_CHUNKING"
+    EMBEDDING_GENERATION = "EMBEDDING_GENERATION"
+    VECTOR_PERSISTENCE = "VECTOR_PERSISTENCE"
+    EVIDENCE_LINKING = "EVIDENCE_LINKING"
+    NEO4J_SYNC = "NEO4J_SYNC"
     COMPLETED = "COMPLETED"
     COMPLETED_PARTIAL = "COMPLETED_PARTIAL"
     FAILED = "FAILED"
@@ -72,6 +81,11 @@ class IngestionJobResponse(BaseModel):
     created_at: datetime
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+
+    # Async Pipeline Progress fields (M15.8)
+    current_step: Optional[str] = None
+    relationship_count: Optional[int] = None
+    progress_detail: Optional[dict] = None
 
     # Recovery and Reliability fields (M15.7)
     failed_step: Optional[str] = None

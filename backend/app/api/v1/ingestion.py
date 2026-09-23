@@ -23,14 +23,15 @@ from app.ingestion.schemas import (
     EntityCandidateResponse,
     SourceType,
 )
-from app.ingestion.service import validate_file, process_ingestion, retry_ingestion_job, UPLOAD_DIR
+from app.ingestion.service import validate_file, process_ingestion, UPLOAD_DIR
+from app.ingestion.worker import dispatch_pipeline, dispatch_retry
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-@router.post("/upload", response_model=IngestionJobResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/upload", response_model=IngestionJobResponse, status_code=status.HTTP_202_ACCEPTED)
 async def upload_file(
     file: UploadFile = File(...),
     source_type: str = Form(default="OTHER"),
@@ -42,7 +43,8 @@ async def upload_file(
     Upload a file for ingestion and NLP extraction.
 
     Supported formats: PDF, CSV, JSON, TXT.
-    The file is validated, parsed, and entities are extracted synchronously.
+    The file is validated and saved synchronously. The pipeline is dispatched
+    to a background thread, and the job is returned immediately in QUEUED state.
     """
     # ── Validate ────────────────────────────────────────────────────────
     try:
@@ -84,6 +86,7 @@ async def upload_file(
 
     # ── Process ─────────────────────────────────────────────────────────
     try:
+        # Create the job and store source durably (synchronous)
         job = process_ingestion(
             db=db,
             file_path=file_path,
@@ -92,9 +95,14 @@ async def upload_file(
             source_type=validated_source.value,
             file_size=file_size,
             user_id=current_user.id,
-            file_bytes=content,           # M15.7.1: pass in-memory bytes for durable storage
+            file_bytes=content,
             content_type=file.content_type or "application/octet-stream",
+            execute_sync=False  # Tell service NOT to run execute_pipeline
         )
+        
+        # Dispatch the heavy pipeline to the background
+        dispatch_pipeline(job.id, file_path)
+        
     except Exception as e:
         logger.error(f"Ingestion processing error: {e}")
         raise HTTPException(
@@ -178,7 +186,7 @@ def get_job_entities(
     return entities
 
 
-@router.post("/{job_id}/retry", response_model=IngestionJobResponse)
+@router.post("/{job_id}/retry", response_model=IngestionJobResponse, status_code=status.HTTP_202_ACCEPTED)
 def retry_job(
     job_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -189,6 +197,7 @@ def retry_job(
     Retry an ingestion job that failed or partially completed.
     Requires OFFICER, ADMIN, or SUPER_ADMIN authorization.
     Prevents simultaneous duplicate retries using atomic database status checks.
+    The retry is dispatched to a background thread.
     """
     job = db.query(IngestionJob).filter(IngestionJob.id == job_id, IngestionJob.is_deleted == False).first()
     if not job:
@@ -220,16 +229,15 @@ def retry_job(
         )
 
     try:
-        updated_job = retry_ingestion_job(db=db, job_id=job_id, user_id=current_user.id)
+        dispatch_retry(job_id)
+        
+        # Fetch fresh job to return
+        updated_job = db.query(IngestionJob).filter(IngestionJob.id == job_id).first()
         return updated_job
     except Exception as e:
-        logger.error(f"Retry execution error for job {job_id}: {e}")
-        # Fetch fresh status after failure handler executed in service
-        updated_job = db.query(IngestionJob).filter(IngestionJob.id == job_id).first()
-        if updated_job:
-            return updated_job
+        logger.error(f"Retry dispatch error for job {job_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retry ingestion job: {e}"
+            detail=f"Failed to dispatch retry for ingestion job: {e}"
         )
 

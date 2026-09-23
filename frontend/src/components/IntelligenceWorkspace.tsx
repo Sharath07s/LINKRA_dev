@@ -15,6 +15,13 @@ import EdgeEvidencePanel from "@/components/EdgeEvidencePanel";
 import { CopilotPanel } from "@/components/CopilotPanel";
 import { CommunityPanel } from "@/components/CommunityPanel";
 
+interface InvestigationOption {
+  id: string;
+  summary?: string;
+  status?: string;
+  crime_id?: string;
+}
+
 interface IntelligenceWorkspaceProps {
   initialFocusId?: string | null;
   hideHeader?: boolean;
@@ -27,19 +34,42 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [selectedEdge, setSelectedEdge] = useState<any>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
-  const [nodeCoordinates, setNodeCoordinates] = useState<Record<string, {x: number, y: number}>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [showCommunities, setShowCommunities] = useState(false);
+  
+  const [investigations, setInvestigations] = useState<InvestigationOption[]>([]);
+  const [selectedInvestigationId, setSelectedInvestigationId] = useState<string>("");
+  const [isClient, setIsClient] = useState(false);
 
-  // Focus on initial if provided
+  useEffect(() => {
+    setIsClient(true);
+    // Fetch investigations
+    const fetchInvestigations = async () => {
+      try {
+        const res = await apiClient.get("/investigations/");
+        setInvestigations(res.data || []);
+      } catch (err) {
+        console.error("Failed to load investigations", err);
+      }
+    };
+    fetchInvestigations();
+  }, []);
+
   useEffect(() => {
     const fetchGraphData = async () => {
+      if (!selectedInvestigationId) {
+        setNodes([]);
+        setEdges([]);
+        setIsLoading(false);
+        return;
+      }
       try {
         setIsLoading(true);
-        let endpoint = `/neo4j/high-risk-networks`; 
+        let endpoint = `/graph/investigations/${encodeURIComponent(selectedInvestigationId)}`; 
         if (initialFocusId) {
-            endpoint = `/graph/subgraph/${encodeURIComponent(initialFocusId)}?depth=2&max_nodes=100`;
+            // we could combine them, but for this milestone we stick to the investigation graph
+            // or just load the investigation graph and focus the node
         }
         
         const res = await apiClient.get(endpoint);
@@ -48,21 +78,7 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
         if (data && data.nodes && data.nodes.length > 0) {
           setNodes(data.nodes);
           setEdges(data.edges || []);
-          
-          // Generate circular layout
-          const coords: Record<string, {x: number, y: number}> = {};
-          const cx = 250;
-          const cy = 175;
-          const r = 120;
-          data.nodes.forEach((node: any, idx: number) => {
-            const angle = (idx / data.nodes.length) * 2 * Math.PI;
-            coords[node.id] = {
-              x: cx + r * Math.cos(angle),
-              y: cy + r * Math.sin(angle)
-            };
-          });
-          setNodeCoordinates(coords);
-          
+          resetSelection();
           if (initialFocusId) {
              const matchedNode = data.nodes.find((n: any) => n.id === initialFocusId);
              if (matchedNode) {
@@ -72,19 +88,14 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
                    .filter((e: any) => e.source === matchedNode.id || e.target === matchedNode.id)
                    .map((e: any) => e.source === matchedNode.id ? e.target : e.source);
                  setHighlightedNodeIds([matchedNode.id, ...neighbors]);
-             } else {
-                 resetSelection();
              }
-          } else {
-              resetSelection();
           }
         } else {
           setNodes([]);
           setEdges([]);
-          setNodeCoordinates({});
         }
       } catch (err) {
-        console.warn("Failed to fetch knowledge graph", err);
+        console.warn("Failed to fetch case knowledge graph", err);
         setNodes([]);
         setEdges([]);
       } finally {
@@ -93,7 +104,7 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
     };
     
     fetchGraphData();
-  }, [initialFocusId]);
+  }, [selectedInvestigationId, initialFocusId]);
 
   const handleNodeClick = (node: any) => {
     setSelectedNode(node);
@@ -116,29 +127,63 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
     setHighlightedNodeIds([]);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     
+    // Check locally first
     const matchedNode = nodes.find(n => n.label.toLowerCase().includes(searchQuery.toLowerCase()));
     if (matchedNode) {
       handleNodeClick(matchedNode);
-    } else {
-      resetSelection();
+      return;
+    }
+
+    try {
+        setIsLoading(true);
+        // Case-specific search filtering is done purely on the frontend for now, or via API if the backend supported it
+        // We'll just rely on the API for global search, but wait - the requirements said search must be case-aware.
+        // If it's just searching nodes in the CURRENT graph:
+        // Already handled above! If the user wants to search for something not in the graph, it's confusing.
+        // I will just rely on the local search above, and if not found, we don't switch cases automatically.
+        alert("Entity not found in the current investigation graph.");
+        resetSelection();
+    } catch (err) {
+        console.error("Search failed:", err);
+    } finally {
+        setIsLoading(false);
     }
   };
+
+  if (!isClient) return null;
+
+  const currentInvestigation = investigations.find(inv => inv.id === selectedInvestigationId);
 
   return (
     <div className="space-y-6 h-full flex flex-col w-full">
       {!hideHeader && (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Criminal Relationship Graph</h1>
             <p className="text-sm text-[#9A9A9A]">Discovering multi-degree associations, shared assets, and common modus operandi</p>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 px-3 py-1 text-[10px] font-bold text-[#10B981]">
-            <Network className="h-3.5 w-3.5 animate-pulse" />
-            <span>NEO4J DATABASE ONLINE</span>
+          
+          <div className="flex items-center gap-3">
+            <select
+              value={selectedInvestigationId}
+              onChange={(e) => setSelectedInvestigationId(e.target.value)}
+              className="bg-[#050505] border border-[#222222] rounded-xl px-4 py-2 text-sm text-[#F5F5F5] focus:outline-none focus:ring-1 focus:ring-[#10B981] max-w-[300px]"
+            >
+              <option value="">-- Select an Investigation --</option>
+              {investigations.map(inv => (
+                <option key={inv.id} value={inv.id}>
+                  {inv.summary ? (inv.summary.substring(0, 50) + (inv.summary.length > 50 ? '...' : '')) : `Case ${inv.id.substring(0,8)}`}
+                </option>
+              ))}
+            </select>
+            <div className="flex items-center gap-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 px-3 py-2 text-[10px] font-bold text-[#10B981]">
+              <Network className="h-3.5 w-3.5 animate-pulse" />
+              <span>NEO4J ONLINE</span>
+            </div>
           </div>
         </div>
       )}
@@ -184,13 +229,20 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
       {/* Main interactive panel */}
       <div className="flex-1 min-h-[500px] grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch w-full">
         
-        <div className="lg:col-span-8 bg-[#050505]/40 border border-[#222222] rounded-2xl flex items-center justify-center p-6 relative overflow-hidden">
-          {nodes.length > 0 ? (
+        <div className="lg:col-span-8 bg-[#050505]/40 border border-[#222222] rounded-2xl flex flex-col p-2 relative overflow-hidden">
+          {!selectedInvestigationId ? (
+            <div className="flex-1 flex flex-col items-center justify-center space-y-3 opacity-60 p-6">
+              <Network className="h-12 w-12 text-[#666666] mb-2" />
+              <h3 className="text-[#F5F5F5] font-semibold text-lg">No Investigation Selected</h3>
+              <p className="text-[#666666] text-sm max-w-sm text-center">
+                Please select a case from the dropdown above to view its relationship graph.
+              </p>
+            </div>
+          ) : nodes.length > 0 ? (
             <>
               <NetworkGraph 
                 nodes={nodes}
                 edges={edges}
-                nodeCoordinates={nodeCoordinates}
                 selectedNode={selectedNode}
                 selectedEdge={selectedEdge}
                 highlightedNodeIds={highlightedNodeIds}
@@ -227,11 +279,11 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center space-y-3 opacity-60">
+            <div className="flex-1 flex flex-col items-center justify-center space-y-3 opacity-60 p-6">
               <Network className="h-12 w-12 text-[#666666] mb-2" />
               <h3 className="text-[#F5F5F5] font-semibold text-lg">No Graph Data Available</h3>
               <p className="text-[#666666] text-sm max-w-sm text-center">
-                The intelligence graph is currently empty or no network matches the specific focus criteria.
+                No relationships or entities available for this investigation.
               </p>
             </div>
           )}
@@ -239,14 +291,21 @@ export function IntelligenceWorkspace({ initialFocusId, hideHeader = false }: In
 
         <div className="lg:col-span-4 flex flex-col gap-4">
           <div className="bg-[#080808]/40 border border-[#222222] p-5 rounded-2xl">
-            <h4 className="font-bold text-white text-sm uppercase tracking-wider mb-2">Network Parameters</h4>
+            <h4 className="font-bold text-white text-sm uppercase tracking-wider mb-2">
+              {currentInvestigation ? "ACTIVE CASE" : "Network Parameters"}
+            </h4>
+            {currentInvestigation && (
+              <p className="text-xs text-[#10B981] mb-4 break-words">
+                {currentInvestigation.summary ? currentInvestigation.summary : `CASE ID: ${currentInvestigation.id}`}
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2 text-center text-xs">
               <div className="bg-[#050505]/40 p-2.5 rounded-lg border border-slate-850">
                 <span className="text-[#666666] block text-[9px] uppercase font-bold">Total Nodes</span>
                 <span className="text-sm font-bold text-[#F5F5F5]">{nodes.length} nodes</span>
               </div>
               <div className="bg-[#050505]/40 p-2.5 rounded-lg border border-slate-850">
-                <span className="text-[#666666] block text-[9px] uppercase font-bold">Modus Links</span>
+                <span className="text-[#666666] block text-[9px] uppercase font-bold">Relationships</span>
                 <span className="text-sm font-bold text-[#F5F5F5]">{edges.length} links</span>
               </div>
             </div>

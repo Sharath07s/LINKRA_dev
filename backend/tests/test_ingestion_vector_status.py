@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 #   app.ingestion.service.extract_entities_llm
 #   app.ingestion.service.IngestionJob
 
-_VS_PATCH = "app.ai.rag.vector_search.VectorStore"
+_VS_PATCH = "app.ingestion.service.VectorStore"
 _LINKER_PATCH = "app.ingestion.evidence_linker.link_evidence_for_job"
 _REL_PATCH = "app.nlp.relationship.extractor._sync_to_neo4j"
 _NEO4J_SYNC_PATCH = "app.nlp.resolution.engine.neo4j_intelligence.sync_canonical_entity"
@@ -42,6 +42,10 @@ def _make_job_mock():
     job.error_message = None
     job.chunk_count = None
     job.status = "QUEUED"
+    job.retry_count = 0
+    job.max_retry_count = 3
+    job.file_type = "txt"
+    job.progress_detail = {}
     return job
 
 
@@ -233,7 +237,7 @@ class TestCaseD_OneFailDoesNotStopRest:
     def test_all_chunks_attempted_past_failure(self, tmp_path):
         call_log = []
 
-        def _side_effect(source_id, text, metadata):
+        def _side_effect(*args, **kwargs):
             idx = len(call_log)
             r = (idx != 1)   # position 1 (second chunk) fails, all others succeed
             call_log.append(r)
@@ -252,7 +256,7 @@ class TestCaseD_OneFailDoesNotStopRest:
     def test_chunk_count_equals_successful_chunks(self, tmp_path):
         call_log = []
 
-        def _side_effect(source_id, text, metadata):
+        def _side_effect(*args, **kwargs):
             idx = len(call_log)
             r = (idx != 1)
             call_log.append(r)

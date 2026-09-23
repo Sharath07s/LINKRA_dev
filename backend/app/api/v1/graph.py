@@ -4,6 +4,8 @@ import logging
 
 from app.api import deps
 from app.models.user import User
+from app.models.investigation import InvestigationEntity
+from sqlalchemy.orm import Session
 from app.ai.neo4j.intelligence import neo4j_intelligence
 from app.schemas.graph import GraphResponse
 
@@ -57,3 +59,67 @@ def get_entity_neighborhood(
     except Exception as e:
         logger.error(f"Graph query error: {e}")
         raise HTTPException(status_code=500, detail="Error querying graph database")
+
+@router.get("/search", response_model=GraphResponse)
+def search_entities(
+    q: str,
+    limit: int = Query(10, ge=1, le=50),
+    current_user: User = Depends(deps.RoleChecker(["OFFICER", "EXECUTIVE", "ADMIN"])),
+):
+    """
+    Search graph entities by name/ID and return a nodes list.
+    """
+    try:
+        data = neo4j_intelligence.search_entities(q, limit=limit)
+        return GraphResponse(
+            nodes=data.get("nodes", []),
+            edges=data.get("edges", []),
+            center_entity_id=None,
+            total_nodes=len(data.get("nodes", [])),
+            total_edges=len(data.get("edges", []))
+        )
+    except Exception as e:
+        logger.error(f"Graph search error: {e}")
+        raise HTTPException(status_code=500, detail="Error searching graph database")
+
+
+@router.get("/investigations/{investigation_id}", response_model=GraphResponse)
+def get_investigation_graph(
+    investigation_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+):
+    """
+    Get the knowledge graph for a specific investigation.
+    """
+    try:
+        # 1. Fetch the canonical entities associated with the investigation from Postgres
+        investigation_entities = db.query(InvestigationEntity).filter(
+            InvestigationEntity.investigation_id == investigation_id
+        ).all()
+        
+        entity_ids = [str(ie.entity_id) for ie in investigation_entities]
+        
+        if not entity_ids:
+            return GraphResponse(
+                nodes=[],
+                edges=[],
+                center_entity_id=None,
+                total_nodes=0,
+                total_edges=0
+            )
+            
+        # 2. Query Neo4j for the subgraph containing ONLY these entities
+        data = neo4j_intelligence.get_subgraph_for_entities(entity_ids)
+        
+        return GraphResponse(
+            nodes=data.get("nodes", []),
+            edges=data.get("edges", []),
+            center_entity_id=None,
+            total_nodes=len(data.get("nodes", [])),
+            total_edges=len(data.get("edges", []))
+        )
+    except Exception as e:
+        logger.error(f"Graph investigation query error: {e}")
+        raise HTTPException(status_code=500, detail="Error querying graph database for investigation")
+

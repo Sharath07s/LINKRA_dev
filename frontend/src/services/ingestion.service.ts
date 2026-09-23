@@ -42,6 +42,12 @@ export interface IngestionJob {
   next_retry_at?: string | null;
   failed_at?: string | null;
   recovery_status?: string;
+
+  // Async Pipeline Progress fields (M15.8)
+  current_step?: string | null;
+  relationship_count?: number | null;
+  progress_detail?: any | null;
+
   // M15.7.1 — Durable Source Storage
   source_storage_provider?: string | null;
   source_has_durable_backup?: boolean | null;
@@ -83,7 +89,7 @@ export const ingestionService = {
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
-        timeout: 120000, // 2 minutes for large files
+        timeout: 30000, // Reduced from 120s to 30s since API returns immediately (async)
       }
     );
     return response.data;
@@ -124,9 +130,16 @@ export const ingestionService = {
     const response = await apiClient.post<IngestionJob>(
       `/ingestion/${jobId}/retry`,
       {},
-      { timeout: 120000 }
+      { timeout: 30000 }
     );
     return response.data;
+  },
+
+  /**
+   * Poll for job status (convenience wrapper around getJobDetail)
+   */
+  async pollJobStatus(jobId: string): Promise<IngestionJobDetail> {
+    return this.getJobDetail(jobId);
   },
 };
 

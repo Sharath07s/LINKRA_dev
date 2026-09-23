@@ -41,6 +41,11 @@ class IngestionJob(BaseModel):
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Async Pipeline Progress fields (M15.8)
+    current_step = Column(String(100), nullable=True)    # Active pipeline step for live progress display
+    relationship_count = Column(Integer, nullable=True)  # Populated after relationship extraction
+    progress_detail = Column(JSON, nullable=True)        # Structured progress metadata e.g. {"parsed_pages": 3, "total_pages": 5}
+
     # Recovery and Reliability fields (M15.7)
     failed_step = Column(String(100), nullable=True)
     error_code = Column(String(100), nullable=True)

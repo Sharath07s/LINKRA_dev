@@ -58,7 +58,7 @@ class RoleChecker:
 
     def __call__(self, user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
         role = db.query(Role).filter(Role.id == user.role_id).first()
-        if not role or role.name not in self.allowed_roles:
+        if not role or role.name.upper() not in [r.upper() for r in self.allowed_roles]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Operation not permitted"

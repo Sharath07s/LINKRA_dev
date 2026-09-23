@@ -16,7 +16,6 @@ import NetworkGraph from "@/components/NetworkGraph";
 export default function FIRWorkspacePage() {
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
-  const [nodeCoordinates, setNodeCoordinates] = useState<Record<string, {x: number, y: number}>>({});
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
   const [isLoadingGraph, setIsLoadingGraph] = useState(true);
@@ -40,19 +39,6 @@ export default function FIRWorkspacePage() {
 
           setNodes(subNodes);
           setEdges(subEdges);
-          
-          const coords: Record<string, {x: number, y: number}> = {};
-          const cx = 250;
-          const cy = 150;
-          const r = 90;
-          subNodes?.forEach((node: any, idx: number) => {
-            const angle = (idx / subNodes.length) * 2 * Math.PI;
-            coords[node.id] = {
-              x: cx + r * Math.cos(angle),
-              y: cy + r * Math.sin(angle)
-            };
-          });
-          setNodeCoordinates(coords);
         }
       } catch (err) {
         console.warn("Failed to fetch knowledge graph", err);
@@ -134,7 +120,6 @@ export default function FIRWorkspacePage() {
                   <NetworkGraph 
                     nodes={nodes}
                     edges={edges}
-                    nodeCoordinates={nodeCoordinates}
                     selectedNode={selectedNode}
                     highlightedNodeIds={highlightedNodeIds}
                     onNodeClick={handleNodeClick}

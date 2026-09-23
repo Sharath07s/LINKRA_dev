@@ -190,4 +190,40 @@ class Neo4jIntelligenceService:
 
         return {"nodes": formatted_nodes, "edges": formatted_edges}
 
+    def search_entities(self, query_str: str, limit: int = 10) -> Dict[str, Any]:
+        query = """
+        MATCH (n:Entity)
+        WHERE toLower(n.name) CONTAINS toLower($q) OR toLower(n.id) CONTAINS toLower($q)
+        RETURN collect(distinct n) AS nodes, [] AS edges
+        LIMIT $limit
+        """
+        with self.get_session() as session:
+            result = session.run(query, q=query_str, limit=limit)
+            record = result.single()
+            if not record or not record["nodes"]:
+                return {"nodes": [], "edges": []}
+            return self._format_graph_data(record["nodes"], record["edges"])
+
+    def get_subgraph_for_entities(self, entity_ids: List[str]) -> Dict[str, Any]:
+        """
+        Retrieves the induced subgraph for a specific list of entity IDs.
+        Used for case-specific knowledge graphs.
+        """
+        if not entity_ids:
+            return {"nodes": [], "edges": []}
+            
+        query = """
+        MATCH (n:Entity)
+        WHERE n.id IN $entity_ids
+        OPTIONAL MATCH (n)-[r]->(m:Entity)
+        WHERE m.id IN $entity_ids
+        RETURN collect(distinct n) AS nodes, collect(distinct r) AS edges
+        """
+        with self.get_session() as session:
+            result = session.run(query, entity_ids=entity_ids)
+            record = result.single()
+            if not record or not record["nodes"]:
+                return {"nodes": [], "edges": []}
+            return self._format_graph_data(record["nodes"], record["edges"])
+
 neo4j_intelligence = Neo4jIntelligenceService()
