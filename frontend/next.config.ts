@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       { source: '/alerts', destination: '/alert-center', permanent: true },
       { source: '/suspects', destination: '/knowledge-graph', permanent: true },
       { source: '/officers', destination: '/officer-workspace', permanent: true },
+      { source: '/copliot', destination: '/copilot', permanent: true },
     ];
   },
 };
